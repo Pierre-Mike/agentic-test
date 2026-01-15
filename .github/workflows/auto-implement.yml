@@ -29,7 +29,7 @@ jobs:
           allowed_non_write_users: "*"
           plugins: "feature-dev@claude-code-plugins"
           plugin_marketplaces: "https://github.com/anthropics/claude-code.git"
-          claude_args: '--allowed-tools Bash(gh pr:*),Bash(gh issue:*),Bash(git *),FileSystem,Validator'
+          claude_args: '--allowed-tools Bash(gh pr:*),Bash(gh issue:*),Bash(git *),FileSystem,Validator,Edit,Write,Skill,WebSearch'
           prompt: |
             You are automating the full development lifecycle from issue to pull request.
 
