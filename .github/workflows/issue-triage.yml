@@ -23,6 +23,19 @@ jobs:
       - name: Install Claude Code
         run: npm install -g @anthropic-ai/claude-code
 
+      - name: Validate Claude API Connection
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          echo "Testing Claude API connection..."
+          response=$(claude --yes -p "Respond with exactly: OK" 2>&1)
+          if echo "$response" | grep -qi "ok"; then
+            echo "Claude API connection successful"
+          else
+            echo "Claude API test failed. Response: $response"
+            exit 1
+          fi
+
       - name: Triage Issue with Claude
         id: triage
         env:
