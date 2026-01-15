@@ -1,0 +1,78 @@
+name: Auto Implement Issue
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  auto-implement:
+    if: github.event.label.name == 'auto-implement'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Auto Plan and Implement
+        uses: anthropics/claude-code-action@main
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          allowed_non_write_users: "*"
+          model: sonnet
+          prompt: |
+            You are automating the full development lifecycle from issue to pull request.
+
+            ISSUE INFORMATION:
+            - Repository: ${{ github.repository }}
+            - Issue Number: ${{ github.event.issue.number }}
+            - Issue Title: ${{ github.event.issue.title }}
+            - Issue URL: ${{ github.event.issue.html_url }}
+
+            YOUR TASK:
+
+            1. ANALYZE THE ISSUE
+               - Read the issue details using: gh issue view ${{ github.event.issue.number }}
+               - Determine if this is a feature, bug, or chore
+               - Understand the requirements thoroughly
+
+            2. CREATE A PLAN
+               - If it's a feature request, use the /feature command
+               - If it's a bug report, use the /bug command
+               - If it's a chore/refactor, use the /chore command
+               - The plan will be saved in the specs/ directory
+
+            3. IMPLEMENT THE PLAN
+               - Use the /implement command with the path to the plan you just created
+               - Follow the plan step by step
+               - Ensure all validation commands pass
+
+            4. CREATE PULL REQUEST
+               - Create a new branch named: issue-${{ github.event.issue.number }}-auto-implement
+               - Commit all changes with a descriptive message
+               - Create a PR using: gh pr create
+               - PR title should reference the issue: "Closes #${{ github.event.issue.number }}: [Issue Title]"
+               - PR body should include:
+                 * Link to the original issue
+                 * Summary of changes
+                 * Link to the plan file
+                 * Test results
+
+            5. LINK BACK TO ISSUE
+               - Post a comment on the issue with the PR link using: gh issue comment ${{ github.event.issue.number }}
+
+            IMPORTANT NOTES:
+            - Run all validation commands (tests, builds, type-checks) before creating the PR
+            - If any validation fails, fix the issues before creating the PR
+            - If the issue is unclear or missing critical information, comment on the issue asking for clarification instead of implementing
+            - Use the git user: "GitHub Actions Bot <actions@github.com>"
+
+            Start by reading the issue details now.
