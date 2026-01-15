@@ -1,0 +1,177 @@
+name: Issue Triage with Claude
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Triage Issue with Claude
+        id: triage
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          claude -p "You are an issue triage assistant for a TypeScript monorepo project (client/server/shared architecture).
+
+          Analyze this GitHub issue and respond with ONLY valid JSON (no markdown, no explanation):
+
+          {
+            \"category\": \"bug|feature|documentation|question|enhancement\",
+            \"priority\": \"critical|high|medium|low\",
+            \"area\": \"client|server|shared|infrastructure|unknown\",
+            \"summary\": \"one sentence summary\",
+            \"labels\": [\"label1\", \"label2\"],
+            \"next_steps\": [\"step 1\", \"step 2\"]
+          }
+
+          Rules for labels array:
+          - Always include the category as a label (e.g., \"bug\", \"feature\")
+          - Always include priority with prefix (e.g., \"priority:high\")
+          - Always include area with prefix (e.g., \"area:client\")
+          - Add \"good-first-issue\" if the issue seems simple
+          - Add \"needs-investigation\" if more info is needed
+          - Add \"security\" if security-related
+          - Add \"performance\" if performance-related
+
+          Issue Title: $ISSUE_TITLE
+
+          Issue Body:
+          $ISSUE_BODY" > triage_result.json
+
+          cat triage_result.json
+
+      - name: Apply Labels and Post Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let triage;
+            try {
+              const raw = fs.readFileSync('triage_result.json', 'utf-8');
+              // Extract JSON from response (in case there's any extra text)
+              const jsonMatch = raw.match(/\{[\s\S]*\}/);
+              if (jsonMatch) {
+                triage = JSON.parse(jsonMatch[0]);
+              } else {
+                throw new Error('No JSON found in response');
+              }
+            } catch (error) {
+              console.error('Failed to parse triage result:', error);
+              triage = null;
+            }
+
+            if (triage) {
+              // Apply labels
+              const labelsToApply = triage.labels || [];
+
+              if (labelsToApply.length > 0) {
+                // First, ensure labels exist (create if they don't)
+                for (const label of labelsToApply) {
+                  try {
+                    await github.rest.issues.getLabel({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      name: label
+                    });
+                  } catch (e) {
+                    // Label doesn't exist, create it
+                    const colors = {
+                      'bug': 'd73a4a',
+                      'feature': 'a2eeef',
+                      'enhancement': 'a2eeef',
+                      'documentation': '0075ca',
+                      'question': 'd876e3',
+                      'priority:critical': 'b60205',
+                      'priority:high': 'd93f0b',
+                      'priority:medium': 'fbca04',
+                      'priority:low': '0e8a16',
+                      'area:client': '1d76db',
+                      'area:server': '5319e7',
+                      'area:shared': 'f9d0c4',
+                      'area:infrastructure': 'bfdadc',
+                      'good-first-issue': '7057ff',
+                      'needs-investigation': 'fbca04',
+                      'security': 'b60205',
+                      'performance': 'ff7619'
+                    };
+
+                    try {
+                      await github.rest.issues.createLabel({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        name: label,
+                        color: colors[label] || 'ededed'
+                      });
+                    } catch (createError) {
+                      console.log(`Could not create label ${label}:`, createError.message);
+                    }
+                  }
+                }
+
+                // Apply labels to issue
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  labels: labelsToApply
+                });
+              }
+
+              // Build and post comment
+              const nextSteps = triage.next_steps?.map((s, i) => `${i + 1}. ${s}`).join('\n') || 'No specific steps identified.';
+
+              const comment = `## 🤖 Automated Issue Triage
+
+            | Field | Value |
+            |-------|-------|
+            | **Category** | ${triage.category} |
+            | **Priority** | ${triage.priority} |
+            | **Area** | ${triage.area} |
+
+            ### Summary
+            ${triage.summary}
+
+            ### Labels Applied
+            ${labelsToApply.map(l => '`' + l + '`').join(' ')}
+
+            ### Recommended Next Steps
+            ${nextSteps}
+
+            ---
+            *This triage was performed automatically by Claude. A maintainer will review shortly.*`;
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            } else {
+              // Fallback comment if triage failed
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `## 🤖 Automated Issue Triage\n\n⚠️ Unable to perform automated triage. Please review manually.\n\n---\n*A maintainer will review this issue shortly.*`
+              });
+            }
