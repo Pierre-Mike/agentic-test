@@ -64,6 +64,5 @@ jobs:
 
             Issue Body:
             ${{ github.event.issue.body }}
-          allowed_tools: |
-            Bash(gh issue *)
-            Bash(gh label *)
+          claude_args: |
+            --allowedTools "Bash(gh issue *),Bash(gh label *)"
