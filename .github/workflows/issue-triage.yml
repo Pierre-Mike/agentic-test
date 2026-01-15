@@ -30,7 +30,7 @@ jobs:
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
-          claude -p "You are an issue triage assistant for a TypeScript monorepo project (client/server/shared architecture).
+          claude --yes -p "You are an issue triage assistant for a TypeScript monorepo project (client/server/shared architecture).
 
           Analyze this GitHub issue and respond with ONLY valid JSON (no markdown, no explanation):
 
