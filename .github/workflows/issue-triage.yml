@@ -27,12 +27,47 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          echo "Testing Claude API connection..."
-          response=$(claude --yes -p "Respond with exactly: OK" 2>&1)
-          if echo "$response" | grep -qi "ok"; then
+          set -euo pipefail
+
+          echo "=== Claude API Connection Validation ==="
+
+          # 1. Verify API key is set
+          if [[ -z "${ANTHROPIC_API_KEY:-}" ]]; then
+            echo "::error::ANTHROPIC_API_KEY secret is not set or empty"
+            exit 1
+          fi
+          echo "API key is set (length: ${#ANTHROPIC_API_KEY} chars)"
+
+          # 2. Determine claude CLI path
+          if command -v claude &>/dev/null; then
+            CLAUDE_CMD="claude"
+            echo "Using claude from PATH: $(which claude)"
+          else
+            CLAUDE_CMD="npx @anthropic-ai/claude-code"
+            echo "claude not in PATH, falling back to: $CLAUDE_CMD"
+          fi
+
+          # 3. Test API connection
+          echo "Sending test prompt..."
+          response=$($CLAUDE_CMD --yes -p "Respond with exactly one word: OK" 2>&1) || {
+            echo "::error::Claude CLI exited with non-zero status"
+            echo "Raw output:"
+            echo "$response"
+            exit 1
+          }
+
+          # 4. Print raw response for debugging
+          echo "Raw response:"
+          echo "---"
+          echo "$response"
+          echo "---"
+
+          # 5. Validate response (trim whitespace, case-insensitive match)
+          trimmed=$(echo "$response" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+          if [[ "${trimmed^^}" == "OK" ]] || [[ "${trimmed^^}" =~ ^OK ]]; then
             echo "Claude API connection successful"
           else
-            echo "Claude API test failed. Response: $response"
+            echo "::error::Unexpected response from Claude API"
             exit 1
           fi
 
