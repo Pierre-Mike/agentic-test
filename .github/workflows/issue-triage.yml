@@ -60,9 +60,67 @@ jobs:
                ---
                *This triage was performed automatically by Claude.*
 
+            4. FEATURE PLANNING: If you categorized the issue as "feature", generate an implementation plan and post it as a SECOND comment. Follow these steps:
+
+               a. Research the codebase by reading:
+                  - README.md for project overview
+                  - Files in server/, client/, and shared/ directories relevant to the feature
+
+               b. Create a detailed implementation plan and post it using:
+                  gh issue comment ${{ github.event.issue.number }} --body "..."
+
+               Use this exact format for the feature plan comment:
+
+               ## Implementation Plan
+
+               ### Feature Description
+               <describe the feature in detail based on the issue>
+
+               ### User Story
+               As a <type of user>
+               I want to <action/goal from the issue>
+               So that <benefit/value>
+
+               ### Problem Statement
+               <the problem this feature solves>
+
+               ### Solution Statement
+               <proposed solution approach>
+
+               ### Relevant Files
+               <list existing files that need modification and why>
+
+               ### Implementation Plan
+               #### Phase 1: Foundation
+               <foundational work needed>
+
+               #### Phase 2: Core Implementation
+               <main implementation work>
+
+               #### Phase 3: Integration
+               <integration with existing functionality>
+
+               ### Step by Step Tasks
+               1. <task 1>
+               2. <task 2>
+               (continue as needed)
+
+               ### Testing Strategy
+               - **Unit Tests**: <what to test>
+               - **Integration Tests**: <what to test>
+               - **Edge Cases**: <list edge cases>
+
+               ### Acceptance Criteria
+               - [ ] <criterion 1>
+               - [ ] <criterion 2>
+               (continue as needed)
+
+               ---
+               *This implementation plan was generated automatically by Claude.*
+
             Issue Title: ${{ github.event.issue.title }}
 
             Issue Body:
             ${{ github.event.issue.body }}
           claude_args: |
-            --allowedTools "Bash(gh issue *),Bash(gh label *)"
+            --allowedTools "Bash(gh issue *),Bash(gh label *),Read,Glob,Grep"
