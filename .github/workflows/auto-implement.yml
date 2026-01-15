@@ -27,7 +27,9 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           allowed_non_write_users: "*"
-          claude_args: '--allowed-tools Bash(gh pr:*),Bash(gh issue:*),Bash(git *),FileSystem,Validator'          
+          plugins: "feature-dev@claude-code-plugins"
+          plugin_marketplaces: "https://github.com/anthropics/claude-code.git"
+          claude_args: '--allowed-tools Bash(gh pr:*),Bash(gh issue:*),Bash(git *),FileSystem,Validator'
           prompt: |
             You are automating the full development lifecycle from issue to pull request.
 
@@ -41,21 +43,21 @@ jobs:
 
             1. ANALYZE THE ISSUE
                - Read the issue details using: gh issue view ${{ github.event.issue.number }}
-               - Determine if this is a feature, bug, or chore
                - Understand the requirements thoroughly
 
-            2. CREATE A PLAN
-               - If it's a feature request, use the /feature command
-               - If it's a bug report, use the /bug command
-               - If it's a chore/refactor, use the /chore command
-               - The plan will be saved in the specs/ directory
+            2. USE THE FEATURE-DEV PLUGIN
+               - Use the /feature-dev command to implement the issue
+               - The plugin will guide you through a 7-phase development workflow:
+                 * Phase 1: Requirements Analysis
+                 * Phase 2: Technical Planning
+                 * Phase 3: Implementation
+                 * Phase 4: Testing
+                 * Phase 5: Documentation
+                 * Phase 6: Review
+                 * Phase 7: Completion
+               - Follow the plugin's guidance for each phase
 
-            3. IMPLEMENT THE PLAN
-               - Use the /implement command with the path to the plan you just created
-               - Follow the plan step by step
-               - Ensure all validation commands pass
-
-            4. CREATE PULL REQUEST
+            3. CREATE PULL REQUEST
                - Create a new branch named: issue-${{ github.event.issue.number }}-auto-implement
                - Commit all changes with a descriptive message
                - Create a PR using: gh pr create
@@ -63,10 +65,9 @@ jobs:
                - PR body should include:
                  * Link to the original issue
                  * Summary of changes
-                 * Link to the plan file
                  * Test results
 
-            5. LINK BACK TO ISSUE
+            4. LINK BACK TO ISSUE
                - Post a comment on the issue with the PR link using: gh issue comment ${{ github.event.issue.number }}
 
             IMPORTANT NOTES:
