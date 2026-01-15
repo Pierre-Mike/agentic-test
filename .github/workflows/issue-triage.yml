@@ -1,126 +1,27 @@
-name: Issue Triage with Claude
-
+name: Claude Issue Triage
+description: Run Claude Code for issue triage in GitHub Actions
 on:
   issues:
     types: [opened]
 
 jobs:
-  triage:
+  triage-issue:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       issues: write
-      id-token: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
-      - name: Triage Issue with Claude
-        id: claude
-        uses: anthropics/claude-code-action@v1
+      - name: Run Claude Code for Issue Triage
+        uses: anthropics/claude-code-action@main
         with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          prompt: |
-            You are an issue triage assistant for a TypeScript monorepo project (client/server/shared architecture).
-
-            Analyze this GitHub issue and perform the following actions:
-
-            1. Determine the appropriate labels based on these rules:
-               - Category: bug, feature, enhancement, documentation, or question
-               - Priority: priority:critical, priority:high, priority:medium, or priority:low
-               - Area: area:client, area:server, area:shared, or area:infrastructure
-               - Add "good-first-issue" if the issue seems simple and well-defined
-               - Add "needs-investigation" if more information is needed
-               - Add "security" if security-related
-               - Add "performance" if performance-related
-
-            2. Apply the labels to issue #${{ github.event.issue.number }} using the gh CLI:
-               gh issue edit ${{ github.event.issue.number }} --add-label "label1,label2,..."
-
-            3. Add a comment to the issue with your triage analysis in this format:
-
-               ## Automated Issue Triage
-
-               | Field | Value |
-               |-------|-------|
-               | **Category** | <category> |
-               | **Priority** | <priority> |
-               | **Area** | <area> |
-
-               ### Summary
-               <one sentence summary of the issue>
-
-               ### Recommended Next Steps
-               1. <step 1>
-               2. <step 2>
-
-               ---
-               *This triage was performed automatically by Claude.*
-
-            4. FEATURE PLANNING: If you categorized the issue as "feature", generate an implementation plan and post it as a SECOND comment. Follow these steps:
-
-               a. Research the codebase by reading:
-                  - README.md for project overview
-                  - Files in server/, client/, and shared/ directories relevant to the feature
-
-               b. Create a detailed implementation plan and post it using:
-                  gh issue comment ${{ github.event.issue.number }} --body "..."
-
-               Use this exact format for the feature plan comment:
-
-               ## Implementation Plan
-
-               ### Feature Description
-               <describe the feature in detail based on the issue>
-
-               ### User Story
-               As a <type of user>
-               I want to <action/goal from the issue>
-               So that <benefit/value>
-
-               ### Problem Statement
-               <the problem this feature solves>
-
-               ### Solution Statement
-               <proposed solution approach>
-
-               ### Relevant Files
-               <list existing files that need modification and why>
-
-               ### Implementation Plan
-               #### Phase 1: Foundation
-               <foundational work needed>
-
-               #### Phase 2: Core Implementation
-               <main implementation work>
-
-               #### Phase 3: Integration
-               <integration with existing functionality>
-
-               ### Step by Step Tasks
-               1. <task 1>
-               2. <task 2>
-               (continue as needed)
-
-               ### Testing Strategy
-               - **Unit Tests**: <what to test>
-               - **Integration Tests**: <what to test>
-               - **Edge Cases**: <list edge cases>
-
-               ### Acceptance Criteria
-               - [ ] <criterion 1>
-               - [ ] <criterion 2>
-               (continue as needed)
-
-               ---
-               *This implementation plan was generated automatically by Claude.*
-
-            Issue Title: ${{ github.event.issue.title }}
-
-            Issue Body:
-            ${{ github.event.issue.body }}
-          claude_args: |
-            --allowedTools "Bash(gh issue *),Bash(gh label *),Read,Glob,Grep"
+          prompt: "/label-issue REPO: ${{ github.repository }} ISSUE_NUMBER${{ github.event.issue.number }}"
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          allowed_non_write_users: "*" # Required for issue triage workflow, if users without repo write access create issues
+          github_token: ${{ secrets.GITHUB_TOKEN }}
