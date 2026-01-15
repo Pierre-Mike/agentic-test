@@ -8,218 +8,62 @@ jobs:
   triage:
     runs-on: ubuntu-latest
     permissions:
-      issues: write
       contents: read
+      issues: write
+      id-token: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
         with:
-          node-version: '20'
-
-      - name: Install Claude Code
-        run: npm install -g @anthropic-ai/claude-code
-
-      - name: Validate Claude API Connection
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: |
-          set -euo pipefail
-
-          echo "=== Claude API Connection Validation ==="
-
-          # 1. Verify API key is set
-          if [[ -z "${ANTHROPIC_API_KEY:-}" ]]; then
-            echo "::error::ANTHROPIC_API_KEY secret is not set or empty"
-            exit 1
-          fi
-          echo "API key is set (length: ${#ANTHROPIC_API_KEY} chars)"
-
-          # 2. Determine claude CLI path
-          if command -v claude &>/dev/null; then
-            CLAUDE_CMD="claude"
-            echo "Using claude from PATH: $(which claude)"
-          else
-            CLAUDE_CMD="npx @anthropic-ai/claude-code"
-            echo "claude not in PATH, falling back to: $CLAUDE_CMD"
-          fi
-
-          # 3. Test API connection
-          echo "Sending test prompt..."
-          response=$($CLAUDE_CMD -p "Respond with exactly one word: OK" --dangerously-skip-permissions 2>&1) || {
-            echo "::error::Claude CLI exited with non-zero status"
-            echo "Raw output:"
-            echo "$response"
-            exit 1
-          }
-
-          # 4. Print raw response for debugging
-          echo "Raw response:"
-          echo "---"
-          echo "$response"
-          echo "---"
-
-          # 5. Validate response (trim whitespace, case-insensitive match)
-          trimmed=$(echo "$response" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-          if [[ "${trimmed^^}" == "OK" ]] || [[ "${trimmed^^}" =~ ^OK ]]; then
-            echo "Claude API connection successful"
-          else
-            echo "::error::Unexpected response from Claude API"
-            exit 1
-          fi
+          fetch-depth: 1
 
       - name: Triage Issue with Claude
-        id: triage
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          ISSUE_TITLE: ${{ github.event.issue.title }}
-          ISSUE_BODY: ${{ github.event.issue.body }}
-        run: |
-          claude --dangerously-skip-permissions -p "You are an issue triage assistant for a TypeScript monorepo project (client/server/shared architecture).
-
-          Analyze this GitHub issue and respond with ONLY valid JSON (no markdown, no explanation):
-
-          {
-            \"category\": \"bug|feature|documentation|question|enhancement\",
-            \"priority\": \"critical|high|medium|low\",
-            \"area\": \"client|server|shared|infrastructure|unknown\",
-            \"summary\": \"one sentence summary\",
-            \"labels\": [\"label1\", \"label2\"],
-            \"next_steps\": [\"step 1\", \"step 2\"]
-          }
-
-          Rules for labels array:
-          - Always include the category as a label (e.g., \"bug\", \"feature\")
-          - Always include priority with prefix (e.g., \"priority:high\")
-          - Always include area with prefix (e.g., \"area:client\")
-          - Add \"good-first-issue\" if the issue seems simple
-          - Add \"needs-investigation\" if more info is needed
-          - Add \"security\" if security-related
-          - Add \"performance\" if performance-related
-
-          Issue Title: $ISSUE_TITLE
-
-          Issue Body:
-          $ISSUE_BODY" > triage_result.json
-
-          cat triage_result.json
-
-      - name: Apply Labels and Post Comment
-        uses: actions/github-script@v7
+        id: claude
+        uses: anthropics/claude-code-action@v1
         with:
-          script: |
-            const fs = require('fs');
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            You are an issue triage assistant for a TypeScript monorepo project (client/server/shared architecture).
 
-            let triage;
-            try {
-              const raw = fs.readFileSync('triage_result.json', 'utf-8');
-              // Extract JSON from response (in case there's any extra text)
-              const jsonMatch = raw.match(/\{[\s\S]*\}/);
-              if (jsonMatch) {
-                triage = JSON.parse(jsonMatch[0]);
-              } else {
-                throw new Error('No JSON found in response');
-              }
-            } catch (error) {
-              console.error('Failed to parse triage result:', error);
-              triage = null;
-            }
+            Analyze this GitHub issue and perform the following actions:
 
-            if (triage) {
-              // Apply labels
-              const labelsToApply = triage.labels || [];
+            1. Determine the appropriate labels based on these rules:
+               - Category: bug, feature, enhancement, documentation, or question
+               - Priority: priority:critical, priority:high, priority:medium, or priority:low
+               - Area: area:client, area:server, area:shared, or area:infrastructure
+               - Add "good-first-issue" if the issue seems simple and well-defined
+               - Add "needs-investigation" if more information is needed
+               - Add "security" if security-related
+               - Add "performance" if performance-related
 
-              if (labelsToApply.length > 0) {
-                // First, ensure labels exist (create if they don't)
-                for (const label of labelsToApply) {
-                  try {
-                    await github.rest.issues.getLabel({
-                      owner: context.repo.owner,
-                      repo: context.repo.repo,
-                      name: label
-                    });
-                  } catch (e) {
-                    // Label doesn't exist, create it
-                    const colors = {
-                      'bug': 'd73a4a',
-                      'feature': 'a2eeef',
-                      'enhancement': 'a2eeef',
-                      'documentation': '0075ca',
-                      'question': 'd876e3',
-                      'priority:critical': 'b60205',
-                      'priority:high': 'd93f0b',
-                      'priority:medium': 'fbca04',
-                      'priority:low': '0e8a16',
-                      'area:client': '1d76db',
-                      'area:server': '5319e7',
-                      'area:shared': 'f9d0c4',
-                      'area:infrastructure': 'bfdadc',
-                      'good-first-issue': '7057ff',
-                      'needs-investigation': 'fbca04',
-                      'security': 'b60205',
-                      'performance': 'ff7619'
-                    };
+            2. Apply the labels to issue #${{ github.event.issue.number }} using the gh CLI:
+               gh issue edit ${{ github.event.issue.number }} --add-label "label1,label2,..."
 
-                    try {
-                      await github.rest.issues.createLabel({
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        name: label,
-                        color: colors[label] || 'ededed'
-                      });
-                    } catch (createError) {
-                      console.log(`Could not create label ${label}:`, createError.message);
-                    }
-                  }
-                }
+            3. Add a comment to the issue with your triage analysis in this format:
 
-                // Apply labels to issue
-                await github.rest.issues.addLabels({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.issue.number,
-                  labels: labelsToApply
-                });
-              }
+               ## Automated Issue Triage
 
-              // Build and post comment
-              const nextSteps = triage.next_steps?.map((s, i) => `${i + 1}. ${s}`).join('\n') || 'No specific steps identified.';
+               | Field | Value |
+               |-------|-------|
+               | **Category** | <category> |
+               | **Priority** | <priority> |
+               | **Area** | <area> |
 
-              const comment = `## 🤖 Automated Issue Triage
+               ### Summary
+               <one sentence summary of the issue>
 
-            | Field | Value |
-            |-------|-------|
-            | **Category** | ${triage.category} |
-            | **Priority** | ${triage.priority} |
-            | **Area** | ${triage.area} |
+               ### Recommended Next Steps
+               1. <step 1>
+               2. <step 2>
 
-            ### Summary
-            ${triage.summary}
+               ---
+               *This triage was performed automatically by Claude.*
 
-            ### Labels Applied
-            ${labelsToApply.map(l => '`' + l + '`').join(' ')}
+            Issue Title: ${{ github.event.issue.title }}
 
-            ### Recommended Next Steps
-            ${nextSteps}
-
-            ---
-            *This triage was performed automatically by Claude. A maintainer will review shortly.*`;
-
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: comment
-              });
-            } else {
-              // Fallback comment if triage failed
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: `## 🤖 Automated Issue Triage\n\n⚠️ Unable to perform automated triage. Please review manually.\n\n---\n*A maintainer will review this issue shortly.*`
-              });
-            }
+            Issue Body:
+            ${{ github.event.issue.body }}
+          allowed_tools: |
+            Bash(gh issue:*)
+            Bash(gh label:*)
