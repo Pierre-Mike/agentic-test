@@ -17,6 +17,10 @@ export const app = new Hono()
 	};
 
 	return c.json(data, { status: 200 });
+})
+
+.get("/api/hello", (c) => {
+	return c.json({ message: "Hello, World!" }, { status: 200 });
 });
 
 export default app;
