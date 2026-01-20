@@ -26,10 +26,8 @@ jobs:
         uses: anthropics/claude-code-action@main
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          allowed_non_write_users: "*"
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          model: sonnet
-          timeout: 180000
+          claude_args: '--allowedTools "Bash(gh:*),Read,Glob,Grep"'
           prompt: |
             You are an issue triage and assessment bot. You have TWO tasks:
 
