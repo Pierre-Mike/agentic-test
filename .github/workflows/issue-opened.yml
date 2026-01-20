@@ -1,0 +1,127 @@
+name: Issue Opened - Triage & Auto-Implement Assessment
+
+on:
+  issues:
+    types: [opened]
+
+concurrency:
+  group: issue-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  triage-and-assess:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Triage and Assess Issue
+        uses: anthropics/claude-code-action@main
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          allowed_non_write_users: "*"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          model: sonnet
+          timeout: 180000
+          prompt: |
+            You are an issue triage and assessment bot. You have TWO tasks:
+
+            ## ISSUE INFORMATION
+            - Repository: ${{ github.repository }}
+            - Issue Number: ${{ github.event.issue.number }}
+            - Issue Title: ${{ github.event.issue.title }}
+
+            ## TASK 1: LABEL THE ISSUE
+
+            1. Run `gh label list` to see available labels
+            2. Run `gh issue view ${{ github.event.issue.number }}` to get issue details
+            3. Analyze the issue and apply appropriate labels:
+               - Issue type (bug, feature, enhancement, etc.)
+               - Priority (P1, P2, P3) based on severity/impact
+               - Technical area if applicable
+            4. Apply labels using `gh issue edit ${{ github.event.issue.number }} --add-label "label1" --add-label "label2"`
+
+            DO NOT comment for labeling - just apply the labels silently.
+
+            ## TASK 2: ASSESS FOR AUTO-IMPLEMENTATION
+
+            ### Check Hard Blockers
+            IMMEDIATELY flag for human review if ANY of these are true:
+            - Contains: "security", "auth", "password", "secret", "credential", "migration", "deploy", "production", "database schema"
+            - Title/body ends with a question mark
+            - Vague scope: "improve", "refactor all", "fix everything", "make better"
+            - Requires major architectural changes
+
+            ### Score the Issue (0-100)
+
+            **A. Issue Clarity (0-25):** Clear title, detailed description, acceptance criteria, reproducibility steps
+            **B. Scope Assessment (0-25):** Single focused task, bounded complexity, no external dependencies
+            **C. Codebase Alignment (0-25):** Similar patterns exist, can identify target files, existing test patterns
+            **D. Risk Assessment (0-25):** No security areas, no breaking changes, easily reversible
+
+            ### Take Action Based on Score
+
+            **Score >= 75 (HIGH):**
+            ```bash
+            gh issue edit ${{ github.event.issue.number }} --add-label "auto-implement" --add-label "confidence:high"
+            ```
+            No comment needed - auto-implement workflow will handle it.
+
+            **Score 50-74 (MEDIUM):**
+            ```bash
+            gh issue edit ${{ github.event.issue.number }} --add-label "needs-review" --add-label "confidence:medium"
+            gh issue comment ${{ github.event.issue.number }} --body "## Confidence Assessment: MEDIUM
+
+            **Score: [X]/100**
+
+            ### Concerns:
+            - [List concerns]
+
+            ### To enable auto-implementation:
+            - [List needed clarifications]
+
+            *A maintainer can add \`auto-implement\` label manually if appropriate.*"
+            ```
+
+            **Score < 50 (LOW):**
+            ```bash
+            gh issue edit ${{ github.event.issue.number }} --add-label "needs-review" --add-label "confidence:low"
+            gh issue comment ${{ github.event.issue.number }} --body "## Confidence Assessment: LOW
+
+            **Score: [X]/100**
+
+            ### Why this cannot be auto-implemented:
+            - [List blockers]
+
+            *This issue requires human review.*"
+            ```
+
+            ## IMPORTANT
+            - Be STRICT - only clear, well-scoped issues get auto-implement
+            - Never apply both `auto-implement` and `needs-review`
+            - Always apply exactly one confidence label
+
+      - name: Handle Assessment Failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              labels: ['needs-review']
+            });
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: '## Assessment Failed\n\nThe automated triage encountered an error. This issue has been flagged for human review.\n\n*A maintainer can add the `auto-implement` label manually if appropriate.*'
+            });
