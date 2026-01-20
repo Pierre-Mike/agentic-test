@@ -27,9 +27,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           allowed_non_write_users: "*"
-          plugins: "feature-dev@claude-code-plugins"
-          plugin_marketplaces: "https://github.com/anthropics/claude-code.git"
-          claude_args: '--allowed-tools Bash(gh pr:*),Bash(gh issue:*),Bash(git *),FileSystem,Validator,Edit,Write,Skill,WebSearch'
+          allowed_tools: "Bash,Read,Write,Edit,Glob,Grep,WebFetch,WebSearch,TodoWrite"
           prompt: |
             You are automating the full development lifecycle from issue to pull request.
 
@@ -45,35 +43,34 @@ jobs:
                - Read the issue details using: gh issue view ${{ github.event.issue.number }}
                - Understand the requirements thoroughly
 
-            2. USE THE FEATURE-DEV PLUGIN
-               - Use the /feature-dev command to implement the issue
-               - The plugin will guide you through a 7-phase development workflow:
-                 * Phase 1: Requirements Analysis
-                 * Phase 2: Technical Planning
-                 * Phase 3: Implementation
-                 * Phase 4: Testing
-                 * Phase 5: Documentation
-                 * Phase 6: Review
-                 * Phase 7: Completion
-               - Follow the plugin's guidance for each phase
+            2. EXPLORE THE CODEBASE
+               - Understand the project structure
+               - Find relevant files that need to be modified
+               - Identify patterns and conventions used
 
-            3. CREATE PULL REQUEST
-               - Create a new branch named: issue-${{ github.event.issue.number }}-auto-implement
-               - Commit all changes with a descriptive message
-               - Create a PR using: gh pr create
-               - PR title should reference the issue: "Closes #${{ github.event.issue.number }}: [Issue Title]"
-               - PR body should include:
-                 * Link to the original issue
-                 * Summary of changes
-                 * Test results
+            3. IMPLEMENT THE CHANGES
+               - Write clean, well-structured code
+               - Follow existing patterns in the codebase
+               - Add tests if the project has a test suite
 
-            4. LINK BACK TO ISSUE
-               - Post a comment on the issue with the PR link using: gh issue comment ${{ github.event.issue.number }}
+            4. VALIDATE THE IMPLEMENTATION
+               - Run any existing tests (npm test, bun test, etc.)
+               - Run build/type-check if applicable
+               - Fix any issues before proceeding
 
-            IMPORTANT NOTES:
-            - Run all validation commands (tests, builds, type-checks) before creating the PR
-            - If any validation fails, fix the issues before creating the PR
-            - If the issue is unclear or missing critical information, comment on the issue asking for clarification instead of implementing
-            - Use the git user: "GitHub Actions Bot <actions@github.com>"
+            5. CREATE PULL REQUEST
+               - Configure git user: git config user.name "github-actions[bot]" && git config user.email "github-actions[bot]@users.noreply.github.com"
+               - Create a new branch: git checkout -b issue-${{ github.event.issue.number }}-auto-implement
+               - Stage and commit changes with a descriptive message
+               - Push the branch: git push -u origin issue-${{ github.event.issue.number }}-auto-implement
+               - Create PR using: gh pr create --title "Closes #${{ github.event.issue.number }}: ${{ github.event.issue.title }}" --body "..."
+
+            6. LINK BACK TO ISSUE
+               - Post a comment on the issue with the PR link: gh issue comment ${{ github.event.issue.number }} --body "..."
+
+            IMPORTANT:
+            - If the issue is unclear, comment asking for clarification instead of implementing
+            - Always validate your changes before creating the PR
+            - Include a summary of changes and test results in the PR body
 
             Start by reading the issue details now.
