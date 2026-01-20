@@ -4,6 +4,10 @@ on:
   issues:
     types: [opened]
 
+concurrency:
+  group: issue-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
 jobs:
   triage-issue:
     runs-on: ubuntu-latest
