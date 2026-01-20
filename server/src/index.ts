@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import type { ApiResponse } from "shared/dist";
+import type { ApiResponse, HealthCheckResponse } from "shared/dist";
 
 export const app = new Hono()
 
@@ -14,6 +14,15 @@ export const app = new Hono()
 	const data: ApiResponse = {
 		message: "Hello BHVR!",
 		success: true,
+	};
+
+	return c.json(data, { status: 200 });
+})
+
+.get("/health", async (c) => {
+	const data: HealthCheckResponse = {
+		status: "ok",
+		timestamp: new Date().toISOString(),
 	};
 
 	return c.json(data, { status: 200 });
