@@ -36,15 +36,18 @@ jobs:
             - Issue Number: ${{ github.event.issue.number }}
             - Issue Title: ${{ github.event.issue.title }}
 
-            ## TASK 1: LABEL THE ISSUE
+            ## TASK 1: CATEGORIZE AND LABEL THE ISSUE
 
-            1. Run `gh label list` to see available labels
-            2. Run `gh issue view ${{ github.event.issue.number }}` to get issue details
-            3. Analyze the issue and apply appropriate labels:
-               - Issue type (bug, feature, enhancement, etc.)
-               - Priority (P1, P2, P3) based on severity/impact
-               - Technical area if applicable
-            4. Apply labels using `gh issue edit ${{ github.event.issue.number }} --add-label "label1" --add-label "label2"`
+            1. Run `gh issue view ${{ github.event.issue.number }}` to get issue details
+            2. Determine the issue TYPE (exactly one):
+               - **bug**: Something is broken, not working as expected, error, crash, regression
+               - **feature**: New functionality, capability, or user-facing improvement
+               - **chore**: Maintenance, refactoring, documentation, dependencies, CI/CD
+
+            3. Apply labels using `gh issue edit ${{ github.event.issue.number }} --add-label "type"`
+               Where type is one of: bug, feature, chore
+
+            4. Optionally add priority label (P1, P2, P3) based on severity/impact
 
             DO NOT comment for labeling - just apply the labels silently.
 
