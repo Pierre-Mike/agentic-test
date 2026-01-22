@@ -1,0 +1,4 @@
+# Run type-check, build, and tests before push
+bun run type-check
+bun run build
+bun run test

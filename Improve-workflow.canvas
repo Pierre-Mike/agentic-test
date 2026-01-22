@@ -1,0 +1,540 @@
+{
+  "nodes": [
+    {
+      "type": "text",
+      "id": "b0d8ff99-8c94-413d-b9c9-ef2dbb144fca",
+      "x": -413,
+      "y": 52,
+      "width": 260,
+      "height": 100,
+      "text": "**1. Create Issue**\nDefine the task, bug, or feature request with clear acceptance criteria"
+    },
+    {
+      "type": "text",
+      "id": "4652cf0b-9b30-4f6e-bb06-17582debfa6d",
+      "x": -35,
+      "y": 52,
+      "width": 260,
+      "height": 100,
+      "text": "**2. Need More Information?**\nIs the issue clear enough to implement?"
+    },
+    {
+      "type": "text",
+      "id": "b5eae339-7ab2-4041-ad1b-57e2ffdb3ddc",
+      "x": -35,
+      "y": 252,
+      "width": 260,
+      "height": 100,
+      "text": "**3. Should It Be Broken Down?**\nIs this issue too large for a single PR?"
+    },
+    {
+      "type": "text",
+      "id": "10f520e6-3563-47f6-a07f-b8b1d5c6c9ee",
+      "x": -35,
+      "y": 385,
+      "width": 260,
+      "height": 100,
+      "text": "**4. Has Dependencies?**\nDoes this issue depend on other open issues/PRs?"
+    },
+    {
+      "type": "text",
+      "id": "b10bf016-fa85-4b4c-a9f7-6da2f5a4fdf0",
+      "x": 342,
+      "y": 385,
+      "width": 260,
+      "height": 100,
+      "text": "**Wait for Dependencies**\nPoll or wait for dependent issues/PRs to complete"
+    },
+    {
+      "type": "text",
+      "id": "f50b1bd8-862a-4bd4-b682-c03a60569c6c",
+      "x": -35,
+      "y": 525,
+      "width": 260,
+      "height": 120,
+      "text": "**5. Create Branch + Plan**\nCreate feature branch and write implementation plan:\n• Architecture decisions\n• Files to modify/create\n• Testing strategy"
+    },
+    {
+      "type": "text",
+      "id": "00bfbbc4-d530-48d5-94e1-6ec4f138a20b",
+      "x": -320,
+      "y": 788,
+      "width": 260,
+      "height": 100,
+      "text": "**6a. Update Documentation**\nAdd or update relevant docs, README, API specs"
+    },
+    {
+      "type": "text",
+      "id": "e0c73541-7193-43b9-8d03-23c3743d6161",
+      "x": -35,
+      "y": 788,
+      "width": 260,
+      "height": 100,
+      "text": "**6b. Create E2E Tests**\nWrite failing end-to-end tests for the feature"
+    },
+    {
+      "type": "text",
+      "id": "a19fbae8-c437-4ddf-95c6-165a8262ae13",
+      "x": 250,
+      "y": 788,
+      "width": 260,
+      "height": 100,
+      "text": "**6c. Create Unit Tests**\nWrite failing unit tests for the feature"
+    },
+    {
+      "type": "text",
+      "id": "261cc8d4-6d78-4541-bbba-4a65f2104430",
+      "x": -35,
+      "y": 1020,
+      "width": 300,
+      "height": 160,
+      "text": "**7. Implementation**\nWrite code with quality gates:\n• Git commit hooks\n• Git pre-push hooks\n• E2E validation\n• Unit test validation\n• TypeScript validation (tsc)"
+    },
+    {
+      "type": "text",
+      "id": "impl-failed",
+      "x": 350,
+      "y": 1020,
+      "width": 260,
+      "height": 100,
+      "text": "**Tests Failed?**\nFix failing tests and re-run quality gates"
+    },
+    {
+      "type": "text",
+      "id": "ef7910fb-abd6-4627-9828-f6c9594c564e",
+      "x": -35,
+      "y": 1230,
+      "width": 260,
+      "height": 100,
+      "text": "**8. Create Pull Request**\nOpen PR with summary, test plan, and linked issue"
+    },
+    {
+      "type": "text",
+      "id": "ci-checks",
+      "x": -35,
+      "y": 1380,
+      "width": 260,
+      "height": 100,
+      "text": "**9. CI Pipeline**\nAutomated checks: lint, test, build, security scan"
+    },
+    {
+      "type": "text",
+      "id": "ci-failed",
+      "x": 350,
+      "y": 1380,
+      "width": 260,
+      "height": 100,
+      "text": "**CI Failed?**\nFix issues and push new commits"
+    },
+    {
+      "type": "text",
+      "id": "code-review",
+      "x": -35,
+      "y": 1530,
+      "width": 260,
+      "height": 100,
+      "text": "**10. Code Review**\nHuman or AI review for code quality, security, and best practices"
+    },
+    {
+      "type": "text",
+      "id": "review-changes",
+      "x": 350,
+      "y": 1530,
+      "width": 260,
+      "height": 100,
+      "text": "**Changes Requested?**\nAddress review feedback and request re-review"
+    },
+    {
+      "type": "text",
+      "id": "3825c125-6889-48a6-a615-25ab9da2d462",
+      "x": -35,
+      "y": 1680,
+      "width": 260,
+      "height": 100,
+      "text": "**11. Deploy to Feature Environment**\nDeploy PR to preview/staging for validation"
+    },
+    {
+      "type": "text",
+      "id": "deploy-failed",
+      "x": 350,
+      "y": 1680,
+      "width": 260,
+      "height": 100,
+      "text": "**Validation Failed?**\nFix issues and redeploy"
+    },
+    {
+      "type": "text",
+      "id": "merge-pr",
+      "x": -35,
+      "y": 1830,
+      "width": 260,
+      "height": 100,
+      "text": "**12. Merge PR**\nSquash and merge to main branch, delete feature branch"
+    },
+    {
+      "type": "text",
+      "id": "deploy-prod",
+      "x": -35,
+      "y": 1980,
+      "width": 260,
+      "height": 100,
+      "text": "**13. Deploy to Production**\nAutomatic or manual deployment to production environment"
+    },
+    {
+      "type": "text",
+      "id": "monitor",
+      "x": -35,
+      "y": 2130,
+      "width": 260,
+      "height": 100,
+      "text": "**14. Monitor & Close**\nMonitor for issues, close GitHub issue when verified"
+    },
+    {
+      "type": "text",
+      "id": "rollback",
+      "x": 350,
+      "y": 1980,
+      "width": 260,
+      "height": 100,
+      "text": "**Rollback?**\nRevert deployment if critical issues found"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "fromNode": "b0d8ff99-8c94-413d-b9c9-ef2dbb144fca",
+      "fromSide": "right",
+      "toNode": "4652cf0b-9b30-4f6e-bb06-17582debfa6d",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "e2",
+      "fromNode": "4652cf0b-9b30-4f6e-bb06-17582debfa6d",
+      "fromSide": "top",
+      "toNode": "b0d8ff99-8c94-413d-b9c9-ef2dbb144fca",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "label": "YES - Ask questions",
+      "style": "dashed",
+      "shape": "curved"
+    },
+    {
+      "id": "e3",
+      "fromNode": "4652cf0b-9b30-4f6e-bb06-17582debfa6d",
+      "fromSide": "bottom",
+      "toNode": "b5eae339-7ab2-4041-ad1b-57e2ffdb3ddc",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "label": "NO - Clear enough",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "e4",
+      "fromNode": "b5eae339-7ab2-4041-ad1b-57e2ffdb3ddc",
+      "fromSide": "left",
+      "toNode": "b0d8ff99-8c94-413d-b9c9-ef2dbb144fca",
+      "toSide": "bottom",
+      "toEnd": "arrow",
+      "label": "YES - Create sub-issues",
+      "style": "dashed",
+      "shape": "curved"
+    },
+    {
+      "id": "e5",
+      "fromNode": "b5eae339-7ab2-4041-ad1b-57e2ffdb3ddc",
+      "fromSide": "bottom",
+      "toNode": "10f520e6-3563-47f6-a07f-b8b1d5c6c9ee",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "label": "NO - Single PR scope",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "e6",
+      "fromNode": "10f520e6-3563-47f6-a07f-b8b1d5c6c9ee",
+      "fromSide": "right",
+      "toNode": "b10bf016-fa85-4b4c-a9f7-6da2f5a4fdf0",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "label": "YES",
+      "style": "solid",
+      "shape": "straight"
+    },
+    {
+      "id": "e7",
+      "fromNode": "b10bf016-fa85-4b4c-a9f7-6da2f5a4fdf0",
+      "fromSide": "bottom",
+      "toNode": "10f520e6-3563-47f6-a07f-b8b1d5c6c9ee",
+      "toSide": "right",
+      "toEnd": "arrow",
+      "label": "Dependencies resolved",
+      "style": "dashed",
+      "shape": "curved"
+    },
+    {
+      "id": "e8",
+      "fromNode": "10f520e6-3563-47f6-a07f-b8b1d5c6c9ee",
+      "fromSide": "bottom",
+      "toNode": "f50b1bd8-862a-4bd4-b682-c03a60569c6c",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "label": "NO",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "e9",
+      "fromNode": "f50b1bd8-862a-4bd4-b682-c03a60569c6c",
+      "fromSide": "bottom",
+      "toNode": "00bfbbc4-d530-48d5-94e1-6ec4f138a20b",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "label": "If needed",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "e10",
+      "fromNode": "f50b1bd8-862a-4bd4-b682-c03a60569c6c",
+      "fromSide": "bottom",
+      "toNode": "e0c73541-7193-43b9-8d03-23c3743d6161",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "label": "If needed",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "e11",
+      "fromNode": "f50b1bd8-862a-4bd4-b682-c03a60569c6c",
+      "fromSide": "bottom",
+      "toNode": "a19fbae8-c437-4ddf-95c6-165a8262ae13",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "label": "If needed",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "e12",
+      "fromNode": "00bfbbc4-d530-48d5-94e1-6ec4f138a20b",
+      "fromSide": "bottom",
+      "toNode": "261cc8d4-6d78-4541-bbba-4a65f2104430",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "e13",
+      "fromNode": "e0c73541-7193-43b9-8d03-23c3743d6161",
+      "fromSide": "bottom",
+      "toNode": "261cc8d4-6d78-4541-bbba-4a65f2104430",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "label": "Merge all",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "e14",
+      "fromNode": "a19fbae8-c437-4ddf-95c6-165a8262ae13",
+      "fromSide": "bottom",
+      "toNode": "261cc8d4-6d78-4541-bbba-4a65f2104430",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "e15",
+      "fromNode": "261cc8d4-6d78-4541-bbba-4a65f2104430",
+      "fromSide": "right",
+      "toNode": "impl-failed",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "label": "FAIL",
+      "style": "dashed",
+      "shape": "straight"
+    },
+    {
+      "id": "e16",
+      "fromNode": "impl-failed",
+      "fromSide": "left",
+      "toNode": "261cc8d4-6d78-4541-bbba-4a65f2104430",
+      "toSide": "right",
+      "toEnd": "arrow",
+      "label": "Fixed",
+      "style": "dashed",
+      "shape": "curved"
+    },
+    {
+      "id": "e17",
+      "fromNode": "261cc8d4-6d78-4541-bbba-4a65f2104430",
+      "fromSide": "bottom",
+      "toNode": "ef7910fb-abd6-4627-9828-f6c9594c564e",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "label": "PASS",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "e18",
+      "fromNode": "ef7910fb-abd6-4627-9828-f6c9594c564e",
+      "fromSide": "bottom",
+      "toNode": "ci-checks",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "e19",
+      "fromNode": "ci-checks",
+      "fromSide": "right",
+      "toNode": "ci-failed",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "label": "FAIL",
+      "style": "dashed",
+      "shape": "straight"
+    },
+    {
+      "id": "e20",
+      "fromNode": "ci-failed",
+      "fromSide": "left",
+      "toNode": "ci-checks",
+      "toSide": "right",
+      "toEnd": "arrow",
+      "label": "Fixed",
+      "style": "dashed",
+      "shape": "curved"
+    },
+    {
+      "id": "e21",
+      "fromNode": "ci-checks",
+      "fromSide": "bottom",
+      "toNode": "code-review",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "label": "PASS",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "e22",
+      "fromNode": "code-review",
+      "fromSide": "right",
+      "toNode": "review-changes",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "label": "Changes requested",
+      "style": "dashed",
+      "shape": "straight"
+    },
+    {
+      "id": "e23",
+      "fromNode": "review-changes",
+      "fromSide": "left",
+      "toNode": "code-review",
+      "toSide": "right",
+      "toEnd": "arrow",
+      "label": "Re-review",
+      "style": "dashed",
+      "shape": "curved"
+    },
+    {
+      "id": "e24",
+      "fromNode": "code-review",
+      "fromSide": "bottom",
+      "toNode": "3825c125-6889-48a6-a615-25ab9da2d462",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "label": "Approved",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "e25",
+      "fromNode": "3825c125-6889-48a6-a615-25ab9da2d462",
+      "fromSide": "right",
+      "toNode": "deploy-failed",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "label": "FAIL",
+      "style": "dashed",
+      "shape": "straight"
+    },
+    {
+      "id": "e26",
+      "fromNode": "deploy-failed",
+      "fromSide": "left",
+      "toNode": "3825c125-6889-48a6-a615-25ab9da2d462",
+      "toSide": "right",
+      "toEnd": "arrow",
+      "label": "Fixed",
+      "style": "dashed",
+      "shape": "curved"
+    },
+    {
+      "id": "e27",
+      "fromNode": "3825c125-6889-48a6-a615-25ab9da2d462",
+      "fromSide": "bottom",
+      "toNode": "merge-pr",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "label": "Validated",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "e28",
+      "fromNode": "merge-pr",
+      "fromSide": "bottom",
+      "toNode": "deploy-prod",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "e29",
+      "fromNode": "deploy-prod",
+      "fromSide": "right",
+      "toNode": "rollback",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "label": "Critical issue",
+      "style": "dashed",
+      "shape": "straight"
+    },
+    {
+      "id": "e30",
+      "fromNode": "rollback",
+      "fromSide": "top",
+      "toNode": "b0d8ff99-8c94-413d-b9c9-ef2dbb144fca",
+      "toSide": "right",
+      "toEnd": "arrow",
+      "label": "Create hotfix issue",
+      "style": "dashed",
+      "shape": "curved"
+    },
+    {
+      "id": "e31",
+      "fromNode": "deploy-prod",
+      "fromSide": "bottom",
+      "toNode": "monitor",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "label": "Success",
+      "style": "solid",
+      "shape": "curved"
+    }
+  ]
+}

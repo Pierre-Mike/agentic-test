@@ -1,0 +1,309 @@
+{
+  "nodes": [
+    {
+      "type": "text",
+      "id": "issue-start",
+      "x": -558.0214862021227,
+      "y": 200,
+      "width": 200,
+      "height": 151.98681103355096,
+      "text": "📝 ISSUE CREATED\n\nBug Report\nFeature Request\nChore/Refactor"
+    },
+    {
+      "type": "text",
+      "id": "auto-labeling",
+      "x": -296.70247700353775,
+      "y": 201.61170795005899,
+      "width": 200,
+      "height": 149.17671313984556,
+      "text": "🏷️ AUTO LABELING\n\nAnalyze content\nApply type labels\nSet priority (P1-P3)"
+    },
+    {
+      "type": "text",
+      "id": "confidence-assessment",
+      "x": -19.266388304363247,
+      "y": 187.1063363995283,
+      "width": 200,
+      "height": 193.06254523634192,
+      "text": "🎯 CONFIDENCE\nASSESSMENT\n\nClarity (25pts)\nScope (25pts)\nAlignment (25pts)\nRisk (25pts)"
+    },
+    {
+      "type": "text",
+      "id": "high-confidence",
+      "x": 198.53650624262963,
+      "y": -113.20686679630653,
+      "width": 200,
+      "height": 121.90440670153303,
+      "text": "✅ HIGH (≥75)\n\nauto-implement\nconfidence:high"
+    },
+    {
+      "type": "text",
+      "id": "medium-confidence",
+      "x": 269.451656045224,
+      "y": 225.78732720094345,
+      "width": 200,
+      "height": 123.51611465159198,
+      "text": "⚠️ MEDIUM (50-74)\n\nneeds-review\nconfidence:medium"
+    },
+    {
+      "type": "text",
+      "id": "low-confidence",
+      "x": 280.7336116956368,
+      "y": 408.0214862021227,
+      "width": 200,
+      "height": 131.5746544018868,
+      "text": "❌ LOW (<50)\n\nneeds-review\nconfidence:low"
+    },
+    {
+      "type": "text",
+      "id": "auto-implement",
+      "x": 472.90758802099447,
+      "y": -109.69085346022612,
+      "width": 200,
+      "height": 120,
+      "text": "🤖 AUTO IMPLEMENT\n\n1. Analyze & Plan\n2. Write Code\n3. Run Tests\n4. Validate Build"
+    },
+    {
+      "type": "text",
+      "id": "manual-review",
+      "x": 580.7336116956368,
+      "y": 307.23415900117925,
+      "width": 431,
+      "height": 104,
+      "text": "👥 MANUAL REVIEW\n\nMaintainer assigns\nDeveloper implements\nManual testing"
+    },
+    {
+      "type": "text",
+      "id": "pr-creation",
+      "x": 791.8212975290854,
+      "y": -137.38248604719095,
+      "width": 200,
+      "height": 164.4683180023585,
+      "text": "📋 PR CREATED\n\nBranch: issue-X-auto\nTests passing\nReady for review"
+    },
+    {
+      "type": "text",
+      "id": "manual-pr",
+      "x": 1075.7478516005058,
+      "y": 304.8861133566833,
+      "width": 200,
+      "height": 181.1936079158985,
+      "text": "📋 MANUAL PR\n\nDeveloper branch\nCustom implementation\nManual testing"
+    },
+    {
+      "type": "text",
+      "id": "peer-review",
+      "x": 1306.4468318002357,
+      "y": 100.75509789775941,
+      "width": 200,
+      "height": 138.68099080141513,
+      "text": "👁️ PEER REVIEW\n\nCode quality check\nSecurity validation\nFunctional testing"
+    },
+    {
+      "type": "text",
+      "id": "merge-success",
+      "x": 1600,
+      "y": 118.483885348408,
+      "width": 200,
+      "height": 151.5746544018868,
+      "text": "🎉 MERGED\n\nIssue closed\nFeature deployed\nWorkflow complete"
+    },
+    {
+      "type": "text",
+      "id": "feedback-loop",
+      "x": 1316.1170795005896,
+      "y": 440.25564520330175,
+      "width": 200,
+      "height": 139.63319415218166,
+      "text": "🔄 FEEDBACK\n\nChanges requested\nBack to development"
+    },
+    {
+      "type": "text",
+      "id": "manual-override",
+      "x": 699.5553574219341,
+      "y": 123.1168967291091,
+      "width": 200,
+      "height": 80,
+      "text": "🛠️ MANUAL OVERRIDE\n\nRemove auto-implement\nForce manual path"
+    }
+  ],
+  "edges": [
+    {
+      "id": "issue-to-labeling",
+      "fromNode": "issue-start",
+      "fromSide": "right",
+      "toNode": "auto-labeling",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "labeling-to-confidence",
+      "fromNode": "auto-labeling",
+      "fromSide": "right",
+      "toNode": "confidence-assessment",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "confidence-to-high",
+      "fromNode": "confidence-assessment",
+      "fromSide": "top",
+      "toNode": "high-confidence",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "label": "Score ≥75",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "confidence-to-medium",
+      "fromNode": "confidence-assessment",
+      "fromSide": "right",
+      "toNode": "medium-confidence",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "label": "Score 50-74",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "confidence-to-low",
+      "fromNode": "confidence-assessment",
+      "fromSide": "bottom",
+      "toNode": "low-confidence",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "label": "Score <50",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "high-to-auto-implement",
+      "fromNode": "high-confidence",
+      "fromSide": "right",
+      "toNode": "auto-implement",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "style": "solid",
+      "shape": "straight"
+    },
+    {
+      "id": "medium-to-manual",
+      "fromNode": "medium-confidence",
+      "fromSide": "right",
+      "toNode": "manual-review",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "low-to-manual",
+      "fromNode": "low-confidence",
+      "fromSide": "right",
+      "toNode": "manual-review",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "auto-implement-to-pr",
+      "fromNode": "auto-implement",
+      "fromSide": "right",
+      "toNode": "pr-creation",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "style": "solid",
+      "shape": "straight"
+    },
+    {
+      "id": "manual-to-manual-pr",
+      "fromNode": "manual-review",
+      "fromSide": "right",
+      "toNode": "manual-pr",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "style": "solid",
+      "shape": "straight"
+    },
+    {
+      "id": "pr-to-peer-review",
+      "fromNode": "pr-creation",
+      "fromSide": "right",
+      "toNode": "peer-review",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "manual-pr-to-peer-review",
+      "fromNode": "manual-pr",
+      "fromSide": "right",
+      "toNode": "peer-review",
+      "toSide": "bottom",
+      "toEnd": "arrow",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "peer-review-to-merge",
+      "fromNode": "peer-review",
+      "fromSide": "right",
+      "toNode": "merge-success",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "label": "Approved",
+      "style": "solid",
+      "shape": "straight"
+    },
+    {
+      "id": "peer-review-to-feedback",
+      "fromNode": "peer-review",
+      "fromSide": "bottom",
+      "toNode": "feedback-loop",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "label": "Changes needed",
+      "style": "dashed",
+      "shape": "curved"
+    },
+    {
+      "id": "feedback-to-manual",
+      "fromNode": "feedback-loop",
+      "fromSide": "left",
+      "toNode": "manual-review",
+      "toSide": "bottom",
+      "toEnd": "arrow",
+      "style": "dashed",
+      "shape": "curved"
+    },
+    {
+      "id": "override-to-manual",
+      "fromNode": "manual-override",
+      "fromSide": "bottom",
+      "toNode": "manual-review",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "label": "Force manual",
+      "style": "dashed",
+      "shape": "curved"
+    },
+    {
+      "id": "medium-approve-to-auto",
+      "fromNode": "medium-confidence",
+      "fromSide": "top",
+      "toNode": "auto-implement",
+      "toSide": "bottom",
+      "toEnd": "arrow",
+      "label": "Maintainer approval",
+      "style": "dashed",
+      "shape": "curved"
+    }
+  ]
+}
