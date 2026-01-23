@@ -1,9 +1,9 @@
 export type ApiResponse = {
-  message: string;
-  success: true;
-}
+	message: string;
+	success: true;
+};
 
 export type VersionResponse = {
-  version: string;
-  name: string;
-}
+	version: string;
+	name: string;
+};
