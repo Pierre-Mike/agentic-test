@@ -1,0 +1,46 @@
+name: Chore / Maintenance
+description: Maintenance task, refactoring, or infrastructure work
+labels: ["chore"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Chore / Maintenance Task
+        Describe the maintenance or infrastructure work needed.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Task Description
+      description: What needs to be done?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Chore Type
+      options:
+        - refactoring
+        - dependencies
+        - documentation
+        - ci-cd
+        - testing
+        - performance
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Rationale
+      description: Why is this work needed?
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What files/areas will be affected?
