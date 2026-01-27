@@ -5,9 +5,12 @@
 	"types": "dist/index.d.ts",
 	"scripts": {
 		"build": "tsc",
-		"dev": "tsc --watch"
+		"dev": "tsc --watch",
+		"test": "bun test",
+		"type-check": "tsc --noEmit"
 	},
 	"devDependencies": {
+		"@types/bun": "latest",
 		"typescript": "^5.9.3"
 	}
 }
