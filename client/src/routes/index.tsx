@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import beaver from "../assets/beaver.svg";
 import { hcWithType } from "server/dist/client";
-import type { InferResponseType } from "hono/client";
+import type { ApiResponse } from "shared/dist";
 import "../App.css";
 
 export const Route = createFileRoute("/")({
@@ -13,10 +13,8 @@ const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
 
 const client = hcWithType(SERVER_URL);
 
-type HelloData = InferResponseType<typeof client.hello.$get>;
-
 function Index() {
-	const [data, setData] = useState<HelloData>();
+	const [data, setData] = useState<ApiResponse>();
 
 	async function sendRequest() {
 		try {
