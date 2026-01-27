@@ -42,3 +42,7 @@ bun.lockb
 
 # Turbo
 .turbo
+
+# Playwright
+e2e/playwright-report/
+e2e/test-results/

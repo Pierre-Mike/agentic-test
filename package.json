@@ -9,7 +9,8 @@
 	"workspaces": [
 		"./server",
 		"./client",
-		"./shared"
+		"./shared",
+		"./e2e"
 	],
 	"scripts": {
 		"dev": "turbo dev",
@@ -23,7 +24,10 @@
 		"test": "turbo test",
 		"postinstall": "turbo build --filter=shared --filter=server",
 		"format": "biome format . --write",
-		"prepare": "husky"
+		"prepare": "husky",
+		"e2e": "turbo e2e",
+		"e2e:ui": "bun run --cwd e2e test:ui",
+		"e2e:headed": "bun run --cwd e2e test:headed"
 	},
 	"keywords": [
 		"bun",

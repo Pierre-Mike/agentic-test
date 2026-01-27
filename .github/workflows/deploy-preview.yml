@@ -18,6 +18,8 @@ concurrency:
 jobs:
   deploy-preview:
     runs-on: ubuntu-latest
+    outputs:
+      preview_url: ${{ steps.set-url.outputs.preview_url }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -43,6 +45,11 @@ jobs:
           destination_dir: previews/pr-${{ github.event.pull_request.number }}
           keep_files: true
 
+      - name: Set preview URL output
+        id: set-url
+        run: |
+          echo "preview_url=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/previews/pr-${{ github.event.pull_request.number }}/" >> $GITHUB_OUTPUT
+
       - name: Comment on PR
         uses: actions/github-script@v7
         with:
@@ -67,6 +74,78 @@ jobs:
 
             const existing = comments.find(c =>
               c.user.type === 'Bot' && c.body.includes('## Preview Deployment')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner, repo, comment_id: existing.id, body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: prNumber, body
+              });
+            }
+
+  e2e-preview:
+    needs: deploy-preview
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.4
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium
+
+      - name: Wait for deployment to be ready
+        run: sleep 30
+
+      - name: Run E2E tests against preview
+        run: bun run e2e
+        env:
+          E2E_BASE_URL: ${{ needs.deploy-preview.outputs.preview_url }}
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-preview
+          path: e2e/playwright-report/
+          retention-days: 7
+
+      - name: Comment E2E results on PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const status = '${{ job.status }}' === 'success' ? '✅ Passed' : '❌ Failed';
+            const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${{ github.run_id }}`;
+
+            const body = `## E2E Test Results
+
+            **Status:** ${status}
+
+            [View test report](${runUrl})
+
+            ---
+            *Tested by GitHub Actions*`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner, repo, issue_number: prNumber
+            });
+
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('## E2E Test Results')
             );
 
             if (existing) {
