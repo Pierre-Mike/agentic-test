@@ -33,7 +33,7 @@ jobs:
       - name: Build client for preview
         run: bun run build:client
         env:
-          VITE_BASE_URL: /agentic-test/
+          VITE_BASE_URL: /agentic-test/previews/pr-${{ github.event.pull_request.number }}/
 
       - name: Deploy to gh-pages branch (preview subdirectory)
         uses: peaceiris/actions-gh-pages@v4
