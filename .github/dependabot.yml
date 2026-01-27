@@ -20,7 +20,7 @@ updates:
       - "dependencies"
       - "chore"
 
-  # Client dependencies
+  # Client dependencies 
   - package-ecosystem: "npm"
     directory: "/client"
     schedule:
