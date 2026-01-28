@@ -135,7 +135,21 @@ jobs:
         run: bunx playwright install --with-deps chromium
 
       - name: Wait for deployment to be ready
-        run: sleep 30
+        run: |
+          URL="${{ needs.deploy-preview.outputs.preview_url }}"
+          echo "Waiting for $URL to be ready..."
+          for i in $(seq 1 30); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+            TITLE=$(curl -s "$URL" | grep -o '<title>[^<]*</title>' || true)
+            if [ "$STATUS" = "200" ] && echo "$TITLE" | grep -qiv "site not found"; then
+              echo "Site is ready! (attempt $i)"
+              exit 0
+            fi
+            echo "Attempt $i: status=$STATUS title=$TITLE - waiting 10s..."
+            sleep 10
+          done
+          echo "Site did not become ready after 300s"
+          exit 1
 
       - name: Run E2E tests against preview
         run: bun run e2e
