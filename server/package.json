@@ -5,7 +5,9 @@
 	"types": "dist/index.d.ts",
 	"scripts": {
 		"build": "tsc",
-		"dev": "bun --watch run src/index.ts & tsc --watch",
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy --minify",
+		"types": "wrangler types --env-interface CloudflareBindings",
 		"test": "bun test",
 		"type-check": "tsc --noEmit"
 	},
@@ -14,6 +16,8 @@
 		"shared": "workspace:*"
 	},
 	"devDependencies": {
-		"@types/bun": "latest"
+		"@cloudflare/workers-types": "^4.20241230.0",
+		"@types/bun": "latest",
+		"wrangler": "^4.61.0"
 	}
 }

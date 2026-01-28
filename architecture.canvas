@@ -12,8 +12,8 @@
     {
       "type": "text",
       "id": "shared-types",
-      "x": 8.889645405004686,
-      "y": 110.44958875403185,
+      "x": 5.487871545550746,
+      "y": 142.76644041884433,
       "width": 200,
       "height": 120,
       "text": "🔗 SHARED\n\nCommon Types\nInterfaces\nUtilities\n\n📁 /shared/src/\n• types/\n• index.ts"
@@ -25,7 +25,7 @@
       "y": 100,
       "width": 220,
       "height": 196.89373059202998,
-      "text": "⚙️ SERVER\n\nNode.js API\nTypeScript\nExpress/Hono\n\n📁 /server/src/\n• index.ts\n• client.ts"
+      "text": "⚙️ SERVER\n\nHono Framework\nCloudflare Workers\nTypeScript\n\n📁 /server/src/\n• index.ts"
     },
     {
       "type": "text",
@@ -49,10 +49,10 @@
       "type": "text",
       "id": "server-runtime",
       "x": 376.88692194698774,
-      "y": 383.562666807044,
+      "y": 386.964440666498,
       "width": 265.7833759970347,
       "height": 176.00817037405062,
-      "text": "🚀 SERVER RUNTIME\n\nNode.js Process\nAPI Endpoints\nRequest Handling"
+      "text": "🚀 SERVER RUNTIME\n\nCloudflare Workers\nEdge Computing\nBun (local dev)"
     },
     {
       "type": "text",
@@ -66,26 +66,26 @@
     {
       "type": "text",
       "id": "http-api",
-      "x": 1.7779290810009343,
-      "y": -187.1185249690459,
+      "x": 409.99079221547413,
+      "y": -183.71675110959197,
       "width": 200,
       "height": 165.340595888045,
-      "text": "📡 HTTP API\n\nREST/GraphQL\nJSON Data\nHTTP Requests"
+      "text": "📡 HTTP API\n\nREST Endpoints\nJSON Responses\nCORS Enabled"
     },
     {
       "type": "text",
       "id": "database",
-      "x": 407.11171632400374,
+      "x": 830.6325618260197,
       "y": -176.4509504830403,
       "width": 216.0013617290084,
       "height": 128.00408518702528,
-      "text": "🗄️ DATABASE\n\nData Storage\nQueries\nPersistence"
+      "text": "🗄️ DATABASE\n\n(Not implemented)\nFuture: D1/KV\nPersistence"
     },
     {
       "type": "text",
       "id": "specs-testing",
-      "x": 787.1185249690459,
-      "y": 80.8787515729372,
+      "x": 827.9398112824932,
+      "y": 99.5885077999339,
       "width": 256.4509504830403,
       "height": 185.34059588804496,
       "text": "🧪 TESTING\n\nSpecs/Tests\nValidation\nQuality Assurance\n\n📁 /specs/"
@@ -169,12 +169,13 @@
     {
       "id": "api-to-server",
       "fromNode": "http-api",
-      "fromSide": "right",
-      "toNode": "database",
-      "toSide": "left",
+      "fromSide": "bottom",
+      "toNode": "server-api",
+      "toSide": "top",
       "toEnd": "arrow",
+      "label": "handled by",
       "style": "solid",
-      "shape": "curved"
+      "shape": "straight"
     },
     {
       "id": "server-to-database",
@@ -183,8 +184,8 @@
       "toNode": "database",
       "toSide": "bottom",
       "toEnd": "arrow",
-      "label": "queries",
-      "style": "solid",
+      "label": "queries (future)",
+      "style": "dashed",
       "shape": "curved"
     },
     {
@@ -226,17 +227,6 @@
       "toSide": "right",
       "toEnd": "arrow",
       "label": "responses",
-      "style": "solid",
-      "shape": "curved"
-    },
-    {
-      "id": "server-api-connection",
-      "fromNode": "server-api",
-      "fromSide": "top",
-      "toNode": "http-api",
-      "toSide": "bottom",
-      "toEnd": "arrow",
-      "label": "serves",
       "style": "solid",
       "shape": "curved"
     }

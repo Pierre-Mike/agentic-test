@@ -5,6 +5,7 @@ on:
     types: [opened, synchronize, reopened]
     paths:
       - "client/**"
+      - "server/**"
       - "shared/**"
 
 permissions:
@@ -16,7 +17,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  deploy-worker:
+    runs-on: ubuntu-latest
+    outputs:
+      worker_url: ${{ steps.deploy.outputs.deployment-url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.4
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Deploy worker to Cloudflare
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: server
+          command: deploy --minify --name server-pr-${{ github.event.pull_request.number }} --var APP_VERSION:${{ github.sha }} --var APP_NAME:server
+
   deploy-preview:
+    needs: deploy-worker
     runs-on: ubuntu-latest
     outputs:
       preview_url: ${{ steps.set-url.outputs.preview_url }}
@@ -36,6 +63,7 @@ jobs:
         run: bun run build:client
         env:
           VITE_BASE_URL: /agentic-test/previews/pr-${{ github.event.pull_request.number }}/
+          VITE_SERVER_URL: ${{ needs.deploy-worker.outputs.worker_url }}
 
       - name: Deploy to gh-pages branch (preview subdirectory)
         uses: peaceiris/actions-gh-pages@v4
@@ -57,13 +85,15 @@ jobs:
             const prNumber = context.payload.pull_request.number;
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const url = `https://${owner}.github.io/${repo}/previews/pr-${prNumber}/`;
+            const clientUrl = `https://${owner}.github.io/${repo}/previews/pr-${prNumber}/`;
+            const apiUrl = '${{ needs.deploy-worker.outputs.worker_url }}';
 
             const body = `## Preview Deployment
 
             Your preview is ready!
 
-            **Preview URL:** ${url}
+            **Client URL:** ${clientUrl}
+            **API URL:** ${apiUrl}
 
             ---
             *Deployed by GitHub Actions*`;

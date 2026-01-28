@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "client/**"
+      - "server/**"
       - "shared/**"
   workflow_dispatch:
 
@@ -18,7 +19,33 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  deploy-worker:
+    runs-on: ubuntu-latest
+    outputs:
+      worker_url: ${{ steps.deploy.outputs.deployment-url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.4
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Deploy worker to Cloudflare
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: server
+          command: deploy --minify --var APP_VERSION:${{ github.sha }} --var APP_NAME:server
+
   build:
+    needs: deploy-worker
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -36,6 +63,7 @@ jobs:
         run: bun run build:client
         env:
           NODE_ENV: production
+          VITE_SERVER_URL: ${{ needs.deploy-worker.outputs.worker_url }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

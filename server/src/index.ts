@@ -1,8 +1,9 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import type { ApiResponse, VersionResponse } from "shared/dist";
+import type { CloudflareBindings } from "./env";
 
-export const app = new Hono()
+export const app = new Hono<{ Bindings: CloudflareBindings }>()
 
 	.use(cors())
 
@@ -19,15 +20,11 @@ export const app = new Hono()
 		return c.json(data, { status: 200 });
 	})
 
-	.get("/version", async (c) => {
-		// Use import.meta.dir to get the directory of this file, then navigate to package.json
-		const packagePath = `${import.meta.dir}/../../package.json`;
-		const packageJson = await Bun.file(packagePath).json();
+	.get("/version", (c) => {
 		const data: VersionResponse = {
-			version: packageJson.version,
-			name: packageJson.name,
+			version: c.env?.APP_VERSION ?? "0.0.0",
+			name: c.env?.APP_NAME ?? "server",
 		};
-
 		return c.json(data, { status: 200 });
 	});
 

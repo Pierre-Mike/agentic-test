@@ -1,0 +1,10 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "server",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-05-25",
+	"vars": {
+		"APP_VERSION": "0.0.1",
+		"APP_NAME": "server"
+	}
+}

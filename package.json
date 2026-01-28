@@ -27,7 +27,8 @@
 		"prepare": "husky",
 		"e2e": "turbo e2e",
 		"e2e:ui": "bun run --cwd e2e test:ui",
-		"e2e:headed": "bun run --cwd e2e test:headed"
+		"e2e:headed": "bun run --cwd e2e test:headed",
+		"deploy:server": "cd server && bun run deploy"
 	},
 	"keywords": [
 		"bun",

@@ -1,0 +1,39 @@
+name: Cleanup Preview
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup-worker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete preview worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: delete agentic-test-api-pr-${{ github.event.pull_request.number }} --force
+        continue-on-error: true
+
+  cleanup-gh-pages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          fetch-depth: 0
+
+      - name: Delete preview directory
+        run: |
+          if [ -d "previews/pr-${{ github.event.pull_request.number }}" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git rm -rf "previews/pr-${{ github.event.pull_request.number }}"
+            git commit -m "Remove preview for PR #${{ github.event.pull_request.number }}"
+            git push origin gh-pages
+          fi
