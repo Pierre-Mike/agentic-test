@@ -73,7 +73,7 @@ server
 ```typescript src/index.ts
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import type { ApiResponse } from 'shared/dist'
+import type { ApiResponse, VersionResponse } from 'shared/dist'
 
 const app = new Hono()
 
@@ -93,8 +93,46 @@ app.get('/hello', async (c) => {
   return c.json(data, { status: 200 })
 })
 
+app.get('/version', async (c) => {
+  const data: VersionResponse = {
+    version: "0.5.1",
+    name: "agentic-test"
+  }
+
+  return c.json(data, { status: 200 })
+})
+
 export default app
 ```
+
+#### API Endpoints
+
+The server provides the following endpoints:
+
+**GET /** - Simple text response
+```typescript
+Response: "Hello Hono!"
+```
+
+**GET /hello** - Returns a JSON response with type-safe data
+```typescript
+Response: ApiResponse
+{
+  message: string
+  success: boolean
+}
+```
+
+**GET /version** - Returns application version information
+```typescript
+Response: VersionResponse
+{
+  version: string
+  name: string
+}
+```
+
+All response types are defined in the `shared` package for type safety across client and server.
 
 If you wanted to add a database to Hono you can do so with a multitude of Typescript libraries like [Supabase](https://supabase.com), or ORMs like [Drizzle](https://orm.drizzle.team/docs/get-started) or [Prisma](https://www.prisma.io/orm)
 
@@ -179,7 +217,7 @@ export default App
 
 ### Shared
 
-The Shared package is used for anything you want to share between the Server and Client. This could be types or libraries that you use in both environments.
+The Shared package is used for anything you want to share between the Server and Client. This could be types, utility functions, or libraries that you use in both environments.
 
 ```
 shared
@@ -195,12 +233,25 @@ Inside the `src/index.ts` we export any of our code from the folders so it's usa
 
 ```typescript
 export * from "./types"
+export * from "./hello-world"
 ```
 
 By running `bun run dev` or `bun run build` it will compile and export the packages from `shared` so it can be used in either `client` or `server`
 
 ```typescript
-import { ApiResponse } from 'shared'
+// Import types
+import { ApiResponse, VersionResponse } from 'shared'
+
+// Import utility functions
+import { greet } from 'shared'
+```
+
+The shared package includes utility functions like `greet()`:
+
+```typescript src/hello-world.ts
+export function greet(): string {
+  return "Hello, World!";
+}
 ```
 
 ## Getting Started
@@ -245,8 +296,11 @@ bun run build:server  # Build the Hono backend
 ### Additional Commands
 
 ```bash
-# Lint all workspaces
+# Lint all workspaces with Biome
 bun run lint
+
+# Format code with Biome
+bun run format
 
 # Type check all workspaces
 bun run type-check
@@ -254,6 +308,50 @@ bun run type-check
 # Run tests across all workspaces
 bun run test
 ```
+
+## Code Quality & Development Workflow
+
+bhvr uses [Biome](https://biomejs.dev) for fast linting and formatting, along with Husky for pre-commit hooks to ensure code quality.
+
+### Biome Configuration
+
+The project is configured with Biome for consistent code style:
+- Automatic import organization
+- Tab-based indentation
+- Double quotes for strings
+- VCS integration with Git
+- Recommended linting rules enabled
+
+### Pre-commit Hooks
+
+Husky runs automatically before each commit to maintain code quality:
+
+```bash
+# Pre-commit hook runs:
+bun run lint    # Checks for linting issues
+bun run format  # Formats code automatically
+```
+
+If there are any linting errors, the commit will be blocked until they're fixed. To manually run these checks:
+
+```bash
+# Check for issues
+bun run lint
+
+# Auto-fix formatting
+bun run format
+```
+
+### Automation & CI/CD
+
+The project includes GitHub Actions workflows for:
+- **Auto-implement**: Automatically plans and implements issues labeled with `auto-implement`
+- **Continuous Integration**: Runs tests, type checking, and builds on every push
+- **Automated Code Review**: Uses Claude for intelligent code review
+- **Preview Deployments**: Automatically deploys preview environments for pull requests
+- **Production Deployments**: Handles production deployment automation
+
+See `.github/AUTO-IMPLEMENT.md` for details on the auto-implementation workflow.
 
 ### Deployment
 
