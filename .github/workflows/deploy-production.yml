@@ -64,6 +64,7 @@ jobs:
         env:
           NODE_ENV: production
           VITE_SERVER_URL: ${{ needs.deploy-worker.outputs.worker_url }}
+          VITE_BASE_URL: /agentic-test/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
