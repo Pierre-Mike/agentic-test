@@ -90,6 +90,17 @@
 			],
 			"outputs": ["coverage/**", ".nyc_output/**", "test-results/**"],
 			"env": ["NODE_ENV", "CI"]
+		},
+		"e2e": {
+			"cache": false,
+			"inputs": [
+				"tests/**/*.ts",
+				"playwright.config.ts",
+				"package.json",
+				"tsconfig.json"
+			],
+			"outputs": ["playwright-report/**", "test-results/**"],
+			"env": ["E2E_BASE_URL", "CI"]
 		}
 	},
 	"globalDependencies": [

@@ -18,16 +18,12 @@ describe("/version endpoint", () => {
 		expect(typeof data.name).toBe("string");
 	});
 
-	test("should return version from package.json", async () => {
+	test("should return default version when no env bindings", async () => {
 		const res = await app.request("/version");
 		const data = (await res.json()) as VersionResponse;
 
-		// Read the actual package.json to verify
-		const packagePath = `${import.meta.dir}/../../package.json`;
-		const packageJson = await Bun.file(packagePath).json();
-
-		expect(data.version).toBe(packageJson.version);
-		expect(data.name).toBe(packageJson.name);
+		expect(data.version).toBe("0.0.0");
+		expect(data.name).toBe("server");
 	});
 
 	test("should have application/json content-type", async () => {

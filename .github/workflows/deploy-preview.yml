@@ -5,6 +5,7 @@ on:
     types: [opened, synchronize, reopened]
     paths:
       - "client/**"
+      - "server/**"
       - "shared/**"
 
 permissions:
@@ -16,8 +17,36 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy-preview:
+  deploy-worker:
     runs-on: ubuntu-latest
+    outputs:
+      worker_url: ${{ steps.deploy.outputs.deployment-url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.4
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Deploy worker to Cloudflare
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: server
+          command: deploy --minify --name server-pr-${{ github.event.pull_request.number }} --var APP_VERSION:${{ github.sha }} --var APP_NAME:server
+
+  deploy-preview:
+    needs: deploy-worker
+    runs-on: ubuntu-latest
+    outputs:
+      preview_url: ${{ steps.set-url.outputs.preview_url }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -34,6 +63,7 @@ jobs:
         run: bun run build:client
         env:
           VITE_BASE_URL: /agentic-test/previews/pr-${{ github.event.pull_request.number }}/
+          VITE_SERVER_URL: ${{ needs.deploy-worker.outputs.worker_url }}
 
       - name: Deploy to gh-pages branch (preview subdirectory)
         uses: peaceiris/actions-gh-pages@v4
@@ -43,6 +73,11 @@ jobs:
           destination_dir: previews/pr-${{ github.event.pull_request.number }}
           keep_files: true
 
+      - name: Set preview URL output
+        id: set-url
+        run: |
+          echo "preview_url=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/previews/pr-${{ github.event.pull_request.number }}/" >> $GITHUB_OUTPUT
+
       - name: Comment on PR
         uses: actions/github-script@v7
         with:
@@ -50,13 +85,15 @@ jobs:
             const prNumber = context.payload.pull_request.number;
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const url = `https://${owner}.github.io/${repo}/previews/pr-${prNumber}/`;
+            const clientUrl = `https://${owner}.github.io/${repo}/previews/pr-${prNumber}/`;
+            const apiUrl = '${{ needs.deploy-worker.outputs.worker_url }}';
 
             const body = `## Preview Deployment
 
             Your preview is ready!
 
-            **Preview URL:** ${url}
+            **Client URL:** ${clientUrl}
+            **API URL:** ${apiUrl}
 
             ---
             *Deployed by GitHub Actions*`;
@@ -67,6 +104,92 @@ jobs:
 
             const existing = comments.find(c =>
               c.user.type === 'Bot' && c.body.includes('## Preview Deployment')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner, repo, comment_id: existing.id, body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: prNumber, body
+              });
+            }
+
+  e2e-preview:
+    needs: deploy-preview
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.4
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium
+
+      - name: Wait for deployment to be ready
+        run: |
+          URL="${{ needs.deploy-preview.outputs.preview_url }}"
+          echo "Waiting for $URL to be ready..."
+          for i in $(seq 1 60); do
+            BODY=$(curl -s -L --no-sessionid "$URL")
+            TITLE=$(echo "$BODY" | grep -o '<title>[^<]*</title>' || true)
+            if echo "$TITLE" | grep -qi "bhvr\|vite"; then
+              echo "Site is ready with app content! (attempt $i, title=$TITLE)"
+              exit 0
+            fi
+            echo "Attempt $i: title=$TITLE - waiting 10s..."
+            sleep 10
+          done
+          echo "Site did not become ready after 600s"
+          exit 1
+
+      - name: Run E2E tests against preview
+        run: bun run e2e
+        env:
+          E2E_BASE_URL: ${{ needs.deploy-preview.outputs.preview_url }}
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-preview
+          path: e2e/playwright-report/
+          retention-days: 7
+
+      - name: Comment E2E results on PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const status = '${{ job.status }}' === 'success' ? '✅ Passed' : '❌ Failed';
+            const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${{ github.run_id }}`;
+
+            const body = `## E2E Test Results
+
+            **Status:** ${status}
+
+            [View test report](${runUrl})
+
+            ---
+            *Tested by GitHub Actions*`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner, repo, issue_number: prNumber
+            });
+
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('## E2E Test Results')
             );
 
             if (existing) {
