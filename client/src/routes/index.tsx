@@ -20,13 +20,13 @@ function Index() {
 		try {
 			const res = await client.hello.$get();
 			if (!res.ok) {
-				console.log("Error fetching data");
+				console.error("Error fetching data");
 				return;
 			}
-			const data = await res.json();
-			setData(data);
+			const json = await res.json();
+			setData(json);
 		} catch (error) {
-			console.log(error);
+			console.error(error);
 		}
 	}
 

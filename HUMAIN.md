@@ -15,5 +15,3 @@
 - 1 prompt 
 - 1 purpose 
 - smaller the ctx the better 
-
-# 
