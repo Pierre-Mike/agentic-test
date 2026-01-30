@@ -6,7 +6,10 @@ on:
 
 jobs:
   auto-implement:
-    if: github.event.label.name == 'auto-implement' && github.event.issue.user.login == 'Pierre-Mike'
+    if: |
+      (github.event.label.name == 'auto-implement' || github.event.label.name == 'confidence:high' || github.event.label.name == 'confidence:medium') &&
+      github.event.issue.user.login == 'Pierre-Mike' &&
+      contains(github.event.issue.labels.*.name, 'auto-implement')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -26,6 +29,7 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          allowed_bots: '*'
           claude_args: '--allowedTools "Bash(gh:*),Bash(git:*),Bash(bun:*),Bash(npm:*),Edit,Write,Read,Glob,Grep,TodoWrite"'
           prompt: |
             You are automating the full development lifecycle from issue to pull request using structured planning.
