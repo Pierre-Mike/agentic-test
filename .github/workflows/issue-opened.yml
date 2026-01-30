@@ -18,6 +18,13 @@ jobs:
       issues: write
 
     steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
@@ -27,7 +34,7 @@ jobs:
         uses: anthropics/claude-code-action@main
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ steps.app-token.outputs.token }}
           claude_args: '--allowedTools "Bash(gh:*),Read,Glob,Grep"'
           prompt: |
             You are an issue triage and assessment bot. You have TWO tasks:
@@ -110,22 +117,13 @@ jobs:
             - Never apply both `auto-implement` and `needs-review`
             - Always apply exactly one confidence label
 
-      - name: Check if auto-implement label was added
-        id: check-label
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          LABELS=$(gh issue view ${{ github.event.issue.number }} --json labels --jq '.labels[].name')
-          if echo "$LABELS" | grep -q "^auto-implement$"; then
-            echo "should_implement=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "should_implement=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Handle Assessment Failure
         if: failure()
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         uses: actions/github-script@v7
         with:
+          github-token: ${{ steps.app-token.outputs.token }}
           script: |
             await github.rest.issues.addLabels({
               owner: context.repo.owner,
@@ -139,128 +137,3 @@ jobs:
               issue_number: context.payload.issue.number,
               body: '## Assessment Failed\n\nThe automated triage encountered an error. This issue has been flagged for human review.\n\n*A maintainer can add the `auto-implement` label manually if appropriate.*'
             });
-
-    outputs:
-      should_implement: ${{ steps.check-label.outputs.should_implement }}
-
-  auto-implement:
-    needs: triage-and-assess
-    if: needs.triage-and-assess.outputs.should_implement == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    permissions:
-      contents: write
-      pull-requests: write
-      issues: write
-      id-token: write
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-
-      - name: Auto Plan and Implement
-        uses: anthropics/claude-code-action@main
-        with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          claude_args: '--allowedTools "Bash(gh:*),Bash(git:*),Bash(bun:*),Bash(npm:*),Edit,Write,Read,Glob,Grep,TodoWrite"'
-          prompt: |
-            You are automating the full development lifecycle from issue to pull request using structured planning.
-
-            ISSUE INFORMATION:
-            - Repository: ${{ github.repository }}
-            - Issue Number: ${{ github.event.issue.number }}
-            - Issue Title: ${{ github.event.issue.title }}
-            - Issue URL: ${{ github.event.issue.html_url }}
-
-            ## PHASE 1: ANALYZE THE ISSUE
-            1. Read the issue: gh issue view ${{ github.event.issue.number }} --json title,body,labels
-            2. Determine the issue type based on labels and content:
-               - "bug" label or bug-related content → BUG
-               - "feature" or "enhancement" label → FEATURE
-               - "chore" or maintenance-related → CHORE
-               - Default to FEATURE if unclear
-
-            ## PHASE 2: CREATE A PLAN
-            Based on the issue type, read the appropriate planning template and create a plan:
-
-            - For BUGS: Read .claude/commands/bug.md and create specs/bug-issue-${{ github.event.issue.number }}.md
-            - For FEATURES: Read .claude/commands/feature.md and create specs/feature-issue-${{ github.event.issue.number }}.md
-            - For CHORES: Read .claude/commands/chore.md and create specs/chore-issue-${{ github.event.issue.number }}.md
-
-            Follow the exact Plan Format from the template. Research the codebase thoroughly before writing the plan.
-
-            ## PHASE 3: IMPLEMENT THE PLAN
-            Read .claude/commands/implement.md for implementation guidelines, then:
-            1. Execute each step from your plan in order
-            2. Follow existing patterns in the codebase
-            3. Write clean, well-structured code
-            4. Add tests as specified in the plan
-
-            ## PHASE 4: VALIDATE
-            Run the validation commands from your plan:
-            - bun run test (if tests exist)
-            - bun run build
-            - bun run type-check
-
-            ## PHASE 5: CREATE PULL REQUEST
-            1. Configure git: git config user.name "github-actions[bot]" && git config user.email "github-actions[bot]@users.noreply.github.com"
-            2. Create branch: git checkout -b issue-${{ github.event.issue.number }}-auto-implement
-            3. Commit the plan file AND implementation: git add . && git commit -m "..."
-            4. Push: git push -u origin issue-${{ github.event.issue.number }}-auto-implement
-            5. Create PR with gh pr create, including:
-               - Link to the plan file in specs/
-               - Summary of changes
-               - Validation results
-
-            ## PHASE 6: LINK BACK
-            Comment on the issue with the PR link and a summary.
-
-            IMPORTANT:
-            - The plan file (specs/*.md) should be committed with the implementation
-            - If the issue is unclear, comment asking for clarification instead of implementing
-            - Always validate before creating the PR
-
-            Start by reading the issue details now.
-
-      - name: Create PR if branch exists
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          BRANCH="issue-${{ github.event.issue.number }}-auto-implement"
-
-          # Check if branch exists on remote
-          if git ls-remote --heads origin "$BRANCH" | grep -q "$BRANCH"; then
-            echo "Branch $BRANCH exists, checking for existing PR..."
-
-            # Check if PR already exists
-            EXISTING_PR=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number')
-
-            if [ -z "$EXISTING_PR" ]; then
-              echo "No existing PR found, creating one..."
-              gh pr create \
-                --head "$BRANCH" \
-                --title "Closes #${{ github.event.issue.number }}: ${{ github.event.issue.title }}" \
-                --body "## Summary
-
-          Automated implementation for #${{ github.event.issue.number }}
-
-          ## Changes
-          See commits for details.
-
-          ## Test Plan
-          - [ ] Review the implementation
-          - [ ] Run tests locally
-
-          ---
-          🤖 Auto-generated by Claude Code"
-
-              echo "PR created successfully!"
-            else
-              echo "PR #$EXISTING_PR already exists for branch $BRANCH"
-            fi
-          else
-            echo "Branch $BRANCH does not exist on remote, skipping PR creation"
-          fi
