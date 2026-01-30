@@ -57,6 +57,12 @@ IMPORTANT: Execute every step in order, top to bottom.
 
 <list step by step tasks as h3 headers plus bullet points. use as many h3 headers as needed to fix the bug. Order matters, start with the foundational shared changes required to fix the bug then move on to the specific changes required to fix the bug. Include tests that will validate the bug is fixed with zero regressions. Your last step should be running the `Validation Commands` to validate the bug is fixed with zero regressions.>
 
+## Regression Test
+<write a test that reproduces the bug — it must fail before the fix and pass after>
+
+## E2E Test
+<if applicable, describe an e2e test covering the bug scenario end-to-end>
+
 ## Validation Commands
 Execute every command to validate the bug is fixed with zero regressions.
 

@@ -18,6 +18,13 @@ jobs:
       issues: write
       id-token: write
 
+    env:
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
+      ISSUE_TITLE: ${{ github.event.issue.title }}
+      ISSUE_URL: ${{ github.event.issue.html_url }}
+      REPO: ${{ github.repository }}
+      BRANCH: issue-${{ github.event.issue.number }}-auto-implement
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -25,56 +32,200 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GH_PAT }}
 
-      - name: Auto Plan and Implement
+      - name: Setup git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+
+      # ── PHASE 1 & 2: Analyze Issue + Create Plan ──
+      - name: "Phase 1-2: Analyze & Plan"
         uses: anthropics/claude-code-action@main
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GH_PAT }}
           allowed_bots: '*'
-          claude_args: '--allowedTools "Bash(gh:*),Bash(git:*),Bash(bun:*),Bash(npm:*),Edit,Write,Read,Glob,Grep,TodoWrite"'
+          claude_args: '--allowedTools "Bash(gh:*),Bash(git:*),Bash(bun:*),Read,Write,Glob,Grep"'
           prompt: |
-            Read and execute the command in .claude/commands/auto-implement.md with these variables:
-            - REPO=${{ github.repository }}
-            - ISSUE_NUMBER=${{ github.event.issue.number }}
-            - ISSUE_TITLE=${{ github.event.issue.title }}
-            - ISSUE_URL=${{ github.event.issue.html_url }}
+            You are in Phase 1-2 of auto-implementation for issue #${{ env.ISSUE_NUMBER }}.
 
-      - name: Create PR if branch exists
+            PHASE 1: ANALYZE THE ISSUE
+            1. Read the issue: gh issue view ${{ env.ISSUE_NUMBER }} --json title,body,labels
+            2. Determine the issue type:
+               - "bug" label or bug-related content → BUG
+               - "feature" or "enhancement" label → FEATURE
+               - "chore" or maintenance-related → CHORE
+               - Default to FEATURE if unclear
+
+            PHASE 2: CREATE A PLAN
+            Based on the issue type, read the appropriate planning template and create a plan:
+            - For BUGS: Read .claude/commands/bug.md and create specs/bug-issue-${{ env.ISSUE_NUMBER }}.md
+            - For FEATURES: Read .claude/commands/feature.md and create specs/feature-issue-${{ env.ISSUE_NUMBER }}.md
+            - For CHORES: Read .claude/commands/chore.md and create specs/chore-issue-${{ env.ISSUE_NUMBER }}.md
+
+            Follow the exact Plan Format from the template. Research the codebase thoroughly before writing the plan.
+            The plan must include: e2e tests, unit tests, implementation steps, and doc updates.
+
+            Then commit the plan file only:
+            git add specs/ && git commit -m "plan: add spec for #${{ env.ISSUE_NUMBER }}"
+
+            IMPORTANT: Only commit the spec file. Do not write any code or tests yet.
+
+      # ── PHASE 3: Write Tests First (TDD Red Phase) ──
+      - name: "Phase 3: Write Tests"
+        uses: anthropics/claude-code-action@main
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GH_PAT }}
+          allowed_bots: '*'
+          claude_args: '--allowedTools "Bash(gh:*),Bash(git:*),Bash(bun:*),Read,Write,Edit,Glob,Grep"'
+          prompt: |
+            You are in Phase 3 (TDD Red Phase) of auto-implementation for issue #${{ env.ISSUE_NUMBER }}.
+
+            1. Read the spec file in specs/ for this issue (specs/*-issue-${{ env.ISSUE_NUMBER }}.md)
+            2. Write all e2e tests derived from the acceptance criteria
+            3. Write unit/integration tests derived from the testing strategy
+            4. Run the tests — confirm they FAIL (red phase). This is expected; the tests validate requirements before code exists.
+            5. Commit the test files:
+               git add . && git commit -m "test: add tests for #${{ env.ISSUE_NUMBER }}"
+
+            IMPORTANT: Only write test files. Do not write implementation code.
+
+      # ── PHASE 4: Implement Code (TDD Green Phase) ──
+      - name: "Phase 4: Implement"
+        uses: anthropics/claude-code-action@main
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GH_PAT }}
+          allowed_bots: '*'
+          claude_args: '--allowedTools "Bash(gh:*),Bash(git:*),Bash(bun:*),Bash(npm:*),Read,Write,Edit,Glob,Grep"'
+          prompt: |
+            You are in Phase 4 (TDD Green Phase) of auto-implementation for issue #${{ env.ISSUE_NUMBER }}.
+
+            1. Read the spec file in specs/ for this issue (specs/*-issue-${{ env.ISSUE_NUMBER }}.md)
+            2. Read .claude/commands/implement.md for implementation guidelines
+            3. Write code to make all tests pass
+            4. Follow existing patterns in the codebase
+            5. Commit the implementation:
+               git add . && git commit -m "feat: implement #${{ env.ISSUE_NUMBER }}"
+               (Use "fix:" prefix for bugs instead of "feat:")
+
+            IMPORTANT: Only write implementation code to make the existing tests pass.
+
+      # ── PHASE 5: Validate ──
+      - name: "Phase 5: Validate"
+        uses: anthropics/claude-code-action@main
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GH_PAT }}
+          allowed_bots: '*'
+          claude_args: '--allowedTools "Bash(gh:*),Bash(git:*),Bash(bun:*),Read,Edit,Glob,Grep"'
+          prompt: |
+            You are in Phase 5 (Validation) of auto-implementation for issue #${{ env.ISSUE_NUMBER }}.
+
+            Run all validation commands:
+            - bun run test — all tests must PASS
+            - bun run build — no build errors
+            - bun run type-check — no type errors
+
+            If any fail, fix the issues and amend the implementation commit:
+            git add . && git commit --amend --no-edit
+
+            Report the results of each validation command.
+
+      # ── PHASE 6: Documentation ──
+      - name: "Phase 6: Documentation"
+        uses: anthropics/claude-code-action@main
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GH_PAT }}
+          allowed_bots: '*'
+          claude_args: '--allowedTools "Bash(git:*),Read,Write,Edit,Glob,Grep"'
+          prompt: |
+            You are in Phase 6 (Documentation) of auto-implementation for issue #${{ env.ISSUE_NUMBER }}.
+
+            1. Read the spec file in specs/ for this issue
+            2. Read the original issue: gh issue view ${{ env.ISSUE_NUMBER }} --json title,body
+               (Note: gh may not be available, use the spec file as primary source)
+            3. Check if any user-facing behavior changed by reviewing: git diff main...HEAD
+            4. If documentation updates are needed:
+               - Update README.md if user-facing behavior changed
+               - Update relevant docs/comments
+               - git add . && git commit -m "docs: update documentation for #${{ env.ISSUE_NUMBER }}"
+            5. If no documentation changes are needed, do nothing.
+
+      # ── PHASE 7: Self-Review ──
+      - name: "Phase 7: Self-Review"
+        uses: anthropics/claude-code-action@main
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GH_PAT }}
+          allowed_bots: '*'
+          claude_args: '--allowedTools "Bash(gh:*),Bash(git:*),Bash(bun:*),Read,Edit,Glob,Grep"'
+          prompt: |
+            You are in Phase 7 (Self-Review) of auto-implementation for issue #${{ env.ISSUE_NUMBER }}.
+
+            1. Review the full diff across all commits: git diff main...HEAD
+            2. Check for: correctness, code quality, security issues, performance problems
+            3. Read the original issue: gh issue view ${{ env.ISSUE_NUMBER }} --json title,body
+            4. Verify all requirements from the issue are met point-by-point
+            5. If any issues are found, fix them and amend the relevant commit
+            6. Run final validation: bun run test && bun run build && bun run type-check
+
+      # ── PHASE 8: Push & Create PR ──
+      - name: "Phase 8: Push branch"
+        run: git push -u origin "$BRANCH"
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+
+      - name: "Phase 8: Create PR"
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          BRANCH="issue-${{ github.event.issue.number }}-auto-implement"
+          # Check if PR already exists
+          EXISTING_PR=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number')
 
-          # Check if branch exists on remote
-          if git ls-remote --heads origin "$BRANCH" | grep -q "$BRANCH"; then
-            echo "Branch $BRANCH exists, checking for existing PR..."
+          if [ -z "$EXISTING_PR" ]; then
+            # Find spec file
+            SPEC_FILE=$(ls specs/*-issue-${ISSUE_NUMBER}.md 2>/dev/null | head -1)
+            SPEC_LINK=""
+            if [ -n "$SPEC_FILE" ]; then
+              SPEC_LINK="- [Spec file]($SPEC_FILE)"
+            fi
 
-            # Check if PR already exists
-            EXISTING_PR=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number')
+            gh pr create \
+              --head "$BRANCH" \
+              --title "Closes #${ISSUE_NUMBER}: ${ISSUE_TITLE}" \
+              --body "$(cat <<EOF
+          ## Summary
 
-            if [ -z "$EXISTING_PR" ]; then
-              echo "No existing PR found, creating one..."
-              gh pr create \
-                --head "$BRANCH" \
-                --title "Closes #${{ github.event.issue.number }}: ${{ github.event.issue.title }}" \
-                --body "## Summary
+          Automated TDD implementation for #${ISSUE_NUMBER}
 
-          Automated implementation for #${{ github.event.issue.number }}
+          ## Commits
+          - \`plan:\` spec file
+          - \`test:\` tests written first (TDD)
+          - \`feat/fix:\` implementation to pass tests
+          - \`docs:\` documentation updates (if any)
 
-          ## Changes
-          See commits for details.
-
-          ## Test Plan
-          - [ ] Review the implementation
-          - [ ] Run tests locally
+          ## References
+          - Issue: #${ISSUE_NUMBER}
+          ${SPEC_LINK}
 
           ---
-          🤖 Auto-generated by Claude Code"
+          🤖 Auto-generated by Claude Code
+          EOF
+          )"
 
-              echo "PR created successfully!"
-            else
-              echo "PR #$EXISTING_PR already exists for branch $BRANCH"
-            fi
+            echo "PR created successfully!"
           else
-            echo "Branch $BRANCH does not exist on remote, skipping PR creation"
+            echo "PR #$EXISTING_PR already exists for branch $BRANCH"
+          fi
+
+      - name: "Phase 8: Comment on issue"
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          PR_URL=$(gh pr list --head "$BRANCH" --json url --jq '.[0].url')
+          if [ -n "$PR_URL" ]; then
+            gh issue comment "$ISSUE_NUMBER" --body "🤖 Auto-implementation PR created: $PR_URL"
           fi

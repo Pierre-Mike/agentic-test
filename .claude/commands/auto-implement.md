@@ -1,6 +1,9 @@
 # Auto Implement Issue
 
-You are automating the full development lifecycle from issue to pull request using structured planning.
+You are automating the full development lifecycle from issue to pull request using structured planning and test-driven development.
+
+> **Note:** When triggered via GitHub Actions, each phase runs as a separate workflow step.
+> This file serves as the full reference and manual fallback.
 
 ISSUE INFORMATION:
 - Repository: $REPO
@@ -24,35 +27,57 @@ Based on the issue type, read the appropriate planning template and create a pla
 - For CHORES: Read .claude/commands/chore.md and create specs/chore-issue-$ISSUE_NUMBER.md
 
 Follow the exact Plan Format from the template. Research the codebase thoroughly before writing the plan.
+The plan must include: e2e tests, unit tests, implementation steps, and doc updates.
 
-## PHASE 3: IMPLEMENT THE PLAN
-Read .claude/commands/implement.md for implementation guidelines, then:
-1. Execute each step from your plan in order
-2. Follow existing patterns in the codebase
-3. Write clean, well-structured code
-4. Add tests as specified in the plan
+Commit the plan file only:
+git add specs/ && git commit -m "plan: add spec for #$ISSUE_NUMBER"
 
-## PHASE 4: VALIDATE
-Run the validation commands from your plan:
-- bun run test (if tests exist)
-- bun run build
-- bun run type-check
+## PHASE 3: WRITE TESTS & E2E FIRST
+Based on the plan:
+1. Write all e2e tests derived from the acceptance criteria
+2. Write unit/integration tests derived from the testing strategy
+3. Run the tests — confirm they FAIL (red phase). This is expected in TDD.
+4. Commit the test files:
+   git add . && git commit -m "test: add tests for #$ISSUE_NUMBER"
 
-## PHASE 5: CREATE PULL REQUEST
-1. Configure git: git config user.name "github-actions[bot]" && git config user.email "github-actions[bot]@users.noreply.github.com"
-2. Create branch: git checkout -b issue-$ISSUE_NUMBER-auto-implement
-3. Commit the plan file AND implementation: git add . && git commit -m "..."
-4. Push: git push -u origin issue-$ISSUE_NUMBER-auto-implement
-5. Create PR with gh pr create, including:
-   - Link to the plan file in specs/
-   - Summary of changes
-   - Validation results
+## PHASE 4: IMPLEMENT CODE
+1. Read .claude/commands/implement.md for implementation guidelines
+2. Write code to make all tests pass
+3. Follow existing patterns in the codebase
+4. Commit the implementation:
+   git add . && git commit -m "feat: implement #$ISSUE_NUMBER"
+   (Use "fix:" prefix for bugs instead of "feat:")
 
-## PHASE 6: LINK BACK
-Comment on the issue with the PR link and a summary.
+## PHASE 5: VALIDATE
+Run all validation commands:
+- bun run test — all tests must PASS
+- bun run build — no build errors
+- bun run type-check — no type errors
+
+If any fail, fix the issues and amend the implementation commit:
+git add . && git commit --amend --no-edit
+
+## PHASE 6: UPDATE DOCUMENTATION
+1. Update README.md if user-facing behavior changed
+2. Update relevant docs/comments
+3. Only commit if there are documentation changes:
+   git add . && git commit -m "docs: update documentation for #$ISSUE_NUMBER"
+
+## PHASE 7: SELF-REVIEW
+1. Review the full diff across all commits: git diff main...HEAD
+2. Check for: correctness, code quality, security, performance
+3. Re-read the original issue and verify all requirements are met point-by-point
+4. If any issues are found, fix them and amend the relevant commit
+5. Run final validation: bun run test && bun run build && bun run type-check
+
+## PHASE 8: CREATE PR & LINK BACK
+1. Push: git push -u origin issue-$ISSUE_NUMBER-auto-implement
+2. Create PR with gh pr create linking to the issue and spec file
+3. Comment on the issue with the PR link
 
 IMPORTANT:
-- The plan file (specs/*.md) should be committed with the implementation
+- Each phase produces its own commit (plan → tests → code → docs)
+- Tests are written BEFORE implementation (TDD)
 - If the issue is unclear, comment asking for clarification instead of implementing
 - Always validate before creating the PR
 

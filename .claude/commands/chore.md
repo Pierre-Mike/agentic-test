@@ -41,6 +41,9 @@ IMPORTANT: Execute every step in order, top to bottom.
 
 <list step by step tasks as h3 headers plus bullet points. use as many h3 headers as needed to accomplish the chore. Order matters, start with the foundational shared changes required to fix the chore then move on to the specific changes required to fix the chore. Your last step should be running the `Validation Commands` to validate the chore is complete with zero regressions.>
 
+## Testing
+<tests to validate the chore changes, if applicable>
+
 ## Validation Commands
 Execute every command to validate the chore is complete with zero regressions.
 

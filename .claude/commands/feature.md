@@ -63,9 +63,12 @@ Use these files to implement the feature:
 ## Step by Step Tasks
 IMPORTANT: Execute every step in order, top to bottom.
 
-<list step by step tasks as h3 headers plus bullet points. use as many h3 headers as needed to implement the feature. Order matters, start with the foundational shared changes required then move on to the specific implementation. Include creating tests throughout the implementation process. Your last step should be running the `Validation Commands` to validate the feature works correctly with zero regressions.>
+<list step by step tasks as h3 headers plus bullet points. use as many h3 headers as needed to implement the feature. Order matters: write tests first (unit, integration, e2e) based on the Testing Strategy, then implement the feature to make those tests pass. Start with the foundational shared changes required then move on to the specific implementation. Your last step should be running the `Validation Commands` to validate the feature works correctly with zero regressions.>
 
 ## Testing Strategy
+### E2E Tests
+<describe end-to-end tests covering full user flows and acceptance criteria>
+
 ### Unit Tests
 <describe unit tests needed for the feature>
 
