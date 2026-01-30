@@ -60,7 +60,7 @@
       "x": 744.0096365255613,
       "y": 172.1634643953461,
       "width": 200,
-      "height": 140,
+      "height": 164.45912381838224,
       "text": "📋 PR CREATED\n\nBranch: issue-X-auto\nor developer branch\nReady for review"
     },
     {
@@ -69,7 +69,7 @@
       "x": 1167.9401202251427,
       "y": 43.44238037871784,
       "width": 220,
-      "height": 180,
+      "height": 218.84684371154825,
       "text": "⚙️ CI PIPELINE\n(ci.yml)\n\n1. Install (Bun)\n2. Lint (Biome)\n3. Type-check (TS)\n4. Test\n5. Build\n6. Security (CodeQL)"
     },
     {
