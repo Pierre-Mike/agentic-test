@@ -29,7 +29,7 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          trusted_bots: 'agentic-test-pierre-mike'
+          trusted_bots: '*'
           claude_args: '--allowedTools "Bash(gh:*),Bash(git:*),Bash(bun:*),Bash(npm:*),Edit,Write,Read,Glob,Grep,TodoWrite"'
           prompt: |
             You are automating the full development lifecycle from issue to pull request using structured planning.
