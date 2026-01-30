@@ -85,19 +85,9 @@ jobs:
 
             **Score 50-74 (MEDIUM):**
             ```bash
-            gh issue edit ${{ github.event.issue.number }} --add-label "needs-review" --add-label "confidence:medium"
-            gh issue comment ${{ github.event.issue.number }} --body "## Confidence Assessment: MEDIUM
-
-            **Score: [X]/100**
-
-            ### Concerns:
-            - [List concerns]
-
-            ### To enable auto-implementation:
-            - [List needed clarifications]
-
-            *A maintainer can add \`auto-implement\` label manually if appropriate.*"
+            gh issue edit ${{ github.event.issue.number }} --add-label "auto-implement" --add-label "confidence:medium"
             ```
+            No comment needed - auto-implement workflow will handle it.
 
             **Score < 50 (LOW):**
             ```bash
@@ -113,7 +103,7 @@ jobs:
             ```
 
             ## IMPORTANT
-            - Be STRICT - only clear, well-scoped issues get auto-implement
+            - Score >= 50 gets auto-implement, only low confidence needs human review
             - Never apply both `auto-implement` and `needs-review`
             - Always apply exactly one confidence label
 
