@@ -7,3 +7,7 @@ export type VersionResponse = {
 	version: string;
 	name: string;
 };
+
+export type HealthResponse = {
+	status: "ok";
+};
