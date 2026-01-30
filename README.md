@@ -2,6 +2,16 @@
 
 ![cover](https://cdn.stevedylan.dev/ipfs/bafybeievx27ar5qfqyqyud7kemnb5n2p4rzt2matogi6qttwkpxonqhra4)
 
+## Production Environment
+
+**Live Application:** [https://Pierre-Mike.github.io/agentic-test/](https://Pierre-Mike.github.io/agentic-test/)
+![Client Status](https://img.shields.io/website?url=https%3A%2F%2FPierre-Mike.github.io%2Fagentic-test%2F&label=Client&up_message=online&down_message=offline)
+
+**API Server:** [https://server.pierre-michael-twagirayezu.workers.dev](https://server.pierre-michael-twagirayezu.workers.dev)
+![Server Status](https://img.shields.io/website?url=https%3A%2F%2Fserver.pierre-michael-twagirayezu.workers.dev%2Fversion&label=API&up_message=online&down_message=offline)
+
+---
+
 A full-stack TypeScript monorepo starter with shared types, using Bun, Hono, Vite, and React.
 
 ## Why bhvr?
