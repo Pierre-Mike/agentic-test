@@ -10,9 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: deploy-production
@@ -47,6 +45,8 @@ jobs:
   build:
     needs: deploy-worker
     runs-on: ubuntu-latest
+    outputs:
+      page_url: ${{ steps.set-url.outputs.page_url }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -66,34 +66,20 @@ jobs:
           VITE_SERVER_URL: ${{ needs.deploy-worker.outputs.worker_url }}
           VITE_BASE_URL: /agentic-test/
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: client/dist
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./client/dist
+          keep_files: true
+          exclude_assets: 'previews/**'
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: ${{ steps.deployment.outputs.page_url }}
-    outputs:
-      page_url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-      - name: Create deployment summary
-        run: |
-          echo "## Production Deployment" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Deployed to: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+      - name: Set page URL
+        id: set-url
+        run: echo "page_url=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" >> $GITHUB_OUTPUT
 
   e2e-production:
-    needs: deploy
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -116,7 +102,7 @@ jobs:
       - name: Run E2E tests against production
         run: bun run e2e
         env:
-          E2E_BASE_URL: ${{ needs.deploy.outputs.page_url }}
+          E2E_BASE_URL: ${{ needs.build.outputs.page_url }}
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
