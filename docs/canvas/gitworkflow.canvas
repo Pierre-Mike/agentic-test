@@ -39,11 +39,11 @@
     {
       "type": "text",
       "id": "auto-implement",
-      "x": 363.53743263176796,
-      "y": 62.99822080326064,
-      "width": 220,
-      "height": 248.70673962557296,
-      "text": "🤖 AUTO IMPLEMENT\n(auto-implement.yml)\n\n1. Analyze Issue\n2. Create Plan (specs/)\n3. Write Code & Tests\n4. Validate (test/build/types)\n5. Create PR"
+      "x": 282.79091789120287,
+      "y": 17.32392695007661,
+      "width": 338.049339327829,
+      "height": 303.9524487765335,
+      "text": "🤖 AUTO IMPLEMENT\n(auto-implement.yml)\n\n1. Analyze Issue\n2. Create Plan (specs/) → commit\n3. Write Tests First (TDD) → commit\n4. Implement Code → commit\n5. Validate (test/build/types)\n6. Update Docs → commit\n7. Self-Review\n8. Create PR"
     },
     {
       "type": "text",
