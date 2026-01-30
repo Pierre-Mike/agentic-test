@@ -3,177 +3,183 @@
     {
       "type": "text",
       "id": "issue-start",
-      "x": -558.0214862021227,
+      "x": -560,
       "y": 200,
       "width": 200,
-      "height": 151.98681103355096,
+      "height": 150,
       "text": "📝 ISSUE CREATED\n\nBug Report\nFeature Request\nChore/Refactor"
     },
     {
       "type": "text",
-      "id": "auto-labeling",
-      "x": -296.70247700353775,
-      "y": 201.61170795005899,
-      "width": 200,
-      "height": 149.17671313984556,
-      "text": "🏷️ AUTO LABELING\n\nAnalyze content\nApply type labels\nSet priority (P1-P3)"
+      "id": "issue-triage",
+      "x": -300,
+      "y": 175,
+      "width": 220,
+      "height": 200,
+      "text": "🏷️ ISSUE TRIAGE\n(issue-opened.yml)\n\n1. Categorize: bug/feature/chore\n2. Score auto-implementation\n   - Clarity (25pts)\n   - Scope (25pts)\n   - Alignment (25pts)\n   - Risk (25pts)"
     },
     {
       "type": "text",
-      "id": "confidence-assessment",
-      "x": -19.266388304363247,
-      "y": 187.1063363995283,
+      "id": "auto-confidence",
+      "x": 0,
+      "y": 140,
       "width": 200,
-      "height": 193.06254523634192,
-      "text": "🎯 CONFIDENCE\nASSESSMENT\n\nClarity (25pts)\nScope (25pts)\nAlignment (25pts)\nRisk (25pts)"
-    },
-    {
-      "type": "text",
-      "id": "high-confidence",
-      "x": 198.53650624262963,
-      "y": -113.20686679630653,
-      "width": 200,
-      "height": 121.90440670153303,
-      "text": "✅ HIGH (≥75)\n\nauto-implement\nconfidence:high"
-    },
-    {
-      "type": "text",
-      "id": "medium-confidence",
-      "x": 269.451656045224,
-      "y": 225.78732720094345,
-      "width": 200,
-      "height": 123.51611465159198,
-      "text": "⚠️ MEDIUM (50-74)\n\nneeds-review\nconfidence:medium"
+      "height": 120,
+      "text": "✅ Score ≥50\n\nauto-implement"
     },
     {
       "type": "text",
       "id": "low-confidence",
-      "x": 280.7336116956368,
-      "y": 408.0214862021227,
+      "x": 0,
+      "y": 370.8574600847161,
       "width": 200,
-      "height": 131.5746544018868,
+      "height": 120,
       "text": "❌ LOW (<50)\n\nneeds-review\nconfidence:low"
     },
     {
       "type": "text",
       "id": "auto-implement",
-      "x": 472.90758802099447,
-      "y": -109.69085346022612,
-      "width": 200,
-      "height": 120,
-      "text": "🤖 AUTO IMPLEMENT\n\n1. Analyze & Plan\n2. Write Code\n3. Run Tests\n4. Validate Build"
+      "x": 363.53743263176796,
+      "y": 62.99822080326064,
+      "width": 220,
+      "height": 248.70673962557296,
+      "text": "🤖 AUTO IMPLEMENT\n(auto-implement.yml)\n\n1. Analyze Issue\n2. Create Plan (specs/)\n3. Write Code & Tests\n4. Validate (test/build/types)\n5. Create PR"
     },
     {
       "type": "text",
       "id": "manual-review",
-      "x": 580.7336116956368,
-      "y": 307.23415900117925,
-      "width": 431,
-      "height": 104,
+      "x": 362.00481826278065,
+      "y": 385.5144250767422,
+      "width": 220,
+      "height": 177.62500742789985,
       "text": "👥 MANUAL REVIEW\n\nMaintainer assigns\nDeveloper implements\nManual testing"
     },
     {
       "type": "text",
-      "id": "pr-creation",
-      "x": 791.8212975290854,
-      "y": -137.38248604719095,
+      "id": "pr-created",
+      "x": 744.0096365255613,
+      "y": 172.1634643953461,
       "width": 200,
-      "height": 164.4683180023585,
-      "text": "📋 PR CREATED\n\nBranch: issue-X-auto\nTests passing\nReady for review"
+      "height": 140,
+      "text": "📋 PR CREATED\n\nBranch: issue-X-auto\nor developer branch\nReady for review"
     },
     {
       "type": "text",
-      "id": "manual-pr",
-      "x": 1075.7478516005058,
-      "y": 304.8861133566833,
-      "width": 200,
-      "height": 181.1936079158985,
-      "text": "📋 MANUAL PR\n\nDeveloper branch\nCustom implementation\nManual testing"
+      "id": "ci-pipeline",
+      "x": 1167.9401202251427,
+      "y": 43.44238037871784,
+      "width": 220,
+      "height": 180,
+      "text": "⚙️ CI PIPELINE\n(ci.yml)\n\n1. Install (Bun)\n2. Lint (Biome)\n3. Type-check (TS)\n4. Test\n5. Build\n6. Security (CodeQL)"
     },
     {
       "type": "text",
-      "id": "peer-review",
-      "x": 1306.4468318002357,
-      "y": 100.75509789775941,
-      "width": 200,
-      "height": 138.68099080141513,
-      "text": "👁️ PEER REVIEW\n\nCode quality check\nSecurity validation\nFunctional testing"
+      "id": "claude-review",
+      "x": 1110.0250108075445,
+      "y": 301.8724429120067,
+      "width": 349.7363053763497,
+      "height": 191.80681693161512,
+      "text": "👁️ CLAUDE PEER REVIEW\n(claude-code-review.yml)\n\nCorrectness\nCode Quality & Security\nInline comments\nAPPROVE / REQUEST_CHANGES"
+    },
+    {
+      "type": "text",
+      "id": "deploy-preview",
+      "x": 1244.8136701891337,
+      "y": -288.12343668464723,
+      "width": 220,
+      "height": 244.52516865428836,
+      "text": "🚀 DEPLOY PREVIEW\n(deploy-preview.yml)\n\nCloudflare Worker (API)\nGitHub Pages (client)\nE2E Tests (Playwright)\nComment preview URLs"
     },
     {
       "type": "text",
       "id": "merge-success",
-      "x": 1600,
-      "y": 118.483885348408,
+      "x": 1679.7067990487722,
+      "y": 141.13461424186156,
       "width": 200,
-      "height": 151.5746544018868,
-      "text": "🎉 MERGED\n\nIssue closed\nFeature deployed\nWorkflow complete"
+      "height": 140,
+      "text": "🎉 MERGED TO MAIN\n\nRequires:\n- ci-complete ✓\n- peer-review ✓\n- 1 approval ✓"
+    },
+    {
+      "type": "text",
+      "id": "deploy-production",
+      "x": 1949.7067990487722,
+      "y": 51.134614241861556,
+      "width": 220,
+      "height": 150,
+      "text": "🌐 DEPLOY PRODUCTION\n(deploy-production.yml)\n\nCloudflare Worker (API)\nGitHub Pages (client)\nE2E Tests (Playwright)"
+    },
+    {
+      "type": "text",
+      "id": "auto-close",
+      "x": 1949.7067990487722,
+      "y": 231.13461424186153,
+      "width": 220,
+      "height": 120,
+      "text": "🔒 AUTO CLOSE ISSUES\n(auto-close-issues.yml)\n\nCloses linked issues\nAdds comment with PR link"
+    },
+    {
+      "type": "text",
+      "id": "cleanup-preview",
+      "x": 1507.2405560396182,
+      "y": -270.912252348419,
+      "width": 220,
+      "height": 184.86815268817477,
+      "text": "🧹 CLEANUP PREVIEW\n(cleanup-preview.yml)\n\nDelete Cloudflare Worker\nRemove preview from Pages"
     },
     {
       "type": "text",
       "id": "feedback-loop",
-      "x": 1316.1170795005896,
-      "y": 440.25564520330175,
+      "x": 1135.3561540608634,
+      "y": 656.1604935689604,
       "width": 200,
-      "height": 139.63319415218166,
-      "text": "🔄 FEEDBACK\n\nChanges requested\nBack to development"
+      "height": 193.13943250464217,
+      "text": "🔄 CHANGES REQUESTED\n\nBack to development\nRe-triggers CI & review"
     },
     {
       "type": "text",
-      "id": "manual-override",
-      "x": 699.5553574219341,
-      "y": 123.1168967291091,
+      "id": "claude-interactive",
+      "x": 707.0697796199674,
+      "y": -90.03969567920537,
+      "width": 272.73095907462016,
+      "height": 133.9314031932227,
+      "text": "💬 @CLAUDE\n(claude.yml)\n\nMention in issues/PRs\nInteractive AI assistant"
+    },
+    {
+      "type": "text",
+      "id": "dependabot",
+      "x": 299.94241853942935,
+      "y": 684.8798405464803,
       "width": 200,
-      "height": 80,
-      "text": "🛠️ MANUAL OVERRIDE\n\nRemove auto-implement\nForce manual path"
+      "height": 140,
+      "text": "📦 DEPENDABOT\n(dependabot.yml)\n\nWeekly on Monday\nGrouped updates\nAuto-creates PRs"
     }
   ],
   "edges": [
     {
-      "id": "issue-to-labeling",
+      "id": "issue-to-triage",
       "fromNode": "issue-start",
       "fromSide": "right",
-      "toNode": "auto-labeling",
+      "toNode": "issue-triage",
       "toSide": "left",
       "toEnd": "arrow",
       "style": "solid",
       "shape": "curved"
     },
     {
-      "id": "labeling-to-confidence",
-      "fromNode": "auto-labeling",
+      "id": "triage-to-auto-confidence",
+      "fromNode": "issue-triage",
       "fromSide": "right",
-      "toNode": "confidence-assessment",
+      "toNode": "auto-confidence",
       "toSide": "left",
       "toEnd": "arrow",
+      "label": "Score ≥50",
       "style": "solid",
       "shape": "curved"
     },
     {
-      "id": "confidence-to-high",
-      "fromNode": "confidence-assessment",
-      "fromSide": "top",
-      "toNode": "high-confidence",
-      "toSide": "left",
-      "toEnd": "arrow",
-      "label": "Score ≥75",
-      "style": "solid",
-      "shape": "curved"
-    },
-    {
-      "id": "confidence-to-medium",
-      "fromNode": "confidence-assessment",
+      "id": "triage-to-low",
+      "fromNode": "issue-triage",
       "fromSide": "right",
-      "toNode": "medium-confidence",
-      "toSide": "left",
-      "toEnd": "arrow",
-      "label": "Score 50-74",
-      "style": "solid",
-      "shape": "curved"
-    },
-    {
-      "id": "confidence-to-low",
-      "fromNode": "confidence-assessment",
-      "fromSide": "bottom",
       "toNode": "low-confidence",
       "toSide": "left",
       "toEnd": "arrow",
@@ -182,24 +188,14 @@
       "shape": "curved"
     },
     {
-      "id": "high-to-auto-implement",
-      "fromNode": "high-confidence",
+      "id": "auto-confidence-to-auto",
+      "fromNode": "auto-confidence",
       "fromSide": "right",
       "toNode": "auto-implement",
       "toSide": "left",
       "toEnd": "arrow",
       "style": "solid",
       "shape": "straight"
-    },
-    {
-      "id": "medium-to-manual",
-      "fromNode": "medium-confidence",
-      "fromSide": "right",
-      "toNode": "manual-review",
-      "toSide": "left",
-      "toEnd": "arrow",
-      "style": "solid",
-      "shape": "curved"
     },
     {
       "id": "low-to-manual",
@@ -212,59 +208,61 @@
       "shape": "curved"
     },
     {
-      "id": "auto-implement-to-pr",
-      "fromNode": "auto-implement",
+      "id": "pr-to-ci",
+      "fromNode": "pr-created",
       "fromSide": "right",
-      "toNode": "pr-creation",
+      "toNode": "ci-pipeline",
       "toSide": "left",
-      "toEnd": "arrow",
-      "style": "solid",
-      "shape": "straight"
-    },
-    {
-      "id": "manual-to-manual-pr",
-      "fromNode": "manual-review",
-      "fromSide": "right",
-      "toNode": "manual-pr",
-      "toSide": "left",
-      "toEnd": "arrow",
-      "style": "solid",
-      "shape": "straight"
-    },
-    {
-      "id": "pr-to-peer-review",
-      "fromNode": "pr-creation",
-      "fromSide": "right",
-      "toNode": "peer-review",
-      "toSide": "top",
       "toEnd": "arrow",
       "style": "solid",
       "shape": "curved"
     },
     {
-      "id": "manual-pr-to-peer-review",
-      "fromNode": "manual-pr",
+      "id": "pr-to-deploy-preview",
+      "fromNode": "pr-created",
       "fromSide": "right",
-      "toNode": "peer-review",
+      "toNode": "deploy-preview",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "pr-to-claude-interactive",
+      "fromNode": "pr-created",
+      "fromSide": "top",
+      "toNode": "claude-interactive",
       "toSide": "bottom",
       "toEnd": "arrow",
+      "label": "@claude mention",
+      "style": "dashed",
+      "shape": "curved"
+    },
+    {
+      "id": "ci-to-merge",
+      "fromNode": "ci-pipeline",
+      "fromSide": "right",
+      "toNode": "merge-success",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "label": "ci-complete ✓",
       "style": "solid",
       "shape": "curved"
     },
     {
-      "id": "peer-review-to-merge",
-      "fromNode": "peer-review",
+      "id": "review-to-merge",
+      "fromNode": "claude-review",
       "fromSide": "right",
       "toNode": "merge-success",
       "toSide": "left",
       "toEnd": "arrow",
       "label": "Approved",
       "style": "solid",
-      "shape": "straight"
+      "shape": "curved"
     },
     {
-      "id": "peer-review-to-feedback",
-      "fromNode": "peer-review",
+      "id": "review-to-feedback",
+      "fromNode": "claude-review",
       "fromSide": "bottom",
       "toNode": "feedback-loop",
       "toSide": "top",
@@ -274,35 +272,85 @@
       "shape": "curved"
     },
     {
-      "id": "feedback-to-manual",
+      "id": "feedback-to-pr",
       "fromNode": "feedback-loop",
       "fromSide": "left",
-      "toNode": "manual-review",
+      "toNode": "pr-created",
       "toSide": "bottom",
       "toEnd": "arrow",
+      "label": "Push fixes",
       "style": "dashed",
       "shape": "curved"
     },
     {
-      "id": "override-to-manual",
-      "fromNode": "manual-override",
-      "fromSide": "bottom",
-      "toNode": "manual-review",
-      "toSide": "top",
+      "id": "merge-to-deploy-prod",
+      "fromNode": "merge-success",
+      "fromSide": "right",
+      "toNode": "deploy-production",
+      "toSide": "left",
       "toEnd": "arrow",
-      "label": "Force manual",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "merge-to-auto-close",
+      "fromNode": "merge-success",
+      "fromSide": "right",
+      "toNode": "auto-close",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "dependabot-to-pr",
+      "fromNode": "dependabot",
+      "fromSide": "right",
+      "toNode": "pr-created",
+      "toSide": "bottom",
+      "toEnd": "arrow",
+      "label": "Dependency PRs",
       "style": "dashed",
       "shape": "curved"
     },
     {
-      "id": "medium-approve-to-auto",
-      "fromNode": "medium-confidence",
+      "id": "4938f5f4-4108-4a50-bc01-8ef51b407c3c",
+      "fromNode": "manual-review",
+      "fromSide": "right",
+      "toNode": "pr-created",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "0d1cdae5-50af-4c51-957b-9e89a4c63b48",
+      "fromNode": "auto-implement",
+      "fromSide": "right",
+      "toNode": "pr-created",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "a9d77af9-5a01-47fe-b446-88138b1d0ca4",
+      "fromNode": "merge-success",
       "fromSide": "top",
-      "toNode": "auto-implement",
+      "toNode": "cleanup-preview",
       "toSide": "bottom",
       "toEnd": "arrow",
-      "label": "Maintainer approval",
-      "style": "dashed",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "5dad84e5-3965-4c99-a2eb-168c3e27f1b9",
+      "fromNode": "pr-created",
+      "fromSide": "right",
+      "toNode": "claude-review",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "style": "solid",
       "shape": "curved"
     }
   ]

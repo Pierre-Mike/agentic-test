@@ -70,21 +70,15 @@ jobs:
 
             ### Take Action Based on Score
 
-            **Score >= 75 (HIGH):**
+            **Score >= 50:**
             ```bash
-            gh issue edit ${{ github.event.issue.number }} --add-label "auto-implement" --add-label "confidence:high"
-            ```
-            No comment needed - auto-implement workflow will handle it.
-
-            **Score 50-74 (MEDIUM):**
-            ```bash
-            gh issue edit ${{ github.event.issue.number }} --add-label "auto-implement" --add-label "confidence:medium"
+            gh issue edit ${{ github.event.issue.number }} --add-label "auto-implement"
             ```
             No comment needed - auto-implement workflow will handle it.
 
             **Score < 50 (LOW):**
             ```bash
-            gh issue edit ${{ github.event.issue.number }} --add-label "needs-review" --add-label "confidence:low"
+            gh issue edit ${{ github.event.issue.number }} --add-label "needs-review"
             gh issue comment ${{ github.event.issue.number }} --body "## Confidence Assessment: LOW
 
             **Score: [X]/100**
@@ -96,9 +90,8 @@ jobs:
             ```
 
             ## IMPORTANT
-            - Score >= 50 gets auto-implement, only low confidence needs human review
+            - Score >= 50 gets `auto-implement`, score < 50 gets `needs-review`
             - Never apply both `auto-implement` and `needs-review`
-            - Always apply exactly one confidence label
 
       - name: Handle Assessment Failure
         if: failure()
