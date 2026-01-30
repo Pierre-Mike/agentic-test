@@ -19,24 +19,17 @@ jobs:
       id-token: write
 
     steps:
-      - name: Generate App Token
-        id: app-token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          token: ${{ steps.app-token.outputs.token }}
+          token: ${{ secrets.GH_PAT }}
 
       - name: Auto Plan and Implement
         uses: anthropics/claude-code-action@main
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ steps.app-token.outputs.token }}
+          github_token: ${{ secrets.GH_PAT }}
           allowed_bots: '*'
           claude_args: '--allowedTools "Bash(gh:*),Bash(git:*),Bash(bun:*),Bash(npm:*),Edit,Write,Read,Glob,Grep,TodoWrite"'
           prompt: |
@@ -100,7 +93,7 @@ jobs:
 
       - name: Create PR if branch exists
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           BRANCH="issue-${{ github.event.issue.number }}-auto-implement"
 

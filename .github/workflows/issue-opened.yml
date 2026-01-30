@@ -18,13 +18,6 @@ jobs:
       issues: write
 
     steps:
-      - name: Generate GitHub App Token
-        id: app-token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
@@ -34,7 +27,7 @@ jobs:
         uses: anthropics/claude-code-action@main
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ steps.app-token.outputs.token }}
+          github_token: ${{ secrets.GH_PAT }}
           claude_args: '--allowedTools "Bash(gh:*),Read,Glob,Grep"'
           prompt: |
             You are an issue triage and assessment bot. You have TWO tasks:
@@ -110,10 +103,10 @@ jobs:
       - name: Handle Assessment Failure
         if: failure()
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         uses: actions/github-script@v7
         with:
-          github-token: ${{ steps.app-token.outputs.token }}
+          github-token: ${{ secrets.GH_PAT }}
           script: |
             await github.rest.issues.addLabels({
               owner: context.repo.owner,
