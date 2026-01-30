@@ -1,2 +1,2 @@
 export * from "./types";
-export * from "./hello-world";
+export * from "./utils/greet";
