@@ -15,7 +15,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-      issues: read
+      issues: write
       id-token: write
 
     steps:
@@ -25,6 +25,7 @@ jobs:
           fetch-depth: 0
 
       - name: Run Claude Peer Review
+        id: review
         uses: anthropics/claude-code-action@main
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -39,3 +40,18 @@ jobs:
             - PR_AUTHOR=${{ github.event.pull_request.user.login }}
             - BASE_BRANCH=${{ github.event.pull_request.base.ref }}
             - HEAD_BRANCH=${{ github.event.pull_request.head.ref }}
+
+      - name: Label PR based on review outcome
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          # Get the latest review state from the PR
+          REVIEW_STATE=$(gh pr view "$PR_NUMBER" --json reviews --jq '[.reviews[] | select(.authorAssociation == "NONE" or .authorAssociation == "MEMBER" or .authorAssociation == "OWNER" or .authorAssociation == "COLLABORATOR")] | last | .state')
+
+          if [ "$REVIEW_STATE" = "APPROVED" ]; then
+            gh pr edit "$PR_NUMBER" --add-label "review:done" --remove-label "review:needs-work" 2>/dev/null || true
+          elif [ "$REVIEW_STATE" = "CHANGES_REQUESTED" ]; then
+            gh pr edit "$PR_NUMBER" --add-label "review:needs-work" --remove-label "review:done" 2>/dev/null || true
+          fi

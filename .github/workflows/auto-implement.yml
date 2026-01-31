@@ -249,52 +249,9 @@ jobs:
                - git push --no-verify
             4. If no documentation changes are needed, do nothing.
 
-  # ── PHASE 7: Self-Review ──
-  self-review:
-    needs: documentation
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: write
-      pull-requests: write
-      issues: write
-      id-token: write
-
-    steps:
-      - name: Checkout branch
-        uses: actions/checkout@v5
-        with:
-          ref: issue-${{ github.event.issue.number }}-auto-implement
-          fetch-depth: 0
-          token: ${{ secrets.GH_PAT }}
-
-      - name: Setup git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: "Phase 7: Self-Review"
-        uses: anthropics/claude-code-action@main
-        with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ secrets.GH_PAT }}
-          allowed_bots: '*'
-          claude_args: '--allowedTools "Bash(gh:*),Bash(git:*),Bash(bun:*),Read,Edit,Glob,Grep"'
-          prompt: |
-            You are in Phase 7 (Self-Review) of auto-implementation for issue #${{ env.ISSUE_NUMBER }}.
-
-            1. Review the full diff across all commits: git diff main...HEAD
-            2. Check for: correctness, code quality, security issues, performance problems
-            3. Read the original issue: gh issue view ${{ env.ISSUE_NUMBER }} --json title,body
-            4. Verify all requirements from the issue are met point-by-point
-            5. If any issues are found, fix them, commit and push:
-               git add . && git commit --no-verify -m "fix: self-review fixes for #${{ env.ISSUE_NUMBER }}"
-               git push --no-verify
-            6. Run final validation: bun run test && bun run build && bun run type-check
-
-  # ── PHASE 8: Create PR ──
+  # ── PHASE 7: Create PR ──
   create-pr:
-    needs: self-review
+    needs: documentation
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:

@@ -31,4 +31,8 @@ gh label create "shared" --description "Affects shared workspace" --color "006b7
 gh label create "dependencies" --description "Dependency updates" --color "0366d6" --force
 gh label create "ci-cd" --description "CI/CD changes" --color "bfd4f2" --force
 
+# Review Labels
+gh label create "review:done" --description "Peer review approved" --color "0e8a16" --force
+gh label create "review:needs-work" --description "Peer review requested changes" --color "e99695" --force
+
 echo "Labels created successfully!"

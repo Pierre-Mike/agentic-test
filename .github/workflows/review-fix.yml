@@ -1,0 +1,87 @@
+name: Review Fix Loop
+
+on:
+  pull_request:
+    types: [labeled]
+
+concurrency:
+  group: review-fix-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  fix-review-comments:
+    if: |
+      github.event.label.name == 'review:needs-work' &&
+      startsWith(github.event.pull_request.head.ref, 'issue-') &&
+      endsWith(github.event.pull_request.head.ref, '-auto-implement')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Check attempt count
+        id: check-attempts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          # Count review-fix commits to track attempts
+          ATTEMPT_COUNT=$(gh pr view "$PR_NUMBER" --json commits --jq '[.commits[].messageHeadline | select(startswith("fix: review fixes"))] | length')
+          echo "attempts=$ATTEMPT_COUNT" >> "$GITHUB_OUTPUT"
+
+          if [ "$ATTEMPT_COUNT" -ge 3 ]; then
+            echo "Max review-fix attempts (3) reached. Stopping loop."
+            gh pr comment "$PR_NUMBER" --body "Review-fix loop reached maximum attempts (3). Manual intervention required."
+            exit 1
+          fi
+
+      - name: Checkout PR branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Setup git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fix review comments
+        uses: anthropics/claude-code-action@main
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          ATTEMPT: ${{ steps.check-attempts.outputs.attempts }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GH_PAT }}
+          allowed_bots: '*'
+          claude_args: '--allowedTools "Bash(gh:*),Bash(git:*),Bash(bun:*),Read,Write,Edit,Glob,Grep"'
+          prompt: |
+            You are fixing review comments on PR #${{ github.event.pull_request.number }} (attempt ${{ steps.check-attempts.outputs.attempts }} of 3).
+
+            1. Read the review comments:
+               gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews --jq '.[] | select(.state == "CHANGES_REQUESTED") | .body'
+               gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments --jq '.[] | {path: .path, line: .line, body: .body}'
+
+            2. Understand each requested change and fix the code accordingly.
+
+            3. Run validation:
+               bun run test && bun run build && bun run type-check
+
+            4. If validation fails, fix the issues.
+
+            5. Commit and push:
+               git add . && git commit --no-verify -m "fix: review fixes for PR #${{ github.event.pull_request.number }} (attempt $((ATTEMPT+1)))"
+               git push --no-verify
+
+      - name: Remove needs-work label
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr edit "$PR_NUMBER" --remove-label "review:needs-work" 2>/dev/null || true
