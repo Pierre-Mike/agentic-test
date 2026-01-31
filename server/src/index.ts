@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import type { ApiResponse, VersionResponse } from "shared/dist";
+import type { ApiResponse, TestResponse, VersionResponse } from "shared/dist";
 import type { CloudflareBindings } from "./env";
 
 export const app = new Hono<{ Bindings: CloudflareBindings }>()
@@ -24,6 +24,13 @@ export const app = new Hono<{ Bindings: CloudflareBindings }>()
 		const data: VersionResponse = {
 			version: c.env?.APP_VERSION ?? "0.0.0",
 			name: c.env?.APP_NAME ?? "server",
+		};
+		return c.json(data, { status: 200 });
+	})
+
+	.get("/test", (c) => {
+		const data: TestResponse = {
+			test: "ok",
 		};
 		return c.json(data, { status: 200 });
 	});
