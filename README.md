@@ -7,8 +7,8 @@
 **Live Application:** [https://Pierre-Mike.github.io/agentic-test/](https://Pierre-Mike.github.io/agentic-test/)
 ![Client Status](https://img.shields.io/website?url=https%3A%2F%2FPierre-Mike.github.io%2Fagentic-test%2F&label=Client&up_message=online&down_message=offline)
 
-**API Server:** [https://server.pierre-michael-twagirayezu.workers.dev](https://server.pierre-michael-twagirayezu.workers.dev)
-![Server Status](https://img.shields.io/website?url=https%3A%2F%2Fserver.pierre-michael-twagirayezu.workers.dev%2Fversion&label=API&up_message=online&down_message=offline)
+**API Server:** [https://server.pm-lemeliner.workers.dev](https://server.pm-lemeliner.workers.dev)
+![Server Status](https://img.shields.io/website?url=https%3A%2F%2Fserver.pm-lemeliner.workers.dev%2Fversion&label=API&up_message=online&down_message=offline)
 
 ---
 
