@@ -117,7 +117,7 @@ jobs:
             }
 
   e2e-preview:
-    needs: deploy-preview
+    needs: [deploy-preview, deploy-worker]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -155,6 +155,7 @@ jobs:
         run: bun run e2e
         env:
           E2E_BASE_URL: ${{ needs.deploy-preview.outputs.preview_url }}
+          E2E_API_URL: ${{ needs.deploy-worker.outputs.worker_url }}
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4

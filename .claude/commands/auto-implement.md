@@ -40,6 +40,17 @@ Based on the plan:
 4. Commit the test files:
    git add . && git commit -m "test: add tests for #$ISSUE_NUMBER"
 
+### E2E Test Guidelines
+- E2E tests run against deployed preview environments, NOT localhost.
+- **Frontend e2e tests** use `baseURL` from Playwright config (set via `E2E_BASE_URL`).
+- **API e2e tests** must import `apiURL` from `../playwright.config` and use it as the base for API requests:
+  ```ts
+  import { apiURL } from "../playwright.config";
+  // then use: request.get(`${apiURL}/your-endpoint`)
+  ```
+- NEVER hardcode `localhost:8787` or any localhost URL in e2e tests.
+- For server-only endpoints with no UI, prefer unit tests (using `app.request()`) over e2e tests.
+
 ## PHASE 4: IMPLEMENT CODE
 1. Read .claude/commands/implement.md for implementation guidelines
 2. Write code to make all tests pass
