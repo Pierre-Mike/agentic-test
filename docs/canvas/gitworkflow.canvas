@@ -31,7 +31,7 @@
       "type": "text",
       "id": "low-confidence",
       "x": 0,
-      "y": 370.8574600847161,
+      "y": 370,
       "width": 200,
       "height": 120,
       "text": "❌ LOW (<50)\n\nneeds-review\nconfidence:low"
@@ -39,62 +39,98 @@
     {
       "type": "text",
       "id": "auto-implement",
-      "x": 282.79091789120287,
-      "y": 17.32392695007661,
-      "width": 338.049339327829,
-      "height": 303.9524487765335,
-      "text": "🤖 AUTO IMPLEMENT\n(auto-implement.yml)\n\n1. Analyze Issue\n2. Create Plan (specs/) → commit\n3. Write Tests First (TDD) → commit\n4. Implement Code → commit\n5. Validate (test/build/types)\n6. Update Docs → commit\n7. Self-Review\n8. Create PR"
+      "x": 260,
+      "y": 80,
+      "width": 260,
+      "height": 200,
+      "text": "🤖 PLAN & DRAFT PR\n(auto-implement.yml)\n\n1. Analyze Issue\n2. Create Plan (specs/) → commit\n3. Create Draft PR\n4. Apply phase:tests label"
+    },
+    {
+      "type": "text",
+      "id": "phase-tests",
+      "x": 560,
+      "y": -20,
+      "width": 240,
+      "height": 160,
+      "text": "🧪 PHASE: TESTS\n(auto-implement-phases.yml)\n\nLabel: phase:tests\nWrite e2e + unit tests (TDD red)\n→ phase:implement"
+    },
+    {
+      "type": "text",
+      "id": "phase-implement",
+      "x": 560,
+      "y": 170,
+      "width": 240,
+      "height": 160,
+      "text": "⚡ PHASE: IMPLEMENT\n(auto-implement-phases.yml)\n\nLabel: phase:implement\nCode + validate (test/build/types)\n→ phase:finalize"
+    },
+    {
+      "type": "text",
+      "id": "phase-finalize",
+      "x": 560,
+      "y": 360,
+      "width": 240,
+      "height": 160,
+      "text": "✨ PHASE: FINALIZE\n(auto-implement-phases.yml)\n\nLabel: phase:finalize\nDocs + gh pr ready\n→ phase:complete"
+    },
+    {
+      "type": "text",
+      "id": "phase-failed",
+      "x": 340,
+      "y": 520,
+      "width": 180,
+      "height": 120,
+      "text": "❌ PHASE: FAILED\n\nphase:failed label\nRe-apply previous label\nto retry"
     },
     {
       "type": "text",
       "id": "manual-review",
-      "x": 362.00481826278065,
-      "y": 385.5144250767422,
+      "x": 260,
+      "y": 385,
       "width": 220,
-      "height": 177.62500742789985,
+      "height": 178,
       "text": "👥 MANUAL REVIEW\n\nMaintainer assigns\nDeveloper implements\nManual testing"
     },
     {
       "type": "text",
       "id": "pr-created",
-      "x": 744.0096365255613,
-      "y": 172.1634643953461,
+      "x": 880,
+      "y": 172,
       "width": 200,
-      "height": 164.45912381838224,
-      "text": "📋 PR CREATED\n\nBranch: issue-X-auto\nor developer branch\nReady for review"
+      "height": 164,
+      "text": "📋 PR READY\n\nBranch: issue-X-auto\nor developer branch\nReady for review"
     },
     {
       "type": "text",
       "id": "ci-pipeline",
-      "x": 1167.9401202251427,
-      "y": 43.44238037871784,
+      "x": 1168,
+      "y": 43,
       "width": 220,
-      "height": 218.84684371154825,
+      "height": 219,
       "text": "⚙️ CI PIPELINE\n(ci.yml)\n\n1. Install (Bun)\n2. Lint (Biome)\n3. Type-check (TS)\n4. Test\n5. Build\n6. Security (CodeQL)"
     },
     {
       "type": "text",
       "id": "claude-review",
-      "x": 1110.0250108075445,
-      "y": 301.8724429120067,
-      "width": 349.7363053763497,
-      "height": 191.80681693161512,
+      "x": 1110,
+      "y": 302,
+      "width": 350,
+      "height": 192,
       "text": "👁️ CLAUDE PEER REVIEW\n(claude-code-review.yml)\n\nCorrectness\nCode Quality & Security\nInline comments\nAPPROVE / REQUEST_CHANGES"
     },
     {
       "type": "text",
       "id": "deploy-preview",
-      "x": 1244.8136701891337,
-      "y": -288.12343668464723,
+      "x": 1245,
+      "y": -288,
       "width": 220,
-      "height": 244.52516865428836,
+      "height": 245,
       "text": "🚀 DEPLOY PREVIEW\n(deploy-preview.yml)\n\nCloudflare Worker (API)\nGitHub Pages (client)\nE2E Tests (Playwright)\nComment preview URLs"
     },
     {
       "type": "text",
       "id": "merge-success",
-      "x": 1679.7067990487722,
-      "y": 141.13461424186156,
+      "x": 1680,
+      "y": 141,
       "width": 200,
       "height": 140,
       "text": "🎉 MERGED TO MAIN\n\nRequires:\n- ci-complete ✓\n- peer-review ✓\n- 1 approval ✓"
@@ -102,8 +138,8 @@
     {
       "type": "text",
       "id": "deploy-production",
-      "x": 1949.7067990487722,
-      "y": 51.134614241861556,
+      "x": 1950,
+      "y": 51,
       "width": 220,
       "height": 150,
       "text": "🌐 DEPLOY PRODUCTION\n(deploy-production.yml)\n\nCloudflare Worker (API)\nGitHub Pages (client)\nE2E Tests (Playwright)"
@@ -111,8 +147,8 @@
     {
       "type": "text",
       "id": "auto-close",
-      "x": 1949.7067990487722,
-      "y": 231.13461424186153,
+      "x": 1950,
+      "y": 231,
       "width": 220,
       "height": 120,
       "text": "🔒 AUTO CLOSE ISSUES\n(auto-close-issues.yml)\n\nCloses linked issues\nAdds comment with PR link"
@@ -120,35 +156,35 @@
     {
       "type": "text",
       "id": "cleanup-preview",
-      "x": 1507.2405560396182,
-      "y": -270.912252348419,
+      "x": 1507,
+      "y": -271,
       "width": 220,
-      "height": 184.86815268817477,
+      "height": 185,
       "text": "🧹 CLEANUP PREVIEW\n(cleanup-preview.yml)\n\nDelete Cloudflare Worker\nRemove preview from Pages"
     },
     {
       "type": "text",
       "id": "feedback-loop",
-      "x": 1135.3561540608634,
-      "y": 656.1604935689604,
+      "x": 1135,
+      "y": 656,
       "width": 200,
-      "height": 193.13943250464217,
+      "height": 193,
       "text": "🔄 CHANGES REQUESTED\n\nBack to development\nRe-triggers CI & review"
     },
     {
       "type": "text",
       "id": "claude-interactive",
-      "x": 707.0697796199674,
-      "y": -90.03969567920537,
-      "width": 272.73095907462016,
-      "height": 133.9314031932227,
+      "x": 707,
+      "y": -90,
+      "width": 273,
+      "height": 134,
       "text": "💬 @CLAUDE\n(claude.yml)\n\nMention in issues/PRs\nInteractive AI assistant"
     },
     {
       "type": "text",
       "id": "dependabot",
-      "x": 299.94241853942935,
-      "y": 684.8798405464803,
+      "x": 300,
+      "y": 685,
       "width": 200,
       "height": 140,
       "text": "📦 DEPENDABOT\n(dependabot.yml)\n\nWeekly on Monday\nGrouped updates\nAuto-creates PRs"
@@ -205,6 +241,83 @@
       "toSide": "left",
       "toEnd": "arrow",
       "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "auto-to-phase-tests",
+      "fromNode": "auto-implement",
+      "fromSide": "right",
+      "toNode": "phase-tests",
+      "toSide": "left",
+      "toEnd": "arrow",
+      "label": "Draft PR + phase:tests",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "phase-tests-to-implement",
+      "fromNode": "phase-tests",
+      "fromSide": "bottom",
+      "toNode": "phase-implement",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "label": "phase:implement",
+      "style": "solid",
+      "shape": "straight"
+    },
+    {
+      "id": "phase-implement-to-finalize",
+      "fromNode": "phase-implement",
+      "fromSide": "bottom",
+      "toNode": "phase-finalize",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "label": "phase:finalize",
+      "style": "solid",
+      "shape": "straight"
+    },
+    {
+      "id": "phase-finalize-to-pr-ready",
+      "fromNode": "phase-finalize",
+      "fromSide": "right",
+      "toNode": "pr-created",
+      "toSide": "bottom",
+      "toEnd": "arrow",
+      "label": "gh pr ready",
+      "style": "solid",
+      "shape": "curved"
+    },
+    {
+      "id": "phase-tests-to-failed",
+      "fromNode": "phase-tests",
+      "fromSide": "bottom",
+      "toNode": "phase-failed",
+      "toSide": "top",
+      "toEnd": "arrow",
+      "label": "failure",
+      "style": "dashed",
+      "shape": "curved"
+    },
+    {
+      "id": "phase-implement-to-failed",
+      "fromNode": "phase-implement",
+      "fromSide": "bottom",
+      "toNode": "phase-failed",
+      "toSide": "right",
+      "toEnd": "arrow",
+      "label": "failure",
+      "style": "dashed",
+      "shape": "curved"
+    },
+    {
+      "id": "phase-finalize-to-failed",
+      "fromNode": "phase-finalize",
+      "fromSide": "bottom",
+      "toNode": "phase-failed",
+      "toSide": "right",
+      "toEnd": "arrow",
+      "label": "failure",
+      "style": "dashed",
       "shape": "curved"
     },
     {
@@ -314,7 +427,7 @@
       "shape": "curved"
     },
     {
-      "id": "4938f5f4-4108-4a50-bc01-8ef51b407c3c",
+      "id": "manual-to-pr",
       "fromNode": "manual-review",
       "fromSide": "right",
       "toNode": "pr-created",
@@ -324,17 +437,7 @@
       "shape": "curved"
     },
     {
-      "id": "0d1cdae5-50af-4c51-957b-9e89a4c63b48",
-      "fromNode": "auto-implement",
-      "fromSide": "right",
-      "toNode": "pr-created",
-      "toSide": "left",
-      "toEnd": "arrow",
-      "style": "solid",
-      "shape": "curved"
-    },
-    {
-      "id": "a9d77af9-5a01-47fe-b446-88138b1d0ca4",
+      "id": "merge-to-cleanup",
       "fromNode": "merge-success",
       "fromSide": "top",
       "toNode": "cleanup-preview",
@@ -344,7 +447,7 @@
       "shape": "curved"
     },
     {
-      "id": "5dad84e5-3965-4c99-a2eb-168c3e27f1b9",
+      "id": "pr-to-claude-review",
       "fromNode": "pr-created",
       "fromSide": "right",
       "toNode": "claude-review",
