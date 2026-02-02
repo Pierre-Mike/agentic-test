@@ -4,6 +4,10 @@ on:
   issues:
     types: [labeled]
 
+concurrency:
+  group: auto-implement-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
 env:
   ISSUE_NUMBER: ${{ github.event.issue.number }}
   ISSUE_TITLE: ${{ github.event.issue.title }}
