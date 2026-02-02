@@ -1,0 +1,220 @@
+name: Auto Implement Phases
+
+on:
+  pull_request:
+    types: [labeled]
+
+concurrency:
+  group: auto-impl-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  PR_NUMBER: ${{ github.event.pull_request.number }}
+  BRANCH: ${{ github.event.pull_request.head.ref }}
+
+jobs:
+  # ── Write Tests (TDD Red Phase) ──
+  write-tests:
+    if: |
+      github.event.label.name == 'phase:tests' &&
+      startsWith(github.event.pull_request.head.ref, 'issue-') &&
+      endsWith(github.event.pull_request.head.ref, '-auto-implement')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ env.BRANCH }}
+          fetch-depth: 0
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Setup git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Extract issue number
+        id: issue
+        run: echo "number=$(echo '${{ env.BRANCH }}' | grep -o '[0-9]\+')" >> "$GITHUB_OUTPUT"
+
+      - name: "Write Tests"
+        uses: anthropics/claude-code-action@main
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GH_PAT }}
+          allowed_bots: '*'
+          claude_args: '--allowedTools "Bash(gh:*),Bash(git:*),Bash(bun:*),Read,Write,Edit,Glob,Grep"'
+          prompt: |
+            You are in the Write Tests phase (TDD Red) for issue #${{ steps.issue.outputs.number }}.
+
+            1. Read the spec file in specs/ for this issue (specs/*-issue-${{ steps.issue.outputs.number }}.md)
+            2. Write all e2e tests derived from the acceptance criteria
+            3. Write unit/integration tests derived from the testing strategy
+            4. Run the tests — confirm they FAIL (red phase). This is expected; the tests validate requirements before code exists.
+            5. Commit and push:
+               git add . && git commit --no-verify -m "test: add tests for #${{ steps.issue.outputs.number }}"
+               git push --no-verify
+
+            IMPORTANT: Only write test files. Do not write implementation code.
+
+      - name: Advance to phase:implement
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          gh pr edit "$PR_NUMBER" --remove-label "phase:tests" --add-label "phase:implement"
+
+      - name: Handle failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          gh pr edit "$PR_NUMBER" --add-label "phase:failed"
+          gh pr comment "$PR_NUMBER" --body "❌ **phase:tests failed.** Remove \`phase:failed\`, then re-apply \`phase:tests\` to retry."
+
+  # ── Implement + Validate (TDD Green Phase) ──
+  implement:
+    if: |
+      github.event.label.name == 'phase:implement' &&
+      startsWith(github.event.pull_request.head.ref, 'issue-') &&
+      endsWith(github.event.pull_request.head.ref, '-auto-implement')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ env.BRANCH }}
+          fetch-depth: 0
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Setup git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Extract issue number
+        id: issue
+        run: echo "number=$(echo '${{ env.BRANCH }}' | grep -o '[0-9]\+')" >> "$GITHUB_OUTPUT"
+
+      - name: "Implement & Validate"
+        uses: anthropics/claude-code-action@main
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GH_PAT }}
+          allowed_bots: '*'
+          claude_args: '--allowedTools "Bash(gh:*),Bash(git:*),Bash(bun:*),Bash(npm:*),Read,Write,Edit,Glob,Grep"'
+          prompt: |
+            You are in the Implement & Validate phase for issue #${{ steps.issue.outputs.number }}.
+
+            IMPLEMENT:
+            1. Read the spec file in specs/ for this issue (specs/*-issue-${{ steps.issue.outputs.number }}.md)
+            2. Read .claude/commands/implement.md for implementation guidelines
+            3. Write code to make all tests pass
+            4. Follow existing patterns in the codebase
+
+            VALIDATE:
+            5. Run all validation commands:
+               - bun run test — all tests must PASS
+               - bun run build — no build errors
+               - bun run type-check — no type errors
+            6. If any fail, fix the issues and re-run validation until all pass.
+
+            7. Commit and push:
+               git add . && git commit --no-verify -m "feat: implement #${{ steps.issue.outputs.number }}"
+               git push --no-verify
+               (Use "fix:" prefix for bugs instead of "feat:")
+
+      - name: Advance to phase:finalize
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          gh pr edit "$PR_NUMBER" --remove-label "phase:implement" --add-label "phase:finalize"
+
+      - name: Handle failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          gh pr edit "$PR_NUMBER" --add-label "phase:failed"
+          gh pr comment "$PR_NUMBER" --body "❌ **phase:implement failed.** Remove \`phase:failed\`, then re-apply \`phase:implement\` to retry."
+
+  # ── Finalize: Docs + Mark Ready ──
+  finalize:
+    if: |
+      github.event.label.name == 'phase:finalize' &&
+      startsWith(github.event.pull_request.head.ref, 'issue-') &&
+      endsWith(github.event.pull_request.head.ref, '-auto-implement')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ env.BRANCH }}
+          fetch-depth: 0
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Setup git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Extract issue number
+        id: issue
+        run: echo "number=$(echo '${{ env.BRANCH }}' | grep -o '[0-9]\+')" >> "$GITHUB_OUTPUT"
+
+      - name: "Documentation"
+        uses: anthropics/claude-code-action@main
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GH_PAT }}
+          allowed_bots: '*'
+          claude_args: '--allowedTools "Bash(git:*),Read,Write,Edit,Glob,Grep"'
+          prompt: |
+            You are in the Finalize phase for issue #${{ steps.issue.outputs.number }}.
+
+            1. Read the spec file in specs/ for this issue
+            2. Check if any user-facing behavior changed by reviewing: git diff main...HEAD
+            3. If documentation updates are needed:
+               - Update README.md if user-facing behavior changed
+               - Update relevant docs/comments
+               - git add . && git commit --no-verify -m "docs: update documentation for #${{ steps.issue.outputs.number }}"
+               - git push --no-verify
+            4. If no documentation changes are needed, do nothing.
+
+      - name: Mark PR ready & complete
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          gh pr ready "$PR_NUMBER"
+          gh pr edit "$PR_NUMBER" --remove-label "phase:finalize" --add-label "phase:complete"
+
+      - name: Handle failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          gh pr edit "$PR_NUMBER" --add-label "phase:failed"
+          gh pr comment "$PR_NUMBER" --body "❌ **phase:finalize failed.** Remove \`phase:failed\`, then re-apply \`phase:finalize\` to retry."

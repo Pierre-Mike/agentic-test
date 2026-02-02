@@ -12,7 +12,7 @@ env:
   BRANCH: issue-${{ github.event.issue.number }}-auto-implement
 
 jobs:
-  # ── PHASE 1 & 2: Analyze Issue + Create Plan ──
+  # ── Plan + Create Draft PR ──
   analyze-and-plan:
     if: |
       (github.event.label.name == 'auto-implement' || github.event.label.name == 'confidence:high' || github.event.label.name == 'confidence:medium') &&
@@ -72,202 +72,7 @@ jobs:
 
             IMPORTANT: Only commit the spec file. Do not write any code or tests yet.
 
-  # ── PHASE 3: Write Tests First (TDD Red Phase) ──
-  write-tests:
-    needs: analyze-and-plan
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: write
-      pull-requests: write
-      issues: write
-      id-token: write
-
-    steps:
-      - name: Checkout branch
-        uses: actions/checkout@v5
-        with:
-          ref: issue-${{ github.event.issue.number }}-auto-implement
-          fetch-depth: 0
-          token: ${{ secrets.GH_PAT }}
-
-      - name: Setup git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: "Phase 3: Write Tests"
-        uses: anthropics/claude-code-action@main
-        with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ secrets.GH_PAT }}
-          allowed_bots: '*'
-          claude_args: '--allowedTools "Bash(gh:*),Bash(git:*),Bash(bun:*),Read,Write,Edit,Glob,Grep"'
-          prompt: |
-            You are in Phase 3 (TDD Red Phase) of auto-implementation for issue #${{ env.ISSUE_NUMBER }}.
-
-            1. Read the spec file in specs/ for this issue (specs/*-issue-${{ env.ISSUE_NUMBER }}.md)
-            2. Write all e2e tests derived from the acceptance criteria
-            3. Write unit/integration tests derived from the testing strategy
-            4. Run the tests — confirm they FAIL (red phase). This is expected; the tests validate requirements before code exists.
-            5. Commit and push:
-               git add . && git commit --no-verify -m "test: add tests for #${{ env.ISSUE_NUMBER }}"
-               git push --no-verify
-
-            IMPORTANT: Only write test files. Do not write implementation code.
-
-  # ── PHASE 4: Implement Code (TDD Green Phase) ──
-  implement:
-    needs: write-tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: write
-      pull-requests: write
-      issues: write
-      id-token: write
-
-    steps:
-      - name: Checkout branch
-        uses: actions/checkout@v5
-        with:
-          ref: issue-${{ github.event.issue.number }}-auto-implement
-          fetch-depth: 0
-          token: ${{ secrets.GH_PAT }}
-
-      - name: Setup git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: "Phase 4: Implement"
-        uses: anthropics/claude-code-action@main
-        with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ secrets.GH_PAT }}
-          allowed_bots: '*'
-          claude_args: '--allowedTools "Bash(gh:*),Bash(git:*),Bash(bun:*),Bash(npm:*),Read,Write,Edit,Glob,Grep"'
-          prompt: |
-            You are in Phase 4 (TDD Green Phase) of auto-implementation for issue #${{ env.ISSUE_NUMBER }}.
-
-            1. Read the spec file in specs/ for this issue (specs/*-issue-${{ env.ISSUE_NUMBER }}.md)
-            2. Read .claude/commands/implement.md for implementation guidelines
-            3. Write code to make all tests pass
-            4. Follow existing patterns in the codebase
-            5. Commit and push:
-               git add . && git commit --no-verify -m "feat: implement #${{ env.ISSUE_NUMBER }}"
-               git push --no-verify
-               (Use "fix:" prefix for bugs instead of "feat:")
-
-            IMPORTANT: Only write implementation code to make the existing tests pass.
-
-  # ── PHASE 5: Validate ──
-  validate:
-    needs: implement
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: write
-      pull-requests: write
-      issues: write
-      id-token: write
-
-    steps:
-      - name: Checkout branch
-        uses: actions/checkout@v5
-        with:
-          ref: issue-${{ github.event.issue.number }}-auto-implement
-          fetch-depth: 0
-          token: ${{ secrets.GH_PAT }}
-
-      - name: Setup git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: "Phase 5: Validate"
-        uses: anthropics/claude-code-action@main
-        with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ secrets.GH_PAT }}
-          allowed_bots: '*'
-          claude_args: '--allowedTools "Bash(gh:*),Bash(git:*),Bash(bun:*),Read,Edit,Glob,Grep"'
-          prompt: |
-            You are in Phase 5 (Validation) of auto-implementation for issue #${{ env.ISSUE_NUMBER }}.
-
-            Run all validation commands:
-            - bun run test — all tests must PASS
-            - bun run build — no build errors
-            - bun run type-check — no type errors
-
-            If any fail, fix the issues and commit the fixes:
-            git add . && git commit --no-verify -m "fix: validation fixes for #${{ env.ISSUE_NUMBER }}"
-            git push --no-verify
-
-            Report the results of each validation command.
-
-  # ── PHASE 6: Documentation ──
-  documentation:
-    needs: validate
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: write
-      pull-requests: write
-      issues: write
-      id-token: write
-
-    steps:
-      - name: Checkout branch
-        uses: actions/checkout@v5
-        with:
-          ref: issue-${{ github.event.issue.number }}-auto-implement
-          fetch-depth: 0
-          token: ${{ secrets.GH_PAT }}
-
-      - name: Setup git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: "Phase 6: Documentation"
-        uses: anthropics/claude-code-action@main
-        with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ secrets.GH_PAT }}
-          allowed_bots: '*'
-          claude_args: '--allowedTools "Bash(git:*),Read,Write,Edit,Glob,Grep"'
-          prompt: |
-            You are in Phase 6 (Documentation) of auto-implementation for issue #${{ env.ISSUE_NUMBER }}.
-
-            1. Read the spec file in specs/ for this issue
-            2. Check if any user-facing behavior changed by reviewing: git diff main...HEAD
-            3. If documentation updates are needed:
-               - Update README.md if user-facing behavior changed
-               - Update relevant docs/comments
-               - git add . && git commit --no-verify -m "docs: update documentation for #${{ env.ISSUE_NUMBER }}"
-               - git push --no-verify
-            4. If no documentation changes are needed, do nothing.
-
-  # ── PHASE 7: Create PR ──
-  create-pr:
-    needs: documentation
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: write
-      pull-requests: write
-      issues: write
-
-    steps:
-      - name: Checkout branch
-        uses: actions/checkout@v5
-        with:
-          ref: issue-${{ github.event.issue.number }}-auto-implement
-          fetch-depth: 0
-          token: ${{ secrets.GH_PAT }}
-
-      - name: "Create PR"
+      - name: Create draft PR
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
@@ -282,11 +87,19 @@ jobs:
 
             gh pr create \
               --head "$BRANCH" \
+              --draft \
               --title "Closes #${ISSUE_NUMBER}: ${ISSUE_TITLE}" \
+              --label "phase:tests" \
               --body "$(cat <<EOF
           ## Summary
 
           Automated TDD implementation for #${ISSUE_NUMBER}
+
+          ## Phase Progress
+          - [x] Plan & spec
+          - [ ] Write tests (TDD red)
+          - [ ] Implement + validate (TDD green)
+          - [ ] Finalize & mark ready
 
           ## Commits
           - \`plan:\` spec file
@@ -303,16 +116,18 @@ jobs:
           EOF
           )"
 
-            echo "PR created successfully!"
+            echo "Draft PR created with phase:tests label"
           else
             echo "PR #$EXISTING_PR already exists for branch $BRANCH"
+            # Ensure phase:tests label is applied
+            gh pr edit "$EXISTING_PR" --add-label "phase:tests"
           fi
 
-      - name: "Comment on issue"
+      - name: Comment on issue
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           PR_URL=$(gh pr list --head "$BRANCH" --json url --jq '.[0].url')
           if [ -n "$PR_URL" ]; then
-            gh issue comment "$ISSUE_NUMBER" --body "🤖 Auto-implementation PR created: $PR_URL"
+            gh issue comment "$ISSUE_NUMBER" --body "🤖 Draft PR created: $PR_URL — phases will run automatically via labels."
           fi
