@@ -30,6 +30,18 @@ jobs:
         with:
           bun-version: 1.2.4
 
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            client/node_modules
+            server/node_modules
+            shared/node_modules
+            e2e/node_modules
+            ~/.bun/install/cache
+          key: deps-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+
       - name: Install dependencies
         run: bun install
 
@@ -55,6 +67,18 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.2.4
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            client/node_modules
+            server/node_modules
+            shared/node_modules
+            e2e/node_modules
+            ~/.bun/install/cache
+          key: deps-${{ runner.os }}-${{ hashFiles('bun.lock') }}
 
       - name: Install dependencies
         run: bun install
@@ -90,14 +114,52 @@ jobs:
         with:
           bun-version: 1.2.4
 
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            client/node_modules
+            server/node_modules
+            shared/node_modules
+            e2e/node_modules
+            ~/.bun/install/cache
+          key: deps-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+
       - name: Install dependencies
         run: bun install
 
+      - name: Cache Playwright browsers
+        id: cache-playwright
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('e2e/package.json') }}
+
       - name: Install Playwright browsers
+        if: steps.cache-playwright.outputs.cache-hit != 'true'
         run: bunx playwright install --with-deps chromium
 
+      - name: Install Playwright system deps
+        if: steps.cache-playwright.outputs.cache-hit == 'true'
+        run: bunx playwright install-deps chromium
+
       - name: Wait for deployment to be ready
-        run: sleep 30
+        run: |
+          URL="${{ needs.build.outputs.page_url }}"
+          echo "Waiting for $URL to be ready..."
+          for i in $(seq 1 30); do
+            BODY=$(curl -s -L --no-sessionid "$URL")
+            TITLE=$(echo "$BODY" | grep -o '<title>[^<]*</title>' || true)
+            if echo "$TITLE" | grep -qi "bhvr\|vite"; then
+              echo "Site is ready with app content! (attempt $i, title=$TITLE)"
+              exit 0
+            fi
+            echo "Attempt $i: title=$TITLE - waiting 10s..."
+            sleep 10
+          done
+          echo "Site did not become ready after 300s"
+          exit 1
 
       - name: Run E2E tests against production
         run: bun run e2e
