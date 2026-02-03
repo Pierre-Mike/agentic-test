@@ -72,7 +72,7 @@ pre_cleanup() {
 
   # Delete any remaining remote issue-*-auto-implement branches
   local stale_branches
-  stale_branches=$(git ls-remote --heads origin | sed 's|.*refs/heads/||' | grep -- '-auto-implement$')
+  stale_branches=$(git ls-remote --heads origin | sed 's|.*refs/heads/||' | grep -- '-auto-implement$' || true)
   for branch in $stale_branches; do
     echo "Deleting stale branch $branch..."
     git push origin --delete "$branch" 2>/dev/null || true
