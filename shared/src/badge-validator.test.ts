@@ -65,9 +65,7 @@ describe("GitHub Actions Badge URL Validation", () => {
 
 		// Missing badge.svg
 		expect(
-			isValidBadgeUrl(
-				"https://github.com/owner/repo/actions/workflows/ci.yml",
-			),
+			isValidBadgeUrl("https://github.com/owner/repo/actions/workflows/ci.yml"),
 		).toBe(false);
 	});
 

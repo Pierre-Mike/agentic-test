@@ -10,6 +10,14 @@
 **API Server:** [https://server.pm-lemeliner.workers.dev](https://server.pm-lemeliner.workers.dev)
 ![Server Status](https://img.shields.io/website?url=https%3A%2F%2Fserver.pm-lemeliner.workers.dev%2Fversion&label=API&up_message=online&down_message=offline)
 
+## CI/CD Status
+
+![CI](https://github.com/Pierre-Mike/agentic-test/actions/workflows/ci.yml/badge.svg)
+![Workflow Smoke Test](https://github.com/Pierre-Mike/agentic-test/actions/workflows/workflow-smoke-test.yml/badge.svg)
+
+**CI Pipeline**: Runs lint (Biome), type-check, test (including e2e with Playwright), build, and security checks
+**Workflow Smoke Test**: Daily validation of the auto-implement workflow end-to-end
+
 ---
 
 A full-stack TypeScript monorepo starter with shared types, using Bun, Hono, Vite, and React.

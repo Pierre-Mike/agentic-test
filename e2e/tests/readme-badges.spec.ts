@@ -63,10 +63,10 @@ test.describe("README.md CI/CD Status Badges", () => {
 			/https:\/\/github\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+\/actions\/workflows\/[a-zA-Z0-9_-]+\.yml\/badge\.svg/;
 
 		const ciMatch = readmeContent.match(
-			/!\[CI\]\((https:\/\/github\.com\/[^\)]+)\)/,
+			/!\[CI\]\((https:\/\/github\.com\/[^)]+)\)/,
 		);
 		const workflowMatch = readmeContent.match(
-			/!\[Workflow Smoke Test\]\((https:\/\/github\.com\/[^\)]+)\)/,
+			/!\[Workflow Smoke Test\]\((https:\/\/github\.com\/[^)]+)\)/,
 		);
 
 		expect(ciMatch?.[1]).toMatch(badgeUrlPattern);
