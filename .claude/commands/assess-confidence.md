@@ -72,7 +72,7 @@ DO NOT comment. The auto-implement workflow will handle the issue.
 
 **If score 50-74 (MEDIUM confidence):**
 ```bash
-gh issue edit $ARGUMENTS --add-label "needs-review" --add-label "confidence:medium"
+gh issue edit $ARGUMENTS --add-label "needs-review"
 ```
 Then post a comment:
 ```bash
@@ -92,7 +92,7 @@ gh issue comment $ARGUMENTS --body "## Confidence Assessment: MEDIUM
 
 **If score < 50 (LOW confidence):**
 ```bash
-gh issue edit $ARGUMENTS --add-label "needs-review" --add-label "confidence:low"
+gh issue edit $ARGUMENTS --add-label "needs-review"
 ```
 Then post a comment:
 ```bash
@@ -116,4 +116,4 @@ gh issue comment $ARGUMENTS --body "## Confidence Assessment: LOW
 2. When in doubt, choose needs-review (false negatives are better than broken PRs)
 3. Always provide actionable feedback in comments
 4. Never apply both `auto-implement` and `needs-review`
-5. Always apply exactly one confidence label (high, medium, or low)
+5. Apply `confidence:high` label only for high-confidence issues that get `auto-implement`

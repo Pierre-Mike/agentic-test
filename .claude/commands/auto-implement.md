@@ -75,7 +75,7 @@ git add . && git commit --amend --no-edit
    git add . && git commit -m "docs: update documentation for #$ISSUE_NUMBER"
 
 ## PHASE 7: SELF-REVIEW
-1. Review the full diff across all commits: git diff main...HEAD
+1. Review the full diff across all commits: git diff origin/main...HEAD
 2. Check for: correctness, code quality, security, performance
 3. Re-read the original issue and verify all requirements are met point-by-point
 4. If any issues are found, fix them and amend the relevant commit

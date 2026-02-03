@@ -18,7 +18,7 @@ Generate a git commit message for the staged work.
 
 ## CRITICAL: Commit Message Validation Rules
 
-Your commit message will be validated by `automation/adws/adw_modules/validation.py`. It MUST pass these checks:
+Your commit message MUST pass these checks:
 
 ### Format Requirements
 - **Conventional Commits format**: `<type>(<scope>): <subject>`

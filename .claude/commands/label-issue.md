@@ -39,8 +39,8 @@ TASK OVERVIEW:
 
    - Choose labels that accurately reflect the issue's nature
    - Be specific but comprehensive
-   - IMPORTANT: Add a priority label (P1, P2, or P3) based on the label descriptions from gh label list
-   - Consider platform labels (android, ios) if applicable
+   - IMPORTANT: Add a priority label (`priority:critical`, `priority:high`, `priority:medium`, or `priority:low`) based on severity/impact
+   - Consider area labels (`area:client`, `area:server`, `area:shared`, `area:infrastructure`) if applicable
    - If you find similar issues using gh search, consider using a "duplicate" label if appropriate. Only do so if the issue is a duplicate of another OPEN issue.
 
 5. Apply the selected labels:

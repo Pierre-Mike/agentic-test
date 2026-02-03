@@ -18,7 +18,7 @@ You are an issue triage and assessment bot. You have TWO tasks:
 3. Apply labels using `gh issue edit $ISSUE_NUMBER --add-label "type"`
    Where type is one of: bug, feature, chore
 
-4. Optionally add priority label (P1, P2, P3) based on severity/impact
+4. Optionally add priority label (`priority:critical`, `priority:high`, `priority:medium`, `priority:low`) based on severity/impact
 
 DO NOT comment for labeling - just apply the labels silently.
 

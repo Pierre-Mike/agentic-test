@@ -42,10 +42,10 @@ https://github.com/user/kota-db-ts/pull/123
 
 ## Preconditions
 - Working tree is clean (`git status --short` empty) and the current branch matches `<branch_name>`.
-- All commits for the issue exist locally and remotely (`feat/`, `bug/`, `chore/`, etc. → `develop` → `main`).
-- **Commit messages validated**: All commit messages follow Conventional Commits format (verified by validation system)
-- **Staged files verified**: All files mentioned in plan are properly staged (verified by validation system)
-- Level 2 or higher validation from `/validate-implementation` has been rerun with passing results captured for the PR body.
+- All commits for the issue exist locally and remotely (`feat/`, `bug/`, `chore/`, etc. → `main`).
+- **Commit messages validated**: All commit messages follow Conventional Commits format
+- **Staged files verified**: All files mentioned in plan are properly staged
+- Validation has been rerun with passing results captured for the PR body.
 - Anti-mock evidence is ready: note which real-service suites ran, data seeded, and any temporary skips with follow-up issues.
 - Plan document and issue references are up to date with final status and validation notes.
 
@@ -53,7 +53,7 @@ https://github.com/user/kota-db-ts/pull/123
 1. `git branch --show-current` – verify you are on `<branch_name>`.
 2. `git fetch --all --prune` – make sure remotes are current.
 3. `git status --short` – confirm no unstaged or untracked files remain.
-4. `git log origin/develop..HEAD --oneline` – review commits that will ship.
+4. `git log origin/main..HEAD --oneline` – review commits that will ship.
 5. **Verify commit messages**: Review commit messages with `git log --oneline` to ensure Conventional Commits format
 6. **Verify PR description**: Ensure validation evidence section is complete with actual command output
 7. `gh pr status` – ensure the branch does not already have an open PR.
@@ -62,10 +62,10 @@ https://github.com/user/kota-db-ts/pull/123
 ## Prepare Metadata
 - Parse `issue_json` for `issue_type`, number, and title.
 - **Determine PR type** (planning vs implementation):
-  1. Run `git diff origin/develop...HEAD --name-only` to get list of changed files
-  2. Count lines changed outside `docs/` with `git diff origin/develop...HEAD --stat | grep -v 'docs/' | tail -1`
-  3. If PR contains ONLY changes to `.claude/.cache/specs/*.md` files → **planning PR**
-  4. If PR contains changes to `app/src/`, `automation/`, or >50 lines outside `docs/` → **implementation PR**
+  1. Run `git diff origin/main...HEAD --name-only` to get list of changed files
+  2. Count lines changed outside `docs/` with `git diff origin/main...HEAD --stat | grep -v 'docs/' | tail -1`
+  3. If PR contains ONLY changes to `specs/*.md` files → **planning PR**
+  4. If PR contains changes to `server/`, `client/`, `shared/`, or >50 lines outside `docs/` → **implementation PR**
 - **PR title format**:
   - **Planning PRs**: `<issue_type>: add [specification|plan] for <feature name> (#<issue_number>)`
     - Extract feature name from issue title (remove "feat:", "chore:", etc. prefix)
@@ -110,11 +110,11 @@ https://github.com/user/kota-db-ts/pull/123
 
 ## Commands
 1. `git status --short`
-2. `git diff origin/develop...HEAD --stat`
-3. `git log origin/develop..HEAD --oneline`
-4. `git diff origin/develop...HEAD --name-only`
+2. `git diff origin/main...HEAD --stat`
+3. `git log origin/main..HEAD --oneline`
+4. `git diff origin/main...HEAD --name-only`
 5. `git push -u origin HEAD`
-6. `gh pr create --base develop --title "<title>" --body "<body>"`
+6. `gh pr create --base main --title "<title>" --body "<body>"`
 
 ## Post-Creation
 - `gh pr view --web` (optional) to verify the rendered description and metadata.
