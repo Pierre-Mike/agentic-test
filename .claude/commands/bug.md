@@ -24,6 +24,7 @@ Focus on the following files:
 - `server/` - Contains the Hono backend server.
 - `client/` - Contains the React frontend client.
 - `shared/` - Contains shared TypeScript type definitions.
+- `e2e/` - Contains Playwright end-to-end tests.
 
 Ignore all other files in the codebase.
 

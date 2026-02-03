@@ -4,10 +4,10 @@
 
 overview:
   description: |
-    Documentation expert domain provides specialized knowledge for kotadb's technical documentation,
+    Documentation expert domain provides specialized knowledge for the project's technical documentation,
     covering API reference accuracy, architectural documentation, installation guides, and versioning
     metadata. This domain ensures documentation stays synchronized with implementation, follows
-    consistent patterns, and provides accurate guidance for developers using KotaDB's MCP tools,
+    consistent patterns, and provides accurate guidance for developers using the project's MCP tools,
     HTTP endpoints, and local-first architecture.
 
   scope:
@@ -33,7 +33,7 @@ overview:
     Accurate documentation is critical for developer adoption and reduces support burden.
     Documentation drift from implementation causes integration failures and developer
     frustration. This expertise enables systematic validation and improvement of technical
-    documentation while maintaining consistency with KotaDB's local-first principles.
+    documentation while maintaining consistency with the project's local-first principles.
 
 core_implementation:
   documentation_structure:
@@ -140,14 +140,14 @@ key_operations:
       - Integration service documentation (Sentry, JWT middleware)
     pitfalls:
       - Outdated technology claims (tree-sitter when using TypeScript ESLint)
-      - Wrong database location (~/.kotadb/ vs .kotadb/)
+      - Wrong database location (~/.the project/ vs .the project/)
       - Missing integration services (Sentry error tracking)
       - Incorrect file structure diagrams
 
   update_installation_documentation:
     when: Ensuring installation guide works end-to-end
     approach: |
-      1. Test CLI commands for accuracy (kotadb index parameters)
+      1. Test CLI commands for accuracy (the project index parameters)
       2. Verify default ports and configuration options
       3. Update system requirements and dependencies
       4. Test troubleshooting sections with common issues
@@ -159,12 +159,12 @@ key_operations:
       - Troubleshooting for common installation issues
     code_example: |
       ```bash
-      kotadb index --repository owner/repo --ref main
+      the project index --repository owner/repo --ref main
       # Or for local path:
-      kotadb index --local-path /path/to/your/repo
+      the project index --local-path /path/to/your/repo
       ```
     pitfalls:
-      - Incorrect CLI parameter format (old: kotadb index /path vs new: --local-path)
+      - Incorrect CLI parameter format (old: the project index /path vs new: --local-path)
       - Wrong default ports (3000 vs 8080)
       - Missing environment variable configuration
       - Untested troubleshooting advice
@@ -185,7 +185,7 @@ key_operations:
     code_example: |
       ---
       title: API Reference
-      description: KotaDB MCP tools and HTTP endpoints
+      description: the project MCP tools and HTTP endpoints
       order: 3
       last_updated: 2026-01-30
       version: 2.0.0

@@ -1,0 +1,197 @@
+# Security Expertise for bhvr
+# Target: 350-600 lines | Domain: OWASP compliance, input validation, auth patterns
+
+overview:
+  description: Security patterns for bhvr—input validation with Zod, parameterized queries, authentication/authorization, OWASP Top 10 mitigations, dependency scanning, and secrets management.
+  scope: |
+    Input validation (shared/src/validation/), SQL injection prevention (parameterized queries),
+    XSS prevention, CSRF protection, authentication patterns, authorization logic, dependency
+    vulnerability scanning (.github/workflows/), and secrets management best practices.
+
+core_implementation:
+  key_files:
+    - path: shared/src/validation/
+      purpose: Zod schemas for input validation
+    - path: server/src/
+      purpose: Server-side validation and auth middleware
+    - path: .github/workflows/
+      purpose: Security scanning in CI
+
+  security_principles:
+    - Defense in depth
+    - Fail securely
+    - Least privilege
+    - Never trust user input
+    - Parameterized queries always
+
+key_operations:
+  input_validation:
+    when: Accepting user input (API, forms)
+    approach: |
+      1. Define Zod schema in shared/src/validation/
+      2. Validate on client and server
+      3. Return descriptive errors
+      4. Never trust client-side validation alone
+    code_example: |
+      import { z } from 'zod';
+
+      export const CreateItemSchema = z.object({
+        name: z.string().min(1).max(100),
+        email: z.string().email(),
+        age: z.number().int().min(0).max(120),
+      });
+
+      // Server usage
+      const result = CreateItemSchema.safeParse(req.body);
+      if (!result.success) {
+        return c.json({ error: result.error.issues }, 400);
+      }
+    pitfalls:
+      - Client-only validation (always validate server-side)
+      - Generic error messages (leak information)
+      - No sanitization after validation
+
+  sql_injection_prevention:
+    when: All database queries
+    approach: |
+      1. ALWAYS use parameterized queries
+      2. NEVER concatenate user input into SQL
+      3. Use prepared statements
+      4. Validate table/column names with whitelist
+    code_example: |
+      // GOOD: Parameterized query
+      const result = db.prepare(
+        'SELECT * FROM users WHERE email = ?'
+      ).get(email);
+
+      // BAD: String concatenation (vulnerable)
+      const result = db.prepare(
+        `SELECT * FROM users WHERE email = '${email}'`
+      ).get();
+    evidence: Database expertise.yaml deletion_manifest_security pattern
+
+  authentication_pattern:
+    when: Implementing user authentication
+    approach: |
+      1. Hash passwords with bcrypt or argon2
+      2. Use secure session tokens (crypto.randomUUID)
+      3. Implement rate limiting
+      4. Use HTTPS only
+      5. Set secure cookie flags
+    pitfalls:
+      - Storing passwords in plaintext
+      - Weak session tokens
+      - No rate limiting (brute force attacks)
+
+  authorization_pattern:
+    when: Controlling resource access
+    approach: |
+      1. Check permissions server-side always
+      2. Use role-based or attribute-based access control
+      3. Fail closed (deny by default)
+      4. Log authorization failures
+    code_example: |
+      function requireRole(role: string) {
+        return async (c: Context, next: Next) => {
+          const user = c.get('user');
+          if (!user || user.role !== role) {
+            return c.json({ error: 'Forbidden' }, 403);
+          }
+          await next();
+        };
+      }
+
+  dependency_scanning:
+    when: CI/CD pipeline, periodic audits
+    approach: |
+      1. Run bun audit in CI
+      2. Use Dependabot for updates
+      3. Monitor security advisories
+      4. Update dependencies regularly
+    evidence: .github/workflows/
+
+decision_trees:
+  validation_location:
+    - condition: User input from forms/API
+      use: Zod schema validation on both client and server
+    - condition: Database query parameters
+      use: Parameterized queries + type validation
+    - condition: File uploads
+      use: File type, size, and content validation
+
+  authentication_method:
+    - condition: Simple username/password
+      use: Bcrypt hash + secure session tokens
+    - condition: OAuth integration
+      use: OAuth 2.0 flow with PKCE
+    - condition: API access
+      use: API keys with rate limiting
+
+patterns:
+  defense_in_depth:
+    structure: |
+      Multiple security layers:
+      1. Input validation (client + server)
+      2. Parameterized queries
+      3. Output encoding
+      4. CSRF tokens
+      5. Rate limiting
+      6. Security headers
+    trade_offs:
+      pros: Multiple layers prevent single point of failure
+      cons: Complexity, maintenance burden
+
+  validation_schema_sharing:
+    structure: |
+      shared/src/validation/
+      ├── user.schema.ts
+      ├── item.schema.ts
+      └── index.ts
+    usage: Import same schema on client and server for consistency
+
+best_practices:
+  - category: Input Validation
+    practices:
+      - practice: Always validate on server, even if validating on client
+        evidence: OWASP Input Validation
+      - practice: Use Zod for type-safe validation
+        evidence: TypeScript integration
+      - practice: Whitelist valid inputs over blacklist
+        evidence: Harder to bypass
+
+  - category: Database Security
+    practices:
+      - practice: Use parameterized queries exclusively
+        evidence: SQL injection prevention (OWASP A03:2021)
+      - practice: Validate table names with whitelist
+        evidence: Database expertise.yaml deletion_manifest_security
+      - practice: Principle of least privilege for DB users
+        evidence: Limit blast radius
+
+  - category: Authentication
+    practices:
+      - practice: Hash passwords with bcrypt (cost factor 10+)
+        evidence: OWASP Password Storage
+      - practice: Implement rate limiting on auth endpoints
+        evidence: Brute force prevention
+      - practice: Use secure, random session tokens
+        evidence: Session fixation prevention
+
+  - category: Secrets Management
+    practices:
+      - practice: Never commit secrets to git
+        evidence: .gitignore, .env patterns
+      - practice: Use environment variables
+        evidence: 12-factor app principles
+      - practice: Rotate secrets regularly
+        evidence: Incident response preparation
+
+known_issues:
+  - issue: XSS via user-generated content
+    resolution: Sanitize output, use framework escaping (React escapes by default)
+  - issue: CSRF on state-changing operations
+    resolution: Implement CSRF tokens for non-GET requests
+
+stability:
+  last_reviewed: 2026-02-03
+  notes: Initial expertise created for security domain

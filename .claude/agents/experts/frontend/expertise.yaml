@@ -1,0 +1,154 @@
+# Frontend Expertise for bhvr
+# Target: 350-600 lines | Domain: React 19, TanStack Router, Vite
+
+overview:
+  description: Frontend patterns for bhvr React app with TanStack Router file-based routing, React 19 features, Vite build optimization, and component architecture standards.
+  scope: |
+    client/src/ structure, TanStack Router conventions, React component patterns,
+    Vite configuration, CSS/styling approach, state management, path aliases (@shared/*),
+    type safety, and deployment to GitHub Pages.
+
+core_implementation:
+  key_files:
+    - path: client/src/main.tsx
+      purpose: React app entry, router setup
+    - path: client/src/routeTree.gen.ts
+      purpose: Auto-generated route tree (TanStack Router)
+    - path: client/src/routes/
+      purpose: File-based routing structure
+    - path: client/vite.config.ts
+      purpose: Vite build configuration, aliases
+    - path: client/package.json
+      purpose: Dependencies and scripts
+
+  routing_structure:
+    pattern: "TanStack Router file-based routing"
+    conventions:
+      - __root.tsx for root route
+      - index.tsx for index routes
+      - route segments map to folders
+      - Auto-generated routeTree.gen.ts
+
+key_operations:
+  create_route:
+    when: Adding new page or route
+    approach: |
+      1. Create client/src/routes/<path>/*.tsx
+      2. Export Route component using createFileRoute()
+      3. Run dev server to regenerate routeTree.gen.ts
+      4. Verify route in browser
+    code_example: |
+      // client/src/routes/about/index.tsx
+      import { createFileRoute } from '@tanstack/react-router'
+
+      export const Route = createFileRoute('/about/')({
+        component: AboutComponent,
+      })
+
+      function AboutComponent() {
+        return <div>About Page</div>
+      }
+    pitfalls:
+      - Manual routeTree.gen.ts edits (auto-generated, will be overwritten)
+      - Missing createFileRoute wrapper
+
+  component_pattern:
+    when: Creating reusable component
+    approach: |
+      1. Define props interface
+      2. Use functional component with TypeScript
+      3. Co-locate styles if component-specific
+      4. Export from index if public component
+    code_example: |
+      interface ButtonProps {
+        label: string;
+        onClick: () => void;
+        variant?: 'primary' | 'secondary';
+      }
+
+      export function Button({ label, onClick, variant = 'primary' }: ButtonProps) {
+        return (
+          <button className={`btn btn-${variant}`} onClick={onClick}>
+            {label}
+          </button>
+        );
+      }
+
+  vite_configuration:
+    when: Configuring build or dev server
+    approach: |
+      1. Configure path aliases matching tsconfig paths
+      2. Set base for GitHub Pages deployment
+      3. Configure proxy for local API
+      4. Optimize bundle with splitting
+    pitfalls:
+      - Base path mismatch between Vite and GitHub Pages
+      - Missing alias for @shared workspace
+
+decision_trees:
+  state_management:
+    - condition: Local component state
+      use: useState hook
+    - condition: Shared state across routes
+      use: TanStack Router context or URL params
+    - condition: Server state
+      use: Fetch in loader with TanStack Router
+
+  styling_approach:
+    - condition: Global styles
+      use: index.css imported in main.tsx
+    - condition: Component-specific
+      use: CSS modules or scoped class names
+    - condition: Dynamic styles
+      use: Inline styles with TypeScript
+
+patterns:
+  file_based_routing:
+    structure: |
+      routes/
+      ├── __root.tsx           # Root layout
+      ├── index.tsx            # Home page
+      └── about/
+          └── index.tsx        # About page
+    trade_offs:
+      pros: Convention over configuration, type-safe routes
+      cons: Must follow strict file naming
+
+  component_organization:
+    structure: |
+      routes/          # Route components
+      components/      # (Future) Shared components
+      assets/          # Static assets
+    usage: "Import shared components from workspace or local"
+
+best_practices:
+  - category: Components
+    practices:
+      - practice: Use functional components with TypeScript interfaces
+        evidence: React 19 best practices
+      - practice: Define props interfaces explicitly
+        evidence: Type safety
+      - practice: Use descriptive component names
+        evidence: Code clarity
+
+  - category: Routing
+    practices:
+      - practice: Follow TanStack Router file conventions
+        evidence: Auto-generation depends on structure
+      - practice: Use createFileRoute for all routes
+        evidence: Type safety and route tree generation
+
+  - category: Performance
+    practices:
+      - practice: Use React.lazy for code splitting
+        evidence: Bundle size optimization
+      - practice: Avoid inline object/array creation in render
+        evidence: Re-render optimization
+
+known_issues:
+  - issue: routeTree.gen.ts manual edits lost
+    resolution: Never edit manually, regenerates on dev server start
+
+stability:
+  last_reviewed: 2026-02-03
+  notes: Initial expertise created for frontend domain

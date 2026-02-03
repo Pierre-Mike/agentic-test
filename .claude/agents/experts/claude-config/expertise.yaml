@@ -4,17 +4,17 @@
 
 overview:
   description: |
-    Claude Code configuration for KotaDB—.claude/ directory structure, command patterns,
+    Claude Code configuration for the project—.claude/ directory structure, command patterns,
     hook implementation with standard Python (hook_helpers.py), agent registry management,
     and expert domain organization. This expertise enables correct configuration of Claude
-    Code within the KotaDB codebase conventions.
+    Code within the the project codebase conventions.
   scope: |
     Covers .claude/ directory organization (agents/, commands/, hooks/, hooks/utils/),
     command frontmatter with Template Category, hook implementation using standard Python
     with hook_helpers.py utilities, agent-registry.json maintenance, expert 4-agent pattern
-    (plan/build/improve/question in agents/experts/<domain>/), and KotaDB-specific conventions.
+    (plan/build/improve/question in agents/experts/<domain>/), and the project-specific conventions.
 
-    KOTADB ADAPTATIONS:
+    PROJECT ADAPTATIONS:
     - Hooks use standard Python with hook_helpers.py (NOT uv shebang)
     - Commands include Template Category field
     - Tools in agent frontmatter use YAML array format (NOT comma-separated)
@@ -25,7 +25,7 @@ overview:
     Does NOT cover agent prompt content authoring (see agent-authoring expert).
   rationale: |
     Correct .claude/ configuration enables tooling, discoverability, and maintainability.
-    Poor structure creates fragmentation and breaks tooling. KotaDB has established
+    Poor structure creates fragmentation and breaks tooling. the project has established
     conventions that differ from other Claude Code projects and must be followed.
 
 core_implementation:
@@ -99,7 +99,7 @@ key_operations:
 
          ## Context
 
-         **Project**: KotaDB - HTTP API service for code indexing
+         **Project**: the project - HTTP API service for code indexing
          ...
 
          ## Instructions
@@ -115,7 +115,7 @@ key_operations:
         reason: "Colons break YAML parsing in Claude Code's configuration system"
       - what: "Missing Template Category"
         instead: "Always include Template Category after the title"
-        reason: "KotaDB convention for command classification"
+        reason: "the project convention for command classification"
 
   implement_hook:
     when: Need to run code on agent lifecycle events
@@ -150,7 +150,7 @@ key_operations:
       2. Exit via output_result("continue") or output_result("block")
       3. Configure in .claude/settings.json hooks object
       4. Use matcher for tool-specific targeting
-    kotadb_conventions:
+    project_conventions:
       - NEVER use print() - use sys.stdout.write() per logging standards
       - Import from hooks.utils.hook_helpers for shared utilities
       - Use standard Python shebang (#!/usr/bin/env python3), NOT uv
@@ -183,9 +183,9 @@ key_operations:
       7. Update agent-registry.json with all new agents
       8. Update CLAUDE.md Expert Domains section
       9. Update /do command with domain detection patterns
-    kotadb_adaptations:
+    project_adaptations:
       - Use YAML array format for tools (NOT comma-separated)
-      - Add MCP tools where appropriate (mcp__kotadb-bunx__*)
+      - Add MCP tools where appropriate (mcp__*__*)
       - Update agent-registry.json capabilityIndex, modelIndex, toolMatrix
     pitfalls:
       - what: "CRITICAL - Using colons in agent description field"
@@ -391,7 +391,7 @@ patterns:
         - github: Issues, PRs, branches, GitHub CLI workflows
 
   agent_frontmatter_format:
-    kotadb_style: |
+    standard_style: |
       ---
       name: agent-name
       description: Brief description without colons
@@ -399,7 +399,7 @@ patterns:
         - Read
         - Glob
         - Grep
-        - mcp__kotadb-bunx__search_code
+        - mcp__*__search_code
       model: haiku|sonnet|opus
       color: yellow|green|purple|cyan
       constraints:
@@ -493,7 +493,7 @@ best_practices:
     - Include model and color fields for expert agents
     - Update agent-registry.json for every new agent
     - CRITICAL: Never use colons in description field
-    - Add MCP tools where appropriate (mcp__kotadb-bunx__*)
+    - Add MCP tools where appropriate (mcp__*__*)
     - Apply "permissive tools + strict prompts" philosophy
 
   hooks:
@@ -536,7 +536,7 @@ known_issues:
 
   - issue: Hook using print() violates logging standards
     impact: Inconsistent output, potential buffering issues
-    resolution: Use sys.stdout.write() per KotaDB conventions
+    resolution: Use sys.stdout.write() per the project conventions
     status: enforced via code review
   - issue: Tool permissions too restrictive for agent workflows
     impact: Agents silently fail to complete tasks (can't write specs, run tests)

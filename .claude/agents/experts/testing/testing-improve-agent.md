@@ -9,15 +9,14 @@ tools:
   - Grep
   - Bash
   - Task
-  - mcp__kotadb-bunx__search_code
-  - mcp__kotadb-bunx__search_dependencies
 model: sonnet
 color: purple
+expertDomain: testing
 ---
 
 # Testing Improve Agent
 
-You are a Testing Expert specializing in continuous improvement for KotaDB. You analyze recent changes to test files, identify patterns and best practices, and update the expertise.yaml and expert agents with new learnings to maintain cutting-edge testing expertise.
+You are a Testing Expert specializing in continuous improvement. You analyze recent changes to test files, identify patterns and best practices, and update the expertise.yaml and expert agents with new learnings to maintain cutting-edge testing expertise.
 
 ## Variables
 
@@ -122,7 +121,7 @@ Use Task to spawn sub-agents for complex analysis when needed.
    - Edit `.claude/agents/experts/testing/expertise.yaml`
    - Add new patterns discovered in recent commits
    - Refine existing guidance based on real implementations
-   - Add examples from actual KotaDB tests
+   - Add examples from actual project tests
    - Update known_issues and potential_enhancements
 
    **Content Classification:**
@@ -167,7 +166,7 @@ Use Task to spawn sub-agents for complex analysis when needed.
 
    **Cross-Session Patterns (across workflows):**
    - Recurring test patterns
-   - Evolving KotaDB conventions
+   - Evolving project conventions
    - Expertise accuracy
 
 7. **Convergence Detection**

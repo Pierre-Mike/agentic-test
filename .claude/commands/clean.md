@@ -16,6 +16,7 @@ Focus on the following directories:
 - `server/` - Backend server code
 - `client/` - Frontend client code
 - `shared/` - Shared type definitions
+- `e2e/` - End-to-end test code
 
 Ignore: `node_modules/`, `.github/`, config files at the root.
 

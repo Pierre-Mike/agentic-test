@@ -1,370 +1,373 @@
 # GitHub Workflow Expertise
-# Target: 400-600 lines | Domain: Operational knowledge for GitHub workflows
-# Adapted for KotaDB project conventions
+# Target: 400-600 lines | Warning: 800 | Hard limit: 1000
+# Domain: Operational knowledge for GitHub workflows, PR labels, and CI/CD automation
 
 overview:
   description: |
-    GitHub workflow management for KotaDB—issue classification and lifecycle, pull request
-    creation with validation levels, branch naming conventions, and GitHub CLI (gh) patterns.
-    This expertise enables correct GitHub operations within the KotaDB codebase conventions.
+    GitHub workflow management for agentic-test—issue classification and lifecycle, pull request
+    creation with validation levels, branch naming conventions, CI/CD automation, and PR labels.
+    This expertise enables correct GitHub operations within the project conventions.
   scope: |
     Covers GitHub issue management (classification, labeling, prioritization), pull request
-    workflows (creation, validation levels 1/2/3, review process), branch naming conventions
-    (feat/*, bug/*, chore/* -> develop -> main), and GitHub CLI (gh) command patterns.
-
-    KOTADB ADAPTATIONS:
-    - Issues follow four-type classification (feature, bug, chore, refactor)
-    - PRs require validation evidence at appropriate levels
-    - Branch naming follows strict type-based prefixes
-    - All PRs target develop branch (not main)
-    - Anti-mock philosophy applies to PR descriptions
-    - Conventional Commits format required for commit messages
-    - Local-only SQLite storage (no cloud dependencies)
+    workflows (creation, validation levels, review process), branch naming conventions,
+    CI/CD automation (12 workflows), and PR label taxonomy (29 labels).
 
     Does NOT cover Claude Code configuration (see claude-config expert) or agent authoring
     (see agent-authoring expert).
   rationale: |
     Consistent GitHub workflows enable predictable issue tracking, code review, and release
-    management. Poor workflow practices create confusion, missed requirements, and integration
-    issues. KotaDB has established conventions that differ from generic GitHub workflows and
-    must be followed.
+    management. The project has established conventions that differ from generic GitHub workflows.
 
-core_implementation:
-  issue_types:
-    feature:
-      purpose: Net-new capability or enhancement delivering user value
-      command: /issues:feature
-      branch_prefix: feat/
-      label: type:feature
-      examples:
-        - "Add MCP tool for dependency analysis"
-        - "Implement rate limiting for API endpoints"
-        - "Create search ranking algorithm"
+# ─────────────────────────────────────────────────────────────────────────────
+# PR LABELS - All 29 labels organized by category
+# ─────────────────────────────────────────────────────────────────────────────
+pr_labels:
+  type:
     bug:
-      purpose: Incorrect behavior, regressions, failing tests, or outages
-      command: /issues:bug
-      branch_prefix: bug/
-      label: type:bug
-      examples:
-        - "Fix SQLite connection pool exhaustion"
-        - "Resolve indexing race condition"
-        - "Correct malformed JSON response"
+      purpose: Something isn't working
+      color: d73a4a
+      applied_by: triage-issue workflow, manual
+      triggers: auto-implement when combined with auto-implement label
+    feature:
+      purpose: New feature or enhancement
+      color: a2eeef
+      applied_by: triage-issue workflow, manual
+      triggers: auto-implement when combined with auto-implement label
     chore:
-      purpose: Maintenance, refactors, dependency upgrades, tooling changes, docs-only work
-      command: /issues:chore
-      branch_prefix: chore/
-      label: type:chore
-      examples:
-        - "Update Bun to latest version"
-        - "Refactor database module structure"
-        - "Add documentation for MCP tools"
-    refactor:
-      purpose: Code restructuring without changing external behavior
-      command: /issues:refactor
-      branch_prefix: refactor/
-      label: type:refactor
-      examples:
-        - "Extract shared utilities from handlers"
-        - "Simplify query builder interface"
-        - "Consolidate error handling patterns"
+      purpose: Maintenance, refactoring, or infrastructure
+      color: fef2c0
+      applied_by: triage-issue workflow, manual
+      triggers: auto-implement when combined with auto-implement label
 
-  branch_naming:
-    convention: "<type>/<issue-number>-<short-description>"
-    types:
-      - feat: New features and enhancements
-      - bug: Bug fixes and corrections
-      - chore: Maintenance and tooling
-      - refactor: Code restructuring
-      - docs: Documentation-only changes
-      - test: Test-only changes
-    flow: "feature branch -> develop -> main"
-    examples:
-      - "feat/123-add-mcp-search-tool"
-      - "bug/456-fix-connection-timeout"
-      - "chore/789-update-dependencies"
-      - "refactor/101-simplify-indexer"
-    rules:
-      - All lowercase letters and numbers
-      - Hyphens for word separation (not underscores)
-      - Include issue number after type prefix
-      - Keep description concise (3-5 words)
+  confidence:
+    confidence:high:
+      purpose: High confidence for auto-implementation
+      color: "0e8a16"
+      applied_by: triage-issue workflow (assess-confidence)
+      triggers: auto-implement.yml (when combined with auto-implement)
+    confidence:medium:
+      purpose: Medium confidence, needs review
+      color: fbca04
+      applied_by: triage-issue workflow (assess-confidence)
+      triggers: auto-implement.yml (when combined with auto-implement)
+    confidence:low:
+      purpose: Low confidence, requires human review
+      color: e99695
+      applied_by: triage-issue workflow (assess-confidence)
+      triggers: none (blocks auto-implementation)
 
-  validation_levels:
-    level_1:
-      name: "Level 1 - Basic"
-      when: "Docs-only changes, configuration updates, trivial fixes"
-      checks:
-        - "bun run lint"
-        - "bun run typecheck"
-      duration: "< 30 seconds"
-      evidence: "Lint and typecheck pass output"
-    level_2:
-      name: "Level 2 - Standard"
-      when: "Feature implementations, bug fixes, code changes"
-      checks:
-        - "bun run lint"
-        - "bun run typecheck"
-        - "bun test --filter integration"
-      duration: "1-5 minutes"
-      evidence: "Lint, typecheck, and integration test output"
-    level_3:
-      name: "Level 3 - Comprehensive"
-      when: "Schema migrations, breaking changes, releases"
-      checks:
-        - "bun run lint"
-        - "bun run typecheck"
-        - "bun test"
-        - "bun run build"
-      duration: "5-15 minutes"
-      evidence: "Full test suite and build output"
+  workflow:
+    auto-implement:
+      purpose: Automatically implement this issue
+      color: "0e8a16"
+      applied_by: triage-issue workflow (high/medium confidence), manual
+      triggers: auto-implement.yml
+    needs-review:
+      purpose: Requires human review before proceeding
+      color: fbca04
+      applied_by: issue-opened failure handler, manual
+      triggers: none (blocks automation)
+    needs-info:
+      purpose: More information needed from reporter
+      color: d876e3
+      applied_by: triage-issue workflow, manual
+      triggers: none
+    needs-breakdown:
+      purpose: Issue is too large, needs to be broken down
+      color: f9d0c4
+      applied_by: triage-issue workflow, manual
+      triggers: none
+    has-dependencies:
+      purpose: Blocked by or depends on other issues
+      color: c5def5
+      applied_by: manual
+      triggers: none
 
-  pr_workflow:
-    target_branch: develop
-    title_format:
-      planning: "<type>: add [specification|plan] for <feature> (#<issue>)"
-      implementation: "<type>: <imperative verb> <feature> (#<issue>)"
-    body_sections:
-      - summary: Brief description of changes
-      - validation_evidence: Commands run and their output
-      - anti_mock_statement: Confirmation no new mocks introduced
-      - plan_link: Link to spec file if exists
-      - closes: "Closes #<issue_number>"
-      - adw_id: "ADW ID: <id>" if applicable
+  phase:
+    phase:tests:
+      purpose: TDD red phase - writing tests first
+      color: "0e8a16"
+      applied_by: auto-implement.yml after draft PR created
+      triggers: auto-implement-phases.yml (write-tests job)
+    phase:implement:
+      purpose: TDD green phase - implementing to pass tests
+      color: fbca04
+      applied_by: auto-implement-phases.yml after tests written
+      triggers: auto-implement-phases.yml (implement job)
+    phase:finalize:
+      purpose: Documentation and cleanup phase
+      color: "1d76db"
+      applied_by: auto-implement-phases.yml after implementation
+      triggers: auto-implement-phases.yml (finalize job)
+    phase:complete:
+      purpose: All phases completed successfully
+      color: "0e8a16"
+      applied_by: auto-implement-phases.yml after finalize
+      triggers: none (terminal state)
+    phase:failed:
+      purpose: Phase failed, requires retry or intervention
+      color: b60205
+      applied_by: auto-implement-phases.yml on failure
+      triggers: none (requires manual intervention)
 
-  key_files:
-    - path: .claude/commands/issues/feature.md
-      purpose: Create feature issue
-    - path: .claude/commands/issues/bug.md
-      purpose: Create bug issue
-    - path: .claude/commands/issues/chore.md
-      purpose: Create chore issue
-    - path: .claude/commands/issues/refactor.md
-      purpose: Create refactor issue
-    - path: .claude/commands/issues/classify_issue.md
-      purpose: Classify issue by type
-    - path: .claude/commands/git/commit.md
-      purpose: Create conventional commit
-    - path: .claude/commands/git/pull_request.md
-      purpose: Create validated pull request
+  review:
+    review:done:
+      purpose: Peer review approved
+      color: "0e8a16"
+      applied_by: claude-code-review.yml on APPROVED
+      triggers: none
+    review:needs-work:
+      purpose: Peer review requested changes
+      color: e99695
+      applied_by: claude-code-review.yml on CHANGES_REQUESTED
+      triggers: review-fix.yml (for auto-implement branches)
 
-key_operations:
-  classify_issue:
-    when: Determining issue type from description or requirements
-    approach: |
-      1. Read the issue description or requirements
-      2. Identify the primary outcome:
-         - New capability for users -> feature
-         - Fixing broken behavior -> bug
-         - Maintenance without user impact -> chore
-         - Code restructuring -> refactor
-      3. Apply the corresponding command:
-         - /issues:feature for features
-         - /issues:bug for bugs
-         - /issues:chore for chores
-         - /issues:refactor for refactors
-      4. Create appropriate branch with naming convention
-    examples:
-      - input: "Add search ranking algorithm"
-        classification: feature
-        reason: "Net-new capability"
-      - input: "SQLite connection fails under load"
-        classification: bug
-        reason: "Incorrect behavior"
-      - input: "Update Bun to v1.2"
-        classification: chore
-        reason: "Dependency maintenance"
-    pitfalls:
-      - what: "Classifying refactors as features"
-        instead: "Use refactor for code restructuring without behavior change"
-        reason: "Features imply user-visible changes"
-      - what: "Classifying docs updates as features"
-        instead: "Use chore for documentation-only changes"
-        reason: "Docs don't deliver new capability"
+  priority:
+    P1:
+      purpose: Critical priority
+      color: b60205
+      applied_by: manual
+      triggers: none
+    P2:
+      purpose: High priority
+      color: d93f0b
+      applied_by: manual
+      triggers: none
+    P3:
+      purpose: Normal priority
+      color: "0e8a16"
+      applied_by: manual
+      triggers: none
 
-  create_pull_request:
-    when: Implementation is complete and validated
-    approach: |
-      1. Verify preconditions:
-         - Working tree is clean (git status --short empty)
-         - On correct branch (git branch --show-current)
-         - Commits follow Conventional Commits format
-         - Validation level appropriate for changes
-      2. Run validation commands:
-         - Level 1: lint + typecheck
-         - Level 2: lint + typecheck + integration tests
-         - Level 3: lint + typecheck + all tests + build
-      3. Prepare PR metadata:
-         - Determine if planning PR or implementation PR
-         - Format title according to type
-         - Compose body with validation evidence
-      4. Create PR:
-         - git push -u origin HEAD
-         - gh pr create --base develop --title "<title>" --body "<body>"
-      5. Verify creation:
-         - gh pr view --web (optional)
-         - Share link with reviewers
-    validation_evidence_template: |
-      ## Validation Evidence
+  scope:
+    client:
+      purpose: Affects client workspace
+      color: 1d76db
+      applied_by: manual
+      triggers: none
+    server:
+      purpose: Affects server workspace
+      color: "5319e7"
+      applied_by: manual
+      triggers: none
+    shared:
+      purpose: Affects shared workspace
+      color: "006b75"
+      applied_by: manual
+      triggers: none
 
-      ### Validation Level: [1/2/3]
-      **Justification**: [Why this level was selected]
+  infrastructure:
+    dependencies:
+      purpose: Dependency updates
+      color: 0366d6
+      applied_by: dependabot, manual
+      triggers: none
+    ci-cd:
+      purpose: CI/CD changes
+      color: bfd4f2
+      applied_by: manual
+      triggers: none
+    workflow-test-failure:
+      purpose: Workflow smoke test failure
+      color: b60205
+      applied_by: workflow-smoke-test.yml on failure
+      triggers: none
 
-      **Commands Run**:
-      - [pass/fail] `bun run lint` - [output snippet]
-      - [pass/fail] `bun run typecheck` - [output snippet]
-      - [pass/fail] `bun test --filter integration` - [if Level 2+]
-      - [pass/fail] `bun test` - [if Level 3]
-      - [pass/fail] `bun run build` - [if Level 3]
-    pitfalls:
-      - what: "Creating PR without validation evidence"
-        instead: "Always run and document validation commands"
-        reason: "Evidence required for review"
-      - what: "Targeting main instead of develop"
-        instead: "Always target develop branch"
-        reason: "KotaDB uses develop as integration branch"
-      - what: "Missing anti-mock statement"
-        instead: "Confirm no new mocks in PR body"
-        reason: "Anti-mock philosophy is core to KotaDB"
+# ─────────────────────────────────────────────────────────────────────────────
+# WORKFLOWS - All 12 workflows organized by trigger type
+# ─────────────────────────────────────────────────────────────────────────────
+workflows:
+  issue_triggers:
+    issue-opened.yml:
+      name: Issue Opened - Triage & Auto-Implement Assessment
+      trigger: issues.opened
+      guard: github.event.issue.user.login == 'Pierre-Mike'
+      purpose: Triage new issues, classify type, assess confidence, apply labels
+      labels_applied: [type labels, confidence labels, auto-implement or needs-review]
+      labels_removed: []
+      failure_behavior: Applies needs-review label, posts failure comment
 
-  apply_issue_labels:
-    when: Categorizing issues for tracking and filtering
-    approach: |
-      1. Apply type label based on classification:
-         - type:feature
-         - type:bug
-         - type:chore
-         - type:refactor
-      2. Apply priority label if known:
-         - priority:high
-         - priority:medium
-         - priority:low
-      3. Apply area labels if applicable:
-         - area:api
-         - area:indexer
-         - area:mcp
-         - area:database
-      4. Use gh CLI to apply:
-         gh issue edit <number> --add-label "<labels>"
-    examples:
-      - "gh issue edit 123 --add-label 'type:feature,priority:high,area:api'"
-      - "gh issue edit 456 --add-label 'type:bug,area:database'"
+    auto-implement.yml:
+      name: Auto Implement Issue
+      trigger: issues.labeled
+      guard: |
+        label is auto-implement/confidence:high/confidence:medium AND
+        issue has auto-implement label AND user is Pierre-Mike
+      purpose: Create spec/plan, create draft PR, start TDD workflow
+      labels_applied: [phase:tests]
+      labels_removed: []
+      creates: Draft PR with issue-{number}-auto-implement branch
 
-  create_branch:
-    when: Starting work on an issue
-    approach: |
-      1. Fetch latest from remote:
-         git fetch --all --prune
-      2. Create branch from develop:
-         git checkout -b <type>/<issue>-<description> origin/develop
-      3. Verify branch name follows convention:
-         - Correct type prefix (feat/bug/chore/refactor/docs/test)
-         - Issue number present
-         - Lowercase with hyphens
-    examples:
-      - "git checkout -b feat/123-add-search-ranking origin/develop"
-      - "git checkout -b bug/456-fix-timeout origin/develop"
+  pr_triggers:
+    auto-implement-phases.yml:
+      name: Auto Implement Phases
+      trigger: pull_request.labeled
+      guard: branch matches issue-*-auto-implement pattern
+      purpose: Execute TDD phases (tests → implement → finalize)
+      jobs:
+        write-tests:
+          trigger_label: phase:tests
+          labels_applied: [phase:implement]
+          labels_removed: [phase:tests]
+        implement:
+          trigger_label: phase:implement
+          labels_applied: [phase:finalize]
+          labels_removed: [phase:implement]
+        finalize:
+          trigger_label: phase:finalize
+          labels_applied: [phase:complete]
+          labels_removed: [phase:finalize]
+          actions: Marks PR ready for review
+      failure_behavior: Applies phase:failed, posts retry instructions
 
-  commit_changes:
-    when: Creating commits for changes
-    approach: |
-      1. Stage specific files (avoid git add -A):
-         git add <specific-files>
-      2. Verify staged changes:
-         git diff --cached
-      3. Create commit with Conventional Commits format:
-         git commit -m "<type>(<scope>): <description>"
+    claude-code-review.yml:
+      name: Claude Peer Review
+      trigger: pull_request.opened/synchronize/ready_for_review/reopened
+      guard: PR is not draft
+      purpose: Automated peer review using Claude Code
+      labels_applied: [review:done OR review:needs-work]
+      labels_removed: [opposite review label]
 
-    conventional_commits_format:
-      structure: "<type>(<scope>): <description>"
-      types:
-        - feat: New feature
-        - fix: Bug fix
-        - chore: Maintenance
-        - refactor: Code restructuring
-        - docs: Documentation
-        - test: Tests
-        - ci: CI/CD changes
-      examples:
-        - "feat(api): add rate limiting to search endpoint"
-        - "fix(indexer): resolve race condition in file watcher"
-        - "chore(deps): update bun to v1.2.0"
-        - "refactor(db): simplify connection pool logic"
+    review-fix.yml:
+      name: Review Fix Loop
+      trigger: pull_request.labeled
+      guard: |
+        label is review:needs-work AND
+        branch matches issue-*-auto-implement pattern
+      purpose: Automatically fix review comments (max 3 attempts)
+      labels_applied: []
+      labels_removed: [review:needs-work]
+      failure_behavior: Stops after 3 attempts, requires manual intervention
 
-  release_workflow:
-    when: Publishing package to npm registry with automated GitHub Release
-    approach: |
-      Release workflows provide automated publishing triggered by semantic version tags.
-      Unlike PR workflows, releases run comprehensive validation and publish to registries.
-      
-      1. Tag trigger mechanism:
-         - Create annotated tag: git tag -a v<major>.<minor>.<patch>
-         - Push tag to trigger workflow: git push origin v<major>.<minor>.<patch>
-      
-      2. Version verification (prevents mismatches):
-         - Extract version from git tag: ${GITHUB_REF#refs/tags/v}
-         - Extract version from package.json: grep '"version"' | awk
-         - Compare and fail if versions don't match
-      
-      3. Full validation chain (Level 3 + publishing):
-         - bun run lint
-         - bun run typecheck
-         - bun install --frozen-lockfile
-         - bun test --coverage
-         - bun run build
-      
-      4. Package metadata verification:
-         - Check 'bin' field exists in package.json
-         - Warn if 'files' field missing (will publish everything)
-         - Validates publishability before attempting push
-      
-      5. Publishing to npm:
-         - Use NODE_AUTH_TOKEN secret for authentication
-         - Command: bun publish --access public
-         - Respects package.json version and bin configuration
-      
-      6. GitHub Release creation:
-         - Use gh CLI: gh release create "${TAG}" --verify-tag
-         - Include release notes with npm registry link
-         - Automatic release discovery for user notifications
-    
-    considerations:
-      - Version must be in semver format (v<major>.<minor>.<patch>)
-      - Tag version MUST match package.json version exactly
-      - Use semantic versioning for all releases
-      - Include release notes URL in GitHub Release
-      - Verify uv is installed (required for MCP tools in test phase)
-    
-    example_commands:
-      - "git tag -a v2.1.0 -m 'Release v2.1.0'"
-      - "git push origin v2.1.0"
-      - "gh release create v2.1.0 --verify-tag"
-    
-    pitfalls:
-      - what: "Version mismatch between tag and package.json"
-        instead: "Update package.json version before creating tag"
-        reason: "Workflow fails if versions don't match, prevents accidental misversioning"
-      - what: "Missing NODE_AUTH_TOKEN secret"
-        instead: "Configure NPM_TOKEN secret in GitHub Actions secrets"
-        reason: "Publishing fails without authentication token"
-      - what: "Skipping validation before publishing"
-        instead: "Release workflow runs full Level 3 validation automatically"
-        reason: "Published packages must pass all checks to prevent broken releases"
-      - what: "Creating release without --verify-tag flag"
-        instead: "Always use --verify-tag to ensure release is properly signed"
-        reason: "Verification ensures release integrity and discoverability"
+    deploy-preview.yml:
+      name: Deploy Preview
+      trigger: pull_request.opened/synchronize/reopened
+      guard: PR is not draft AND changes in client/server/shared
+      purpose: Deploy preview to Cloudflare Worker + GitHub Pages
+      labels_applied: []
+      labels_removed: []
+      creates: Preview deployment comment
 
+    cleanup-preview.yml:
+      name: Cleanup Preview
+      trigger: pull_request.closed
+      guard: none
+      purpose: Delete Cloudflare Worker and gh-pages preview directory
+      labels_applied: []
+      labels_removed: []
+
+    auto-close-issues.yml:
+      name: Auto Close Issues
+      trigger: pull_request.closed
+      guard: PR was merged
+      purpose: Close issues linked via Closes/Fixes/Resolves keywords
+      labels_applied: []
+      labels_removed: []
+
+  push_triggers:
+    ci.yml:
+      name: CI
+      trigger: push to main/development OR pull_request to main/development
+      guard: push always runs; PR skips drafts
+      purpose: Run lint, type-check, test, build, security (CodeQL)
+      jobs: [install, lint, type-check, test, build, security, ci-complete]
+
+    deploy-production.yml:
+      name: Deploy Production
+      trigger: push to main (when client/server/shared changed) OR workflow_dispatch
+      guard: changes in client/server/shared paths
+      purpose: Deploy to production (Cloudflare Worker + GitHub Pages)
+      creates: Production deployment
+
+  comment_triggers:
+    claude.yml:
+      name: Claude Code
+      trigger: |
+        issue_comment.created OR pull_request_review_comment.created OR
+        issues.opened/assigned OR pull_request_review.submitted
+      guard: Comment/body/title contains @claude
+      purpose: Respond to @claude mentions with Claude Code
+
+  scheduled:
+    workflow-smoke-test.yml:
+      name: Workflow Smoke Test
+      trigger: schedule (daily 8:00 UTC) OR workflow_dispatch
+      guard: none
+      purpose: End-to-end test of auto-implement workflow
+      labels_applied: [workflow-test-failure, bug] on failure
+      creates: Failure issue if test fails, closes on success
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DECISION TREES
+# ─────────────────────────────────────────────────────────────────────────────
 decision_trees:
+  label_selection:
+    question: What label should I apply to this issue/PR?
+    options:
+      - if: New issue needs classification
+        then: |
+          Apply type label: bug (broken behavior), feature (new capability), chore (maintenance)
+          Apply confidence label based on complexity assessment
+          Apply auto-implement if confidence:high or confidence:medium
+      - if: PR needs review status
+        then: review:done (approved) or review:needs-work (changes requested)
+      - if: Auto-implement PR phase tracking
+        then: phase:tests → phase:implement → phase:finalize → phase:complete
+      - if: Issue is blocked or depends on others
+        then: has-dependencies
+      - if: Issue needs more information
+        then: needs-info
+      - if: Issue is too large
+        then: needs-breakdown
+
+  workflow_trigger_map:
+    question: Which workflow runs for this action?
+    options:
+      - if: New issue opened by Pierre-Mike
+        then: issue-opened.yml → triage and assess confidence
+      - if: Issue receives auto-implement or confidence label
+        then: auto-implement.yml → create spec + draft PR
+      - if: PR receives phase:* label (auto-implement branch)
+        then: auto-implement-phases.yml → execute TDD phase
+      - if: PR opened/updated (not draft)
+        then: claude-code-review.yml → peer review
+      - if: PR receives review:needs-work (auto-implement branch)
+        then: review-fix.yml → fix review comments
+      - if: PR opened/updated with client/server/shared changes
+        then: deploy-preview.yml → create preview deployment
+      - if: PR closed
+        then: cleanup-preview.yml + auto-close-issues.yml (if merged)
+      - if: Push to main/development
+        then: ci.yml → run validation
+      - if: Push to main with client/server/shared changes
+        then: deploy-production.yml → production deployment
+      - if: Comment contains @claude
+        then: claude.yml → Claude Code response
+      - if: Daily schedule or manual trigger
+        then: workflow-smoke-test.yml → end-to-end test
+
+  phase_progression:
+    question: What is the auto-implement phase flow?
+    flow: |
+      1. Issue opened → issue-opened.yml → triage + assess
+      2. auto-implement label applied → auto-implement.yml → create spec + draft PR
+      3. phase:tests label → write tests (TDD red)
+      4. phase:implement label → implement code (TDD green)
+      5. phase:finalize label → update docs, mark PR ready
+      6. phase:complete label → terminal state, ready for merge
+      7. If any phase fails → phase:failed label, manual intervention required
+
   issue_type_selection:
     question: What is the primary outcome of this work?
     options:
       - if: Adds new capability visible to users
-        then: feature (use /issues:feature, branch feat/*)
+        then: feature (branch feat/*)
       - if: Fixes incorrect or broken behavior
-        then: bug (use /issues:bug, branch bug/*)
+        then: bug (branch bug/*)
       - if: Maintenance, deps, docs, or tooling
-        then: chore (use /issues:chore, branch chore/*)
+        then: chore (branch chore/*)
       - if: Restructures code without behavior change
-        then: refactor (use /issues:refactor, branch refactor/*)
+        then: refactor (branch refactor/*)
 
   pr_validation_level:
     question: What type of changes does the PR contain?
@@ -376,222 +379,142 @@ decision_trees:
       - if: Schema migration, breaking changes, releases
         then: Level 3 (full test suite + build)
 
+# ─────────────────────────────────────────────────────────────────────────────
+# CORE IMPLEMENTATION
+# ─────────────────────────────────────────────────────────────────────────────
+core_implementation:
   branch_naming:
-    question: What type of work is being done?
-    options:
-      - if: New feature or enhancement
-        then: "feat/<issue>-<description>"
-      - if: Bug fix
-        then: "bug/<issue>-<description>"
-      - if: Maintenance or tooling
-        then: "chore/<issue>-<description>"
-      - if: Code restructuring
-        then: "refactor/<issue>-<description>"
-      - if: Documentation only
-        then: "docs/<issue>-<description>"
-      - if: Tests only
-        then: "test/<issue>-<description>"
+    convention: "<type>/<issue-number>-<short-description>"
+    types: [feat, bug, chore, refactor, docs, test]
+    flow: "feature branch -> main"
+    examples:
+      - "feat/123-add-search-ranking"
+      - "bug/456-fix-timeout"
+      - "chore/789-update-dependencies"
+    auto_implement_pattern: "issue-{number}-auto-implement"
 
-  pr_type_determination:
-    question: What files are being changed?
-    options:
-      - if: Only .claude/.cache/specs/*.md files
-        then: Planning PR (title uses "add specification/plan for")
-      - if: app/src/, automation/, or >50 lines outside docs/
-        then: Implementation PR (title uses imperative verb)
+  validation_levels:
+    level_1:
+      name: "Level 1 - Basic"
+      when: "Docs-only, config, trivial fixes"
+      checks: ["bun run lint", "bun run typecheck"]
+    level_2:
+      name: "Level 2 - Standard"
+      when: "Features, bug fixes, code changes"
+      checks: ["bun run lint", "bun run typecheck", "bun test --filter integration"]
+    level_3:
+      name: "Level 3 - Comprehensive"
+      when: "Schema migrations, breaking changes, releases"
+      checks: ["bun run lint", "bun run typecheck", "bun test", "bun run build"]
 
+  key_files:
+    issue_commands:
+      - .claude/commands/triage-issue.md
+      - .claude/commands/assess-confidence.md
+      - .claude/commands/label-issue.md
+    planning_commands:
+      - .claude/commands/feature.md
+      - .claude/commands/bug.md
+      - .claude/commands/chore.md
+    git_commands:
+      - .claude/commands/git/commit.md
+      - .claude/commands/git/pull_request.md
+    workflows:
+      - .github/workflows/*.yml
+      - .github/setup-labels.sh
+
+# ─────────────────────────────────────────────────────────────────────────────
+# KEY OPERATIONS
+# ─────────────────────────────────────────────────────────────────────────────
+key_operations:
+  create_pull_request:
+    when: Implementation is complete and validated
+    approach: |
+      1. Verify working tree is clean, on correct branch
+      2. Run validation at appropriate level
+      3. Push: git push -u origin HEAD
+      4. Create PR: gh pr create --base main --title "<title>" --body "<body>"
+
+  commit_changes:
+    format: "<type>(<scope>): <description>"
+    types: [feat, fix, chore, refactor, docs, test, ci]
+    examples:
+      - "feat(api): add rate limiting to search endpoint"
+      - "fix(indexer): resolve race condition"
+      - "chore(deps): update bun to v1.2.0"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PATTERNS
+# ─────────────────────────────────────────────────────────────────────────────
 patterns:
-  gh_cli_common_commands:
-    issue_operations:
+  gh_cli:
+    issues:
       - "gh issue create --title '<title>' --body '<body>'"
       - "gh issue edit <number> --add-label '<labels>'"
       - "gh issue view <number>"
-      - "gh issue list --label '<label>'"
       - "gh issue close <number>"
-    pr_operations:
-      - "gh pr create --base develop --title '<title>' --body '<body>'"
+    prs:
+      - "gh pr create --base main --title '<title>' --body '<body>'"
       - "gh pr view <number>"
-      - "gh pr status"
       - "gh pr merge <number> --squash"
-      - "gh pr checks <number>"
-    api_operations:
-      - "gh api repos/{owner}/{repo}/issues/<number>"
-      - "gh api repos/{owner}/{repo}/pulls/<number>/comments"
+    labels:
+      - "gh api repos/{owner}/{repo}/issues/<number>/labels --method POST -f 'labels[]=<label>'"
+      - "gh api repos/{owner}/{repo}/issues/<number>/labels/<label> --method DELETE"
 
-    release_operations:
-      - "git tag -a v<major>.<minor>.<patch> -m 'Release v<major>.<minor>.<patch>'"
-      - "git push origin v<major>.<minor>.<patch>"
-      - "gh release create v<major>.<minor>.<patch> --verify-tag"
-      - "gh release list --limit 10"
-      - "bun publish --access public"
+  pr_body_template: |
+    ## Summary
+    <1-3 bullet points describing changes>
 
-  pr_body_structure:
-    template: |
-      ## Summary
-      <1-3 bullet points describing changes>
+    ## Validation Evidence
+    - Validation Level: [1/2/3]
+    - Commands Run: [pass/fail status]
 
-      ## Validation Evidence
-      ### Validation Level: [1/2/3]
-      **Justification**: [reason for level selection]
-      **Commands Run**:
-      - [status] `command` - [output]
+    ## References
+    - Closes #<issue_number>
 
-      ## Anti-Mock Statement
-      - No new mocks introduced
-      - [or] Temporary exception: [description] - follow-up: #<issue>
-
-      ## References
-      - [Plan](./.claude/.cache/specs/<spec-file>.md) (if applicable)
-      - Closes #<issue_number>
-      - ADW ID: <id> (if applicable)
-
-  conventional_commits:
-    format: "<type>(<scope>): <description>"
-    body_format: |
-      <type>(<scope>): <description>
-
-      <optional body explaining why>
-
-    scope_examples:
-      - api: API routes and handlers
-      - db: Database operations
-      - indexer: Code indexing
-      - mcp: MCP tools
-      - cli: CLI commands
-
-  issue_templates:
-    feature: |
-      ## Summary
-      Brief description of the feature.
-
-      ## Motivation
-      Why this feature is needed.
-
-      ## Acceptance Criteria
-      - [ ] Criterion 1
-      - [ ] Criterion 2
-
-      ## Technical Notes
-      Implementation considerations.
-    bug: |
-      ## Description
-      What is broken.
-
-      ## Steps to Reproduce
-      1. Step 1
-      2. Step 2
-
-      ## Expected Behavior
-      What should happen.
-
-      ## Actual Behavior
-      What actually happens.
-
-      ## Environment
-      - Bun version:
-      - OS:
-    chore: |
-      ## Summary
-      What maintenance work is needed.
-
-      ## Rationale
-      Why this work is necessary.
-
-      ## Tasks
-      - [ ] Task 1
-      - [ ] Task 2
-
+# ─────────────────────────────────────────────────────────────────────────────
+# BEST PRACTICES
+# ─────────────────────────────────────────────────────────────────────────────
 best_practices:
   issue_management:
     - Classify issues immediately upon creation
-    - Apply type and area labels consistently
-    - Link related issues with references
-    - Keep issue descriptions concise and actionable
-    - Update issue status as work progresses
-
-  branch_workflow:
-    - Always branch from latest develop
-    - Use descriptive branch names with issue numbers
-    - Keep branches focused on single issues
-    - Delete branches after PR merge
-    - Avoid long-lived feature branches
-
+    - Apply type and confidence labels consistently
+    - Use auto-implement for high/medium confidence issues
   pull_requests:
     - Run validation before creating PR
-    - Include all required body sections
-    - Target develop branch (never main directly)
-    - Request appropriate reviewers
-    - Respond to review comments promptly
+    - Target main branch
     - Squash merge for clean history
-
   commits:
     - Follow Conventional Commits format
     - Keep commits atomic and focused
-    - Write meaningful commit messages
-    - Include issue references in commits
 
-  gh_cli_usage:
-    - Use gh for all GitHub operations
-    - Prefer gh over web UI for consistency
-    - Use --json flag for scripting
-    - Check gh auth status before operations
-    - Use environment variables for tokens
-
-  release_management:
-    - Tag releases with semantic versioning (v<major>.<minor>.<patch>)
-    - Always verify version matches between git tag and package.json
-    - Run full Level 3 validation before publishing
-    - Include release notes with npm registry URL
-    - Use --verify-tag flag when creating GitHub Releases
-    - Ensure NODE_AUTH_TOKEN secret is configured in GitHub Actions
-    - Test package.json bin and files fields before release
-    - Create GitHub Release after successful npm publish
-
+# ─────────────────────────────────────────────────────────────────────────────
+# KNOWN ISSUES
+# ─────────────────────────────────────────────────────────────────────────────
 known_issues:
-  - issue: gh auth may expire during long sessions
-    impact: GitHub operations fail with 401 errors
-    resolution: Run gh auth refresh or gh auth login
-    prevention: Check auth status at session start
+  - issue: Phase label not triggering workflow
+    impact: Auto-implement stalls
+    resolution: Ensure label is applied via REST API, not gh issue edit
     status: operational guidance
 
-  - issue: Branch naming inconsistency across issues
-    impact: Difficult to track which branches belong to which issues
-    resolution: Always include issue number in branch name
-    prevention: Follow naming convention strictly
-    status: enforce via code review
+  - issue: Review-fix loop exceeds 3 attempts
+    impact: Manual intervention required
+    resolution: Fix issues manually or break into smaller changes
+    status: by design (prevents infinite loops)
 
-  - issue: Validation evidence missing from PRs
-    impact: Reviewers cannot verify implementation quality
-    resolution: Add validation evidence section to PR body
-    prevention: Use PR body template
-    status: enforce via checklist
+  - issue: Draft PR skips peer review
+    impact: Delays review until ready
+    resolution: Mark PR ready for review when implementation complete
+    status: by design
 
-  - issue: PRs targeting main instead of develop
-    impact: Bypasses integration testing
-    resolution: Change base branch to develop
-    prevention: Default to develop in gh pr create
-    status: operational guidance
-
-potential_enhancements:
-  - Automated issue classification via webhook
-  - Branch naming validation hook
-  - PR body template enforcement
-  - Validation level auto-detection from changed files
-  - Commit message format validation hook
-
+# ─────────────────────────────────────────────────────────────────────────────
+# STABILITY
+# ─────────────────────────────────────────────────────────────────────────────
 stability:
   convergence_indicators:
-    insight_rate_trend: growing
+    insight_rate_trend: stable
     contradiction_count: 0
-    new_patterns_added_this_cycle: 1
-    patterns_updated_this_cycle: 1
-    last_reviewed: 2026-01-28
-    utility_ratio: 1.0
+    last_reviewed: 2026-02-03
     notes: |
-      Cycle 2 additions from npm-publish.yml workflow implementation:
-      - Added release_workflow operation for tag-triggered npm publishing
-      - Added release_management best practices section
-      - Discovered patterns: version verification, Level 3 + publishing, metadata validation
-      - Implementation example: .github/workflows/npm-publish.yml (untracked)
-      - Key learning: Bun 1.1.29 consistency across workflows, uv dependency for tests
-      - No contradictions with existing patterns found
+      Major restructure: Added comprehensive pr_labels (29 labels), workflows (12),
+      and CI/CD decision trees. Consolidated redundant content to stay under 800 lines.

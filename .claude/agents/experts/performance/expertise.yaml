@@ -1,0 +1,248 @@
+# Performance Expertise for bhvr
+# Target: 350-600 lines | Domain: Bundle optimization, query tuning, caching
+
+overview:
+  description: Performance optimization patterns for bhvr—bundle size reduction, code splitting, database query optimization with indexes and CTEs, API response time tuning, caching strategies, and runtime performance monitoring.
+  scope: |
+    Frontend bundle analysis (client/), code splitting and lazy loading, database query
+    optimization (EXPLAIN QUERY PLAN, indexes, CTEs), API performance (server/),
+    caching strategies (browser, CDN, server), and performance profiling tools.
+
+core_implementation:
+  key_files:
+    - path: client/vite.config.ts
+      purpose: Build optimization, code splitting config
+    - path: server/src/
+      purpose: API optimization, query tuning
+    - path: shared/src/
+      purpose: Shared code efficiency
+
+  performance_principles:
+    - Measure before optimizing
+    - Set performance budgets
+    - Optimize critical path first
+    - Use profiling tools
+    - Monitor continuously
+
+key_operations:
+  bundle_size_optimization:
+    when: Client bundle exceeds budget (target <200KB gzipped)
+    approach: |
+      1. Analyze bundle with bun build --analyze or vite-bundle-visualizer
+      2. Identify large dependencies
+      3. Implement code splitting with React.lazy
+      4. Remove unused code with tree shaking
+      5. Use dynamic imports for routes
+    code_example: |
+      // Code splitting with React.lazy
+      const HeavyComponent = React.lazy(() => import('./HeavyComponent'));
+
+      function App() {
+        return (
+          <Suspense fallback={<div>Loading...</div>}>
+            <HeavyComponent />
+          </Suspense>
+        );
+      }
+
+      // Dynamic route imports with TanStack Router
+      export const Route = createFileRoute('/heavy/')({
+        component: React.lazy(() => import('./HeavyPage')),
+      })
+    pitfalls:
+      - Over-splitting (too many chunks, HTTP overhead)
+      - Not measuring after changes
+
+  database_query_optimization:
+    when: Slow query (>100ms), N+1 queries, missing indexes
+    approach: |
+      1. Use EXPLAIN QUERY PLAN to analyze
+      2. Add indexes on frequently filtered columns
+      3. Use CTEs for complex queries
+      4. Batch queries to reduce round trips
+      5. Use prepared statements
+    code_example: |
+      // Before: N+1 query problem
+      const users = db.prepare('SELECT * FROM users').all();
+      for (const user of users) {
+        const posts = db.prepare('SELECT * FROM posts WHERE user_id = ?').all(user.id);
+        // Process posts...
+      }
+
+      // After: Single query with JOIN
+      const usersWithPosts = db.prepare(`
+        SELECT u.*, json_group_array(
+          json_object('id', p.id, 'title', p.title)
+        ) as posts
+        FROM users u
+        LEFT JOIN posts p ON u.id = p.user_id
+        GROUP BY u.id
+      `).all();
+    evidence: Database expertise.yaml recursive_cte_dependencies, indexing_strategies
+
+  caching_strategy:
+    when: Repeated expensive operations (API calls, computations)
+    approach: |
+      1. Browser caching with Cache-Control headers
+      2. CDN caching for static assets
+      3. Server-side caching with in-memory store
+      4. Stale-while-revalidate pattern
+    code_example: |
+      // Server-side response caching
+      const cache = new Map<string, { data: any; timestamp: number }>();
+      const CACHE_TTL = 60_000; // 60 seconds
+
+      function getCachedOrFetch(key: string, fetchFn: () => any) {
+        const cached = cache.get(key);
+        if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+          return cached.data;
+        }
+        const data = fetchFn();
+        cache.set(key, { data, timestamp: Date.now() });
+        return data;
+      }
+
+      // HTTP caching headers
+      c.header('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
+    pitfalls:
+      - Cache invalidation bugs (stale data)
+      - Over-caching dynamic data
+
+  lazy_loading_pattern:
+    when: Heavy components, routes, or images
+    approach: |
+      1. Use React.lazy for components
+      2. Use dynamic imports for routes
+      3. Use loading="lazy" for images
+      4. Implement Intersection Observer for viewport loading
+    code_example: |
+      // Image lazy loading
+      <img
+        src="/heavy-image.jpg"
+        loading="lazy"
+        alt="Description"
+      />
+
+      // Viewport-based loading
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            // Load content
+            observer.unobserve(entry.target);
+          }
+        });
+      });
+
+  performance_profiling:
+    when: Identifying bottlenecks, verifying optimizations
+    tools:
+      - Bun: bun build --analyze (bundle analysis)
+      - Chrome DevTools: Performance tab, Lighthouse
+      - React DevTools: Profiler
+      - Database: EXPLAIN QUERY PLAN, timing logs
+    approach: |
+      1. Establish baseline metrics
+      2. Profile with appropriate tool
+      3. Identify bottlenecks
+      4. Optimize
+      5. Re-profile to verify improvement
+    metrics:
+      - Bundle size (KB gzipped)
+      - Time to Interactive (TTI)
+      - First Contentful Paint (FCP)
+      - Query execution time (ms)
+      - API response time (ms)
+
+decision_trees:
+  optimization_priority:
+    - condition: Page load >3s
+      use: Bundle splitting, lazy loading, critical CSS
+    - condition: Query >100ms
+      use: Add indexes, optimize query, caching
+    - condition: API response >500ms
+      use: Optimize query, add caching, reduce payload
+    - condition: High memory usage
+      use: Profile memory leaks, reduce allocations
+
+  caching_strategy:
+    - condition: Static content
+      use: Long-term browser cache + CDN
+    - condition: User-specific data
+      use: Short-term cache with revalidation
+    - condition: Frequently accessed data
+      use: Server-side in-memory cache
+    - condition: Expensive computation
+      use: Memoization or result cache
+
+patterns:
+  code_splitting_by_route:
+    structure: |
+      Routes automatically split by TanStack Router:
+      - Each route file becomes separate chunk
+      - Lazy load heavy components within routes
+    trade_offs:
+      pros: Automatic splitting, smaller initial bundle
+      cons: Lazy loading delay on navigation
+
+  database_index_strategy:
+    structure: |
+      Indexes based on query patterns:
+      - Composite indexes for multi-column queries
+      - Partial indexes for filtered subsets
+      - Covering indexes to avoid table lookups
+    evidence: Database expertise.yaml indexing_strategies
+
+best_practices:
+  - category: Frontend Performance
+    practices:
+      - practice: Set bundle size budget (<200KB gzipped)
+        evidence: Performance best practices
+      - practice: Use code splitting for routes
+        evidence: TanStack Router automatic splitting
+      - practice: Lazy load images with loading="lazy"
+        evidence: Browser native support
+      - practice: Minimize JavaScript execution time
+        evidence: Time to Interactive metric
+
+  - category: Database Performance
+    practices:
+      - practice: Use EXPLAIN QUERY PLAN before optimizing
+        evidence: Identify actual bottlenecks
+      - practice: Add indexes on frequently filtered columns
+        evidence: Database expertise.yaml
+      - practice: Use prepared statements for repeated queries
+        evidence: Query compilation caching
+      - practice: Batch operations in transactions
+        evidence: Reduce round trips
+
+  - category: API Performance
+    practices:
+      - practice: Minimize payload size (only return needed fields)
+        evidence: Network transfer time
+      - practice: Use compression (gzip, brotli)
+        evidence: Reduce transfer size
+      - practice: Implement pagination for large datasets
+        evidence: Prevent memory issues
+      - practice: Set appropriate Cache-Control headers
+        evidence: Browser caching
+
+  - category: Caching
+    practices:
+      - practice: Cache static assets with long TTL
+        evidence: Reduce server load
+      - practice: Use stale-while-revalidate for dynamic data
+        evidence: Fast response + freshness
+      - practice: Implement cache invalidation strategy
+        evidence: Prevent stale data bugs
+
+known_issues:
+  - issue: TanStack Router over-splitting causing waterfall loading
+    resolution: Preload critical routes, use suspense boundaries strategically
+  - issue: FTS5 queries slow on large datasets
+    resolution: Add covering indexes, use rank limits, consider pagination
+  - issue: Cloudflare Workers 50ms CPU time limit
+    resolution: Optimize hot paths, use async operations, move computation to build time
+
+stability:
+  last_reviewed: 2026-02-03
+  notes: Initial expertise created for performance domain

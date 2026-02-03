@@ -25,10 +25,10 @@ constraints:
 
 | Agent | Purpose | Tool Access | Model |
 |-------|---------|-------------|-------|
-| scout-agent | Read-only codebase exploration | Glob, Grep, Read, MCP search | haiku |
+| scout-agent | Read-only codebase exploration | Glob, Grep, Read, Task | haiku |
 | build-agent | File implementation and modification | Edit, Write, Bash, full toolset | sonnet |
 | review-agent | Code review and analysis | Read-only + review-focused tools | haiku |
-| docs-scraper | Documentation scraping and saving | WebFetch, Firecrawl, Write | sonnet |
+| docs-scraper | Documentation scraping and saving | WebFetch, Write | sonnet |
 
 ### Expert Domains (4-Agent Pattern)
 
@@ -76,8 +76,6 @@ Select agents by model tier:
 - `Glob` - File pattern matching
 - `Grep` - Content search
 - `Read` - File reading
-- `mcp__kotadb-bunx__search_code` - Code search via MCP
-- `mcp__kotadb-bunx__search_dependencies` - Dependency analysis via MCP
 
 ### Write Tools
 - `Edit` - File modification
@@ -87,8 +85,7 @@ Select agents by model tier:
 
 ### Analysis Tools
 - `WebFetch` - URL content fetching
-- `mcp__kotadb-bunx__analyze_change_impact` - Change impact analysis
-- `mcp__firecrawl-mcp__firecrawl_scrape` - Web scraping
+- `Task` - Sub-agent spawning for complex operations
 
 ## Agent Selection Guidelines
 

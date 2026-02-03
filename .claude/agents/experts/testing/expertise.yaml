@@ -1,18 +1,18 @@
-# Testing Expertise for KotaDB
+# Testing Expertise for the project
 # Target: 400-600 lines | Domain: Operational knowledge for Bun test runner and antimocking patterns
-# Adapted for KotaDB project conventions
+# Adapted for the project project conventions
 
 overview:
   description: |
-    Testing expertise for KotaDB—Bun test runner (Jest-compatible API), antimocking philosophy
+    Testing expertise for the project—Bun test runner (Jest-compatible API), antimocking philosophy
     with real SQLite databases, in-memory database patterns, and test lifecycle management.
-    This expertise enables correct test implementation within the KotaDB codebase conventions.
+    This expertise enables correct test implementation within the the project codebase conventions.
   scope: |
     Covers Bun test runner configuration and usage, antimocking philosophy (real SQLite, no mocks),
     in-memory SQLite database patterns (":memory:"), test lifecycle hooks (beforeAll, beforeEach,
-    afterEach, afterAll), test organization patterns, and KotaDB-specific testing conventions.
+    afterEach, afterAll), test organization patterns, and the project-specific testing conventions.
 
-    KOTADB ADAPTATIONS:
+    PROJECT ADAPTATIONS:
     - Uses Bun test runner with Jest-compatible API (describe, test, expect)
     - Antimocking philosophy - always use real implementations over mocks
     - In-memory SQLite via createDatabase({ path: ":memory:" })
@@ -70,12 +70,12 @@ key_operations:
          ```
       2. Import database factory
          ```typescript
-         import { createDatabase, type KotaDatabase } from "@db/sqlite/index.js";
+         import { createDatabase, type Database } from "@db/sqlite/index.js";
          ```
       3. Set up test lifecycle
          ```typescript
          describe("Feature Name", () => {
-           let db: KotaDatabase;
+           let db: Database;
            const testRepoId = "test-repo-123";
 
            beforeEach(() => {
@@ -111,7 +111,7 @@ key_operations:
         reason: "Antimocking philosophy ensures real code paths tested"
 
   apply_antimocking_philosophy:
-    when: Writing any test in KotaDB
+    when: Writing any test in the project
     principles:
       - name: Real over Mock
         description: |
@@ -152,14 +152,14 @@ key_operations:
         ```typescript
         let tempDir: string;
         beforeAll(() => {
-          tempDir = mkdtempSync(join(tmpdir(), "kota-test-"));
+          tempDir = mkdtempSync(join(tmpdir(), "test-temp-"));
         });
         ```
       beforeEach: |
         Primary hook for test setup. Use for per-test isolation.
         Example: Creating fresh in-memory database.
         ```typescript
-        let db: KotaDatabase;
+        let db: Database;
         beforeEach(() => {
           db = createDatabase({ path: ":memory:" });
         });
@@ -195,7 +195,7 @@ key_operations:
       3. Assert on responses and database state
       ```typescript
       describe("API Handler", () => {
-        let db: KotaDatabase;
+        let db: Database;
 
         beforeEach(() => {
           db = createDatabase({ path: ":memory:" });
@@ -276,21 +276,21 @@ key_operations:
       ```typescript
       describe("Local Mode Tests", () => {
         const originalEnv = {
-          KOTADB_PATH: process.env.KOTADB_PATH,
-          KOTA_LOCAL_MODE: process.env.KOTA_LOCAL_MODE,
+          TEST_DB_PATH: process.env.TEST_DB_PATH,
+          TEST_LOCAL_MODE: process.env.TEST_LOCAL_MODE,
         };
         
         beforeAll(() => {
-          process.env.KOTADB_PATH = testDbPath;
-          process.env.KOTA_LOCAL_MODE = "true";
+          process.env.TEST_DB_PATH = testDbPath;
+          process.env.TEST_LOCAL_MODE = "true";
         });
         
         afterAll(() => {
           // Restore or delete to prevent pollution
-          if (originalEnv.KOTADB_PATH !== undefined) {
-            process.env.KOTADB_PATH = originalEnv.KOTADB_PATH;
+          if (originalEnv.TEST_DB_PATH !== undefined) {
+            process.env.TEST_DB_PATH = originalEnv.TEST_DB_PATH;
           } else {
-            delete process.env.KOTADB_PATH;
+            delete process.env.TEST_DB_PATH;
           }
         });
       });
@@ -423,7 +423,7 @@ key_operations:
       2. Create fixtures with defaults + overrides
          ```typescript
          describe("Repository Search", () => {
-           let db: KotaDatabase;
+           let db: Database;
            let repo: TestRepository;
            let files: TestFile[];
 
@@ -597,7 +597,7 @@ key_operations:
 
          describe("File Processing", () => {
            const testId = randomUUID().slice(0, 8);
-           const tempDir = join(tmpdir(), \`kota-test-\${testId}\`);
+           const tempDir = join(tmpdir(), \`test-temp-\${testId}\`);
 
            beforeAll(() => {
              mkdtempSync(tempDir, { recursive: true });
@@ -681,10 +681,10 @@ patterns:
   sqlite_test_pattern:
     structure: |
       import { describe, expect, test, beforeEach, afterEach } from "bun:test";
-      import { createDatabase, type KotaDatabase } from "@db/sqlite/index.js";
+      import { createDatabase, type Database } from "@db/sqlite/index.js";
 
       describe("Feature", () => {
-        let db: KotaDatabase;
+        let db: Database;
 
         beforeEach(() => {
           db = createDatabase({ path: ":memory:" });
@@ -712,10 +712,10 @@ patterns:
 
       describe("File-based Feature", () => {
         let tempDir: string;
-        let db: KotaDatabase;
+        let db: Database;
 
         beforeAll(() => {
-          tempDir = mkdtempSync(join(tmpdir(), "kota-test-"));
+          tempDir = mkdtempSync(join(tmpdir(), "test-temp-"));
         });
 
         beforeEach(() => {
@@ -744,7 +744,7 @@ patterns:
   nested_describe_pattern:
     structure: |
       describe("Module", () => {
-        let db: KotaDatabase;
+        let db: Database;
 
         beforeEach(() => {
           db = createDatabase({ path: ":memory:" });
@@ -818,7 +818,7 @@ best_practices:
     - Use beforeAll only for truly shared, immutable setup
     - Parallelize independent test suites
 
-  kotadb_conventions:
+  project_conventions:
     - Import from path aliases (@api/*, @db/*, @indexer/*, @shared/*)
     - Use process.stdout.write for any logging (never console.*)
     - Include JSDoc comment at top of test file describing coverage

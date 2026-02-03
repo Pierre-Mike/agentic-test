@@ -1,0 +1,178 @@
+# Deployment Expertise for bhvr
+# Target: 350-600 lines | Domain: GitHub Pages, Cloudflare Workers, CI/CD
+
+overview:
+  description: Deployment patterns for bhvr—GitHub Pages for static client, Cloudflare Workers for serverless API, GitHub Actions CI/CD, environment configuration, and multi-platform deployment coordination.
+  scope: |
+    Client deployment (GitHub Pages), server deployment (Cloudflare Workers),
+    CI/CD pipelines (.github/workflows/), build configuration (vite.config.ts, wrangler.toml),
+    environment variables, secrets management, and rollback procedures.
+
+core_implementation:
+  key_files:
+    - path: .github/workflows/deploy-client.yml
+      purpose: GitHub Pages deployment workflow
+    - path: .github/workflows/deploy-server.yml
+      purpose: Cloudflare Workers deployment workflow
+    - path: client/vite.config.ts
+      purpose: Client build configuration with base path
+    - path: server/wrangler.toml
+      purpose: Cloudflare Workers configuration
+    - path: turbo.json
+      purpose: Monorepo build orchestration
+
+  deployment_platforms:
+    client:
+      platform: GitHub Pages
+      trigger: Push to main branch
+      build: "turbo build --filter=client"
+      artifact: client/dist/
+    server:
+      platform: Cloudflare Workers
+      trigger: Push to main branch or manual
+      deploy: "wrangler deploy"
+      runtime: Cloudflare Workers (V8 isolates)
+
+key_operations:
+  deploy_client_github_pages:
+    when: Deploying static client to GitHub Pages
+    approach: |
+      1. Build client with correct base path
+      2. Configure GitHub Pages in repo settings
+      3. Use actions/deploy-pages action
+      4. Verify deployment at <username>.github.io/<repo>
+    code_example: |
+      # .github/workflows/deploy-client.yml
+      - name: Build client
+        run: bun run build:client
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: client/dist
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+    pitfalls:
+      - Base path mismatch (set base in vite.config.ts)
+      - Missing permissions (pages: write, id-token: write)
+
+  deploy_server_cloudflare_workers:
+    when: Deploying serverless API to Cloudflare Workers
+    approach: |
+      1. Configure wrangler.toml with worker name
+      2. Set CLOUDFLARE_API_TOKEN secret in GitHub
+      3. Use cloudflare/wrangler-action
+      4. Verify deployment at <worker>.workers.dev
+    code_example: |
+      # .github/workflows/deploy-server.yml
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: server
+    pitfalls:
+      - Missing API token
+      - Incorrect wrangler.toml syntax
+
+  environment_configuration:
+    when: Managing environment-specific config
+    approach: |
+      1. Use .env files for local development
+      2. GitHub Secrets for CI/CD
+      3. Cloudflare Environment Variables for Workers
+      4. Never commit secrets to git
+    patterns:
+      - .env.example for documentation
+      - Different configs per environment (dev, staging, prod)
+
+  rollback_procedure:
+    when: Deployment fails or introduces bugs
+    github_pages: |
+      1. Revert commit on main branch
+      2. Redeploy workflow runs automatically
+    cloudflare_workers: |
+      1. Use Cloudflare dashboard rollback
+      2. Or: wrangler rollback <worker-name>
+      3. Or: Deploy previous commit
+
+decision_trees:
+  deployment_trigger:
+    - condition: Push to main branch
+      use: Automatic deployment via CI/CD
+    - condition: Testing deployment
+      use: Manual workflow_dispatch trigger
+    - condition: Hotfix
+      use: Fast-track deployment with manual approval
+
+  build_optimization:
+    - condition: Client bundle too large
+      use: Code splitting, lazy loading, tree shaking
+    - condition: Server cold start slow
+      use: Minimize dependencies, optimize imports
+    - condition: Build time too long
+      use: Turbo cache, incremental builds
+
+patterns:
+  multi_platform_deployment:
+    structure: |
+      .github/workflows/
+      ├── deploy-client.yml    # GitHub Pages
+      ├── deploy-server.yml    # Cloudflare Workers
+      └── ci.yml               # Pre-deployment checks
+    coordination: Both deploy after CI passes on main branch
+
+  environment_separation:
+    structure: |
+      Environments:
+      - Development: Local dev servers
+      - Staging: Preview deployments (Cloudflare preview URLs)
+      - Production: Main branch deploys
+    usage: Use branch protection to enforce testing before production
+
+best_practices:
+  - category: CI/CD
+    practices:
+      - practice: Run tests before deployment
+        evidence: Catch regressions early
+      - practice: Use caching for faster builds
+        evidence: Turbo cache, GitHub Actions cache
+      - practice: Separate workflows for client and server
+        evidence: Independent deployment failures
+
+  - category: GitHub Pages
+    practices:
+      - practice: Set correct base path in vite.config.ts
+        evidence: Routing breaks without it
+      - practice: Use actions/deploy-pages for atomic deployment
+        evidence: Official GitHub action
+      - practice: Configure custom domain in repo settings
+        evidence: Professional URLs
+
+  - category: Cloudflare Workers
+    practices:
+      - practice: Use wrangler.toml for configuration
+        evidence: Version-controlled settings
+      - practice: Minimize bundle size
+        evidence: Cold start performance
+      - practice: Use environment variables for secrets
+        evidence: No secrets in code
+
+  - category: Secrets Management
+    practices:
+      - practice: Use GitHub Secrets for CI/CD tokens
+        evidence: Encrypted at rest
+      - practice: Use Cloudflare Environment Variables
+        evidence: Available at runtime
+      - practice: Rotate secrets periodically
+        evidence: Security best practice
+
+known_issues:
+  - issue: GitHub Pages 404 on client-side routes
+    resolution: Add 404.html that redirects to index.html (SPA pattern)
+  - issue: Cloudflare Workers KV eventual consistency
+    resolution: Design for eventual consistency, use cache headers
+
+stability:
+  last_reviewed: 2026-02-03
+  notes: Initial expertise created for deployment domain

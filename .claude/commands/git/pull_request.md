@@ -22,14 +22,14 @@ Return **ONLY** the PR URL as plain text on a single line.
 
 **Correct output:**
 ```
-https://github.com/user/kota-db-ts/pull/123
+https://github.com/owner/repo/pull/123
 ```
 
 **INCORRECT output (do NOT do this):**
 ```
 Successfully created pull request!
 
-PR URL: https://github.com/user/kota-db-ts/pull/123
+PR URL: https://github.com/owner/repo/pull/123
 
 The pull request is now ready for review. It includes validation evidence and anti-mock compliance notes.
 ```
@@ -37,7 +37,7 @@ The pull request is now ready for review. It includes validation evidence and an
 ```
 **Pull Request Created**
 
-https://github.com/user/kota-db-ts/pull/123
+https://github.com/owner/repo/pull/123
 ```
 
 ## Preconditions
@@ -97,7 +97,7 @@ https://github.com/user/kota-db-ts/pull/123
 
 **Commands Run**:
 - ✅/❌ `bun run lint` - [status/output snippet]
-- ✅/❌ `bun run typecheck` - [status/output snippet]
+- ✅/❌ `bun run type-check` - [status/output snippet]
 - ✅/❌ `bun test --filter integration` - [X tests passed, include if Level 2+]
 - ✅/❌ `bun test` - [X tests passed, include if Level 3]
 - ✅/❌ `bun run build` - [build output, include if Level 3]
@@ -137,4 +137,4 @@ The orchestrator extracts two values from the URL:
 - `pr_number`: The numeric PR identifier (extracted from URL path)
 - `pr_url`: The complete GitHub URL
 
-Example valid output: `https://github.com/user/kota-db-ts/pull/123`
+Example valid output: `https://github.com/owner/repo/pull/123`

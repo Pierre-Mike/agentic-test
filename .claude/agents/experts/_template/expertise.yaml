@@ -1,0 +1,108 @@
+# [Domain Name] Expertise
+# Target: 400-600 lines | Warning: 800 | Hard limit: 1000
+# Domain: [Brief description of what this expertise covers]
+
+overview:
+  description: |
+    [2-3 sentences describing the domain and its purpose within the project.
+    What problems does this expertise help solve?]
+  scope: |
+    [What this expertise covers and explicitly does NOT cover.
+    Include references to other experts for out-of-scope topics.]
+  rationale: |
+    [Why this expertise is important. What happens when it's done poorly?
+    Why do we need domain-specific knowledge here?]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CORE IMPLEMENTATION
+# ─────────────────────────────────────────────────────────────────────────────
+core_implementation:
+  # Key concepts, entities, or structures in this domain
+  key_concepts:
+    concept_1:
+      purpose: What this concept represents
+      examples: [example1, example2]
+    concept_2:
+      purpose: What this concept represents
+      examples: [example1, example2]
+
+  # Critical files and their purposes
+  key_files:
+    - path: path/to/file
+      purpose: What this file does
+    - path: path/to/another/file
+      purpose: What this file does
+
+# ─────────────────────────────────────────────────────────────────────────────
+# KEY OPERATIONS
+# ─────────────────────────────────────────────────────────────────────────────
+key_operations:
+  operation_name:
+    when: When to perform this operation
+    approach: |
+      1. Step one
+      2. Step two
+      3. Step three
+    code_example: |
+      # Optional: show how to do it
+      example_command
+    pitfalls:
+      - what: Common mistake
+        instead: What to do instead
+        reason: Why this matters
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DECISION TREES
+# ─────────────────────────────────────────────────────────────────────────────
+decision_trees:
+  decision_name:
+    question: What question are we trying to answer?
+    options:
+      - if: Condition 1
+        then: Action or answer 1
+      - if: Condition 2
+        then: Action or answer 2
+      - if: Default/fallback condition
+        then: Default action
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PATTERNS
+# ─────────────────────────────────────────────────────────────────────────────
+patterns:
+  pattern_name:
+    structure: |
+      Template or structure of the pattern
+    usage: When and how to use this pattern
+    trade_offs: What you gain and lose by using this pattern
+    example: |
+      # Concrete example of the pattern in use
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BEST PRACTICES
+# ─────────────────────────────────────────────────────────────────────────────
+best_practices:
+  category_name:
+    - Practice 1: brief description
+    - Practice 2: brief description
+    - Practice 3: brief description
+
+# ─────────────────────────────────────────────────────────────────────────────
+# KNOWN ISSUES
+# ─────────────────────────────────────────────────────────────────────────────
+known_issues:
+  - issue: Description of the known issue
+    impact: How this affects work
+    resolution: How to fix or work around it
+    status: operational guidance | by design | pending fix
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STABILITY
+# ─────────────────────────────────────────────────────────────────────────────
+stability:
+  convergence_indicators:
+    insight_rate_trend: growing | stable | declining
+    contradiction_count: 0
+    last_reviewed: YYYY-MM-DD
+    notes: |
+      Notes about recent changes, what was added/modified, and why.
+      Track patterns discovered and lessons learned.

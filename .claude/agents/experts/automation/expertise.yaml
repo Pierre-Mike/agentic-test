@@ -4,7 +4,7 @@
 
 overview:
   description: |
-    Automation expert domain provides specialized knowledge for kotadb's automation layer,
+    Automation expert domain provides specialized knowledge for the automation layer,
     which uses the Claude Agent SDK (@anthropic-ai/claude-code) to execute automated workflows.
     This domain covers SDK integration patterns, workflow orchestration, metrics tracking with
     SQLite, GitHub commenting via gh CLI, console output transparency, and cost tracking for AI operations.
@@ -25,7 +25,7 @@ overview:
     
     broader_scope:
       - Claude Agent SDK patterns (query(), message streaming, hooks, stderr callback)
-      - MCP server configuration for kotadb access
+      - MCP server configuration for local code access
       - Bun.spawn patterns for gh CLI integration
       - SQLite metrics storage (automation/.data/metrics.db)
       - ANSI escape code formatting for console output
@@ -35,7 +35,7 @@ overview:
     not_covered:
       - General Claude configuration (see claude-config expert)
       - GitHub issue/PR workflows (see github expert)
-      - KotaDB API implementation (see api expert)
+      - API implementation (see api expert)
       
   rationale: |
     The automation layer represents a critical architectural component that orchestrates
@@ -334,7 +334,7 @@ key_operations:
       - maxTurns 100 (allow complex multi-turn workflows)
       - permissionMode bypassPermissions (automation context, no interactive prompts)
       - cwd projectRoot (ensure correct working directory)
-      - mcpServers Configure kotadb server with stdio transport
+      - mcpServers Configure MCP server with stdio transport
       - hooks for action-level logging
       - stderr callback to suppress default output
     code_example: |
@@ -348,11 +348,11 @@ key_operations:
           cwd: projectRoot,
           permissionMode: "bypassPermissions",
           mcpServers: {
-            kotadb: {
+            "mcp-server": {
               type: "stdio",
               command: "bunx",
-              args: ["--bun", "kotadb"],
-              env: { KOTADB_CWD: projectRoot }
+              args: ["--bun", "mcp-server"],
+              env: { CWD: projectRoot }
             }
           },
           stderr: (data: string) => { /* suppress */ },
@@ -364,7 +364,7 @@ key_operations:
       }
     pitfalls:
       - Missing ANTHROPIC_API_KEY causes SDK error
-      - Incorrect projectRoot path breaks kotadb MCP access
+      - Incorrect projectRoot path breaks MCP access
       - Not using bypassPermissions requires manual intervention
       - Low maxTurns value terminates complex workflows prematurely
       - Missing hooks means no action-level visibility
@@ -405,28 +405,28 @@ key_operations:
       - Missing error state handling prevents failure tracking
       
   configure_mcp_server:
-    when: Enabling kotadb MCP tools in SDK workflow
+    when: Enabling MCP tools in SDK workflow
     approach: |
-      Configure mcpServers object with stdio transport to enable kotadb code intelligence
-      tools during SDK workflow execution. Pass KOTADB_CWD env var for correct indexing.
+      Configure mcpServers object with stdio transport to enable code intelligence
+      tools during SDK workflow execution. Pass CWD env var for correct indexing.
     patterns:
-      - Server name kotadb matches SDK expectations
+      - Server name matches SDK expectations
       - Type stdio for local server process
       - Command bunx with --bun flag for Bun runtime
       - Args for package execution
-      - Env KOTADB_CWD for indexing context
+      - Env variables for indexing context
     code_example: |
       mcpServers: {
-        kotadb: {
+        "mcp-server": {
           type: "stdio",
           command: "bunx",
-          args: ["--bun", "kotadb"],
-          env: { KOTADB_CWD: projectRoot }
+          args: ["--bun", "mcp-server"],
+          env: { CWD: projectRoot }
         }
       }
     pitfalls:
       - Wrong transport type fails to connect
-      - Missing KOTADB_CWD causes indexing in wrong directory
+      - Missing CWD env var causes indexing in wrong directory
       - Incorrect package name breaks MCP server startup
       - Not using bunx --bun flag may use Node.js
       
@@ -517,8 +517,8 @@ decision_trees:
         action: Set maxTurns to 100 or higher
         rationale: Prevents premature termination
         
-      - condition: Need kotadb code intelligence
-        action: Configure mcpServers with kotadb stdio transport
+      - condition: Need code intelligence
+        action: Configure mcpServers with stdio transport
         rationale: Enables code search and dependency analysis
         
       - condition: Multiple repositories or paths
@@ -649,7 +649,7 @@ best_practices:
   sdk_integration:
     - Always validate ANTHROPIC_API_KEY before query()
     - Use type guards for message handling
-    - Configure mcpServers for kotadb access
+    - Configure mcpServers for code access
     - Set permissionMode bypassPermissions for automation
     - Configure hooks for action-level logging
     - Provide stderr callback to suppress default output
