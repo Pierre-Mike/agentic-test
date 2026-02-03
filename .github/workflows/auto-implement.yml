@@ -6,7 +6,7 @@ on:
 
 concurrency:
   group: auto-implement-${{ github.event.issue.number }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   ISSUE_NUMBER: ${{ github.event.issue.number }}
