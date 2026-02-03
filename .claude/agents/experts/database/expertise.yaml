@@ -1,0 +1,300 @@
+# Database Expertise for KotaDB
+# Target: 400-600 lines | Domain: SQLite schema design, FTS5 search, local-only architecture
+
+overview:
+  description: SQLite database expertise for KotaDB—local-only code intelligence storage with FTS5 full-text search, WAL mode, and type-safe TypeScript wrappers.
+  scope: |
+    Schema (app/src/db/sqlite-schema.sql), client (app/src/db/sqlite/sqlite-client.ts),
+    queries (app/src/api/queries.ts), FTS5 patterns, recursive CTEs, WAL config,
+    migrations, and project-local storage (project-root.ts, gitignore.ts).
+    
+    ARCHITECTURE (v2 - LOCAL-FIRST):
+    - Local-only SQLite (no cloud); location: <project-root>/.kotadb/kota.db
+    - Path resolution: config > KOTADB_PATH env > project-local (via .git marker)
+    - Auto-gitignore for .kotadb/; WAL mode; FTS5; pool: 1 writer + N readers
+    - Types: uuid->TEXT, timestamptz->TEXT(ISO8601), jsonb->TEXT, boolean->INTEGER
+
+core_implementation:
+  database_location:
+    primary: "<project-root>/.kotadb/kota.db"
+    resolution:
+      - Explicit config
+      - KOTADB_PATH env var
+      - Project-local via .git marker
+
+  key_files:
+    - path: app/src/db/sqlite-schema.sql
+      purpose: Schema with FTS5, triggers, indexes
+    - path: app/src/db/sqlite/sqlite-client.ts
+      purpose: KotaDatabase, ConnectionPool, getGlobalDatabase()
+    - path: app/src/api/queries.ts
+      purpose: searchFiles(), queryDependents(), queryDependencies()
+    - path: app/src/config/project-root.ts
+      purpose: findProjectRoot() - walk up to .git
+    - path: app/src/config/gitignore.ts
+      purpose: ensureKotadbIgnored() - auto-add .kotadb/
+
+  schema_principles:
+    types:
+      uuid: "TEXT (36 chars)"
+      timestamp: "TEXT (ISO 8601)"
+      json: "TEXT"
+      boolean: "INTEGER 0/1"
+    constraints:
+      - TEXT UUIDs via randomUUID()
+      - ON DELETE CASCADE
+      - partial indexes
+      - CHECK for enums
+
+key_operations:
+  fts5_with_escaping:
+    when: Full-text search on file content
+    pattern: |
+      # External content FTS5 (no duplicate storage)
+      CREATE VIRTUAL TABLE indexed_files_fts USING fts5(
+        path, content, content='indexed_files', content_rowid='rowid'
+      );
+      # Query with bm25 ranking:
+      SELECT f.*, snippet(...) FROM indexed_files_fts fts
+      JOIN indexed_files f ON fts.rowid = f.rowid
+      WHERE indexed_files_fts MATCH ? ORDER BY bm25() LIMIT ?
+    escaping: |
+      function escapeFts5Term(term: string): string {
+        return `"${term.replace(/"/g, '""')}"`;
+      }
+      # Prevents: multi-word as AND, hyphens as NOT, keywords as operators
+    test_cases:
+      - "pre-commit (hyphen)"
+      - "planType smb (multi-word)"
+      - "search and find (keyword)"
+    evidence: "Commit 5af086f (issue #595), 2026-01-28"
+
+  auto_init_and_project_storage:
+    when: First database access / determining storage location
+    auto_init: "Check tableExists('indexed_files'); if !readonly && !exists, exec(sqlite-schema.sql)"
+    path_resolution: |
+      1. Explicit config.path (testing/CI)
+      2. KOTADB_PATH env var (deployments)
+      3. findProjectRoot() + .kotadb/kota.db (walk up looking for .git)
+    gitignore: "ensureKotadbIgnored() auto-adds '.kotadb/' (non-fatal on error)"
+    evidence: "Commits 2032801 (issue #574), d669841 (issue #592), 2026-01-28"
+
+  recursive_cte_dependencies:
+    when: Traversing dependency graphs (dependents/dependencies)
+    pattern: |
+      WITH RECURSIVE dependents AS (
+        SELECT f.id, f.path, 1 AS depth, '/' || f.id || '/' AS path_tracker
+        FROM indexed_references r JOIN indexed_files f ON r.file_id = f.id
+        WHERE r.reference_type = 'import' AND r.repository_id = ? AND r.target_file_path = ?
+        UNION ALL
+        SELECT f2.id, f2.path, d.depth + 1, d.path_tracker || f2.id || '/'
+        FROM indexed_references r2 JOIN indexed_files f2 ON r2.file_id = f2.id
+        JOIN indexed_files target2 ON r2.target_file_path = target2.path
+        JOIN dependents d ON target2.id = d.file_id
+        WHERE r2.reference_type = 'import' AND r2.repository_id = ? AND d.depth < ?
+        AND INSTR(d.path_tracker, '/' || f2.id || '/') = 0  -- cycle detection
+      ) SELECT DISTINCT file_path, depth FROM dependents ORDER BY depth, file_path
+    techniques:
+      - "path_tracker: String accumulator for cycle detection via INSTR check"
+      - "depth limit: d.depth < max_depth prevents infinite recursion"
+      - "repository_id: Scopes to specific repository"
+    evidence: "Commits 35e8b4c, 6055382, ba1e03a (Issue #37), 2026-01-29"
+
+  path_normalization:
+    when: Storing/comparing file paths
+    pattern: "path.replace(/\\\\/g, '/').replace(/^\\//, '').replace(/^\\.\\//, '')"
+    rules:
+      - No leading slashes
+      - Forward slashes only
+      - No ./ prefix
+    critical: Required for recursive CTE joins on target_file_path
+    evidence: "Commit 35e8b4c, queries.ts:23-50, 2026-01-29"
+
+  indexing_strategies:
+    partial:
+      pattern: "CREATE INDEX idx ON tbl(col) WHERE col IS NOT NULL"
+      use_case: Nullable columns where queries filter by non-NULL
+    composite:
+      pattern: "CREATE INDEX idx ON tbl(filter_col, join_col) WHERE filter_col = 'value'"
+      use_case: Multi-column queries
+    benefits:
+      - Smaller size
+      - Faster maintenance
+      - Better selectivity
+    evidence: "Commit 3d7d5b3, 2026-01-29"
+
+  single_source_of_truth:
+    when: Avoiding duplicate storage tables
+    anti_pattern: Separate dependency_graph table duplicating indexed_references
+    better: Single table with proper indexes + recursive CTEs
+    migration: Add indexes, rewrite queries with CTEs, verify tests, remove unused table
+    evidence: "Commit ba1e03a (~650 lines deleted), 2026-01-29"
+    lessons:
+      - "Remove unused tables aggressively to reduce maintenance burden"
+      - "Consolidate related operations into fewer, well-indexed tables"
+      - "Trust recursive CTEs over separate materialized dependency graphs"
+
+  deletion_manifest_security:
+    when: Tracking deletions in sync operations
+    pattern: |
+      const ALLOWED_DELETION_TABLES = ['repositories', 'indexed_files', ...] as const;
+      type AllowedDeletionTable = typeof ALLOWED_DELETION_TABLES[number];
+      function validateDeletionTableName(name: string): asserts name is AllowedDeletionTable {
+        if (!ALLOWED_DELETION_TABLES.includes(name)) throw new SecurityError(...);
+      }
+    security_controls:
+      - "Whitelist table names with readonly const array"
+      - "Type-safe table validation using TypeScript asserts"
+      - "Manifest size limits (10MB max) to prevent DoS"
+      - "Error rate thresholds (>10% errors = potential attack)"
+      - "Template literals safe only with validated table names"
+    evidence: "app/src/sync/deletion-manifest.ts, 2026-02-02"
+
+  sync_architecture_jsonl:
+    when: Implementing database synchronization
+    problem: "JSONL export only captures current state, deletions are invisible"
+    solution: ".deletions.jsonl manifest tracks explicit deletions"
+    lifecycle: |
+      1. Export: Record deletions in manifest during export
+      2. Git: Manifest syncs like any other file
+      3. Import: Apply deletions before importing new data
+      4. Cleanup: Clear manifest after successful import
+    patterns:
+      - "Append-only manifest with ISO timestamps"
+      - "Batch deletions by table in single transaction"
+      - "Defense-in-depth: whitelist + table existence check"
+    evidence: "app/src/sync/deletion-manifest.ts, 2026-02-02"
+
+  wal_configuration:
+    pragmas: |
+      PRAGMA journal_mode = WAL;
+      PRAGMA busy_timeout = 30000;
+      PRAGMA synchronous = NORMAL;
+      PRAGMA cache_size = -64000;
+      PRAGMA foreign_keys = ON;
+    pool: "Single writer (read-write), N readers (readonly), round-robin selection"
+
+  migrations:
+    approach: |
+      1. Check PRAGMA user_version
+      2. CREATE TABLE/INDEX IF NOT EXISTS (idempotent)
+      3. db.transaction(() => { db.exec(sql); db.setSchemaVersion(v); })
+      4. Record in schema_migrations table
+
+decision_trees:
+  fts5_vs_like:
+    - condition: File content search
+      use: "FTS5 (ranking, snippets, O(log n))"
+    - condition: Exact column values
+      use: "LIKE with index"
+    - condition: Complex patterns
+      use: "LIKE '%pattern%' (full scan)"
+
+  index_selection:
+    - condition: Single column equality
+      use: B-tree index
+    - condition: Multi-column queries
+      use: "Composite (selective column first)"
+    - condition: Filtered subset
+      use: Partial index with WHERE
+    - condition: Full-text
+      use: FTS5 virtual table
+    - condition: JSON access
+      use: Expression index on json_extract()
+
+  transaction_type:
+    - condition: Read-only
+      use: autocommit
+    - condition: Single write
+      use: db.run()
+    - condition: Multiple writes
+      use: db.transaction()
+    - condition: Must not fail
+      use: db.immediateTransaction()
+
+patterns:
+  external_content_fts5:
+    structure: "FTS5 with content='base_table' + sync triggers (ai/ad/au)"
+    trade_offs:
+      pros:
+        - No duplicate storage
+        - Auto sync
+      cons:
+        - Trigger overhead
+
+  connection_pool:
+    structure: "1 writer + N readers (cpus().length), round-robin"
+    usage: "pool.write(db => ...), pool.read(db => ...)"
+
+  batch_insert:
+    structure: "db.transaction(() => { const stmt = db.prepare(...); for (r of records) stmt.run(...); })"
+
+best_practices:
+  schema:
+    - TEXT UUIDs (36 chars)
+    - TEXT ISO 8601 timestamps
+    - INTEGER booleans
+    - CHECK for enums
+    - indexes on FKs
+    - ON DELETE CASCADE
+
+  queries:
+    - Parameterized only
+    - escapeFts5Term() always
+    - batch in transactions
+    - IMMEDIATE for writes
+
+  security:
+    - Whitelist table names for dynamic SQL
+    - Validate all user inputs with type assertions
+    - Size limits on external files (manifests, imports)
+    - Error rate monitoring for attack detection
+
+  connections:
+    - Pool pattern
+    - single writer
+    - WAL mode
+    - 30s busy_timeout
+    - close on shutdown
+
+  performance:
+    - Covering indexes
+    - partial indexes
+    - EXPLAIN QUERY PLAN
+    - periodic WAL checkpoint
+
+  migrations:
+    - IF NOT EXISTS
+    - PRAGMA user_version
+    - schema_migrations table
+    - test rollback
+
+known_issues:
+  - issue: FTS5 syntax errors with hyphens/multi-word
+    resolution: "escapeFts5Term() (commit 5af086f)"
+
+  - issue: SQLite no ALTER COLUMN type
+    resolution: "New column, migrate, drop old"
+
+  - issue: WAL requires filesystem support
+    resolution: "Check compatibility, fallback to default journal"
+
+  - issue: Large transactions grow WAL
+    resolution: "Checkpoint periodically, smaller batches"
+
+stability:
+  last_reviewed: 2026-02-02
+  insight_rate_trend: accelerating
+  contradiction_count: 0
+  notes: |
+    Major update (2026-02-02) - added sync and security patterns:
+    - Deletion manifest security controls (whitelist, validation, DoS protection)
+    - JSONL sync architecture with explicit deletion tracking
+    - Single source of truth lessons learned from dependency_graph removal
+
+    Previous consolidation (2026-01-30) preserved:
+    - FTS5 + escapeFts5Term (issue #595)
+    - Auto-init schema (issue #574)
+    - Project-local storage (issue #592)
+    - Recursive CTE dependencies (issue #37)
+    - Path normalization, partial/composite indexes

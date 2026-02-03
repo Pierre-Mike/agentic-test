@@ -1,0 +1,587 @@
+# Claude Code Configuration Expertise
+# Target: 400-600 lines | Domain: Operational knowledge for .claude/ configuration
+# Last updated: 2026-02-02 (documentation accuracy patterns, 9 expert domains)
+
+overview:
+  description: |
+    Claude Code configuration for KotaDB—.claude/ directory structure, command patterns,
+    hook implementation with standard Python (hook_helpers.py), agent registry management,
+    and expert domain organization. This expertise enables correct configuration of Claude
+    Code within the KotaDB codebase conventions.
+  scope: |
+    Covers .claude/ directory organization (agents/, commands/, hooks/, hooks/utils/),
+    command frontmatter with Template Category, hook implementation using standard Python
+    with hook_helpers.py utilities, agent-registry.json maintenance, expert 4-agent pattern
+    (plan/build/improve/question in agents/experts/<domain>/), and KotaDB-specific conventions.
+
+    KOTADB ADAPTATIONS:
+    - Hooks use standard Python with hook_helpers.py (NOT uv shebang)
+    - Commands include Template Category field
+    - Tools in agent frontmatter use YAML array format (NOT comma-separated)
+    - Agent-registry.json must be updated when adding agents
+    - Logging uses sys.stdout.write (never print())
+    - Local-only SQLite storage (no cloud dependencies)
+
+    Does NOT cover agent prompt content authoring (see agent-authoring expert).
+  rationale: |
+    Correct .claude/ configuration enables tooling, discoverability, and maintainability.
+    Poor structure creates fragmentation and breaks tooling. KotaDB has established
+    conventions that differ from other Claude Code projects and must be followed.
+
+core_implementation:
+  directory_structure:
+    .claude/:
+      agents/:
+        purpose: Agent definitions (general-purpose + experts/)
+        README.md: Documents agent structure, registry, tool access
+        agent-template.md: Starting template for new agents
+        agent-registry.json: Machine-readable agent catalog with indexes
+        build-agent.md: Implementation agent with write access
+        scout-agent.md: Read-only exploration agent
+        review-agent.md: Code review agent
+        experts/<domain>/:
+          purpose: 4-agent pattern (plan/build/improve/question + expertise.yaml)
+          pattern: Domain experts with queryable knowledge
+          active_domains: [claude-config, agent-authoring, database, api, testing, indexer, github, automation, documentation]
+      commands/:
+        purpose: Slash commands by category
+        workflows/: SDLC phase commands (prime, plan, implement, validate)
+        docs/: Documentation reference commands
+        issues/: Issue management commands
+        git/: Git operation commands
+        testing/: Test-related commands
+        ci/: CI/CD commands
+        tools/: Development tools
+        app/: Application development commands
+        automation/: ADW automation commands
+        worktree/: Worktree management commands
+        release/: Release workflow commands
+        validation/: Validation commands
+        experts/orchestrators/: Expert orchestration commands
+      hooks/:
+        purpose: Lifecycle hooks (standard Python with hook_helpers.py)
+        utils/hook_helpers.py: Shared hook utilities
+      settings.json:
+        purpose: Project-wide config (committed)
+      settings.local.json:
+        purpose: Local overrides (gitignored)
+
+  key_files:
+    - path: .claude/commands/<category>/<name>.md
+      purpose: Slash command (frontmatter + prompt)
+      invocation: /category:name (e.g., /workflows:plan)
+    - path: .claude/agents/experts/<domain>/<domain>-{plan,build,improve,question}-agent.md
+      purpose: Expert 4-agent pattern with standardized colors
+    - path: .claude/agents/experts/<domain>/expertise.yaml
+      purpose: Structured domain knowledge (400-600 lines target)
+    - path: .claude/hooks/<hook-name>.py
+      purpose: Lifecycle hook using hook_helpers.py
+    - path: .claude/hooks/utils/hook_helpers.py
+      purpose: Shared hook utilities (read_hook_input, output_result, etc.)
+    - path: .claude/agents/agent-registry.json
+      purpose: Machine-readable agent catalog with capability/model/tool indexes
+
+key_operations:
+  create_slash_command:
+    when: Adding new command functionality
+    approach: |
+      1. Create .claude/commands/<category>/<name>.md
+      2. Add frontmatter and Template Category:
+         ```markdown
+         # /command-name
+
+         **Template Category**: Path Resolution | Action | Reference
+
+         Brief description of command purpose.
+
+         ## Inputs
+         - `$1` (param_name): Description
+
+         ## Context
+
+         **Project**: KotaDB - HTTP API service for code indexing
+         ...
+
+         ## Instructions
+         ...
+         ```
+      3. Invoked as /category:name
+    examples:
+      - .claude/commands/workflows/plan.md -> /workflows:plan
+      - .claude/commands/docs/architecture.md -> /docs:architecture
+    pitfalls:
+      - what: "CRITICAL - Using colons in frontmatter string values"
+        instead: "No colons in description or any YAML value"
+        reason: "Colons break YAML parsing in Claude Code's configuration system"
+      - what: "Missing Template Category"
+        instead: "Always include Template Category after the title"
+        reason: "KotaDB convention for command classification"
+
+  implement_hook:
+    when: Need to run code on agent lifecycle events
+    events: [PreToolUse, PostToolUse, UserPromptSubmit, Stop]
+    approach: |
+      1. Create .claude/hooks/<hook-name>.py with standard Python shebang:
+         ```python
+         #!/usr/bin/env python3
+         """Hook description."""
+
+         import os
+         import sys
+
+         # Add parent directory for imports
+         sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+         from hooks.utils.hook_helpers import (
+             read_hook_input,
+             output_result,
+             get_file_path_from_input,
+             get_project_root,
+         )
+
+         def main() -> None:
+             hook_input = read_hook_input()
+             # Hook logic here
+             output_result("continue", "Optional message")
+
+         if __name__ == "__main__":
+             main()
+         ```
+      2. Exit via output_result("continue") or output_result("block")
+      3. Configure in .claude/settings.json hooks object
+      4. Use matcher for tool-specific targeting
+    kotadb_conventions:
+      - NEVER use print() - use sys.stdout.write() per logging standards
+      - Import from hooks.utils.hook_helpers for shared utilities
+      - Use standard Python shebang (#!/usr/bin/env python3), NOT uv
+    examples:
+      - auto_linter.py: PostToolUse hook for JS/TS file linting
+
+  create_expert_domain:
+    when: Adding new expert domain with queryable expertise
+    approach: |
+      1. Create .claude/agents/experts/<domain>/
+      2. Create expertise.yaml (overview, core_implementation, key_operations,
+         decision_trees, patterns, best_practices, known_issues)
+         Target: 400-600 lines, max 1000 lines
+      3. Create <domain>-plan-agent.md:
+         - model: sonnet
+         - color: yellow
+         - tools: [Read, Glob, Grep, Write, Bash]
+      4. Create <domain>-build-agent.md:
+         - model: sonnet
+         - color: green
+         - tools: [Read, Write, Edit, Glob, Grep, Bash]
+      5. Create <domain>-improve-agent.md:
+         - model: sonnet
+         - color: purple
+         - tools: [Read, Write, Edit, Glob, Grep, Bash, Task]
+      6. Create <domain>-question-agent.md:
+         - model: haiku
+         - color: cyan
+         - tools: [Read, Glob, Grep]
+      7. Update agent-registry.json with all new agents
+      8. Update CLAUDE.md Expert Domains section
+      9. Update /do command with domain detection patterns
+    kotadb_adaptations:
+      - Use YAML array format for tools (NOT comma-separated)
+      - Add MCP tools where appropriate (mcp__kotadb-bunx__*)
+      - Update agent-registry.json capabilityIndex, modelIndex, toolMatrix
+    pitfalls:
+      - what: "CRITICAL - Using colons in agent description field"
+        instead: "Remove colons from description values"
+        reason: "Colons cause agent discovery to fail silently"
+      - what: "Forgetting to update agent-registry.json"
+        instead: "Always add new agents to registry with capabilities and tools"
+        reason: "Registry enables programmatic agent discovery"
+      - what: "Missing CLAUDE.md updates"
+        instead: "Update expert domain table and usage examples"
+        reason: "Users discover experts via CLAUDE.md"
+        timestamp: 2026-01-28
+        evidence: commit 902c49a CLAUDE.md updates
+
+  update_agent_registry:
+    when: Adding, modifying, or removing agents
+    approach: |
+      1. Read current .claude/agents/agent-registry.json
+      2. Update agents object with new agent definition:
+         ```json
+         "agent-name": {
+           "name": "agent-name",
+           "description": "Brief description",
+           "file": "path/to/agent.md",
+           "model": "haiku|sonnet|opus",
+           "capabilities": [
+             "capability1",
+             "capability2"
+           ],
+           "tools": [
+             "Tool1",
+             "Tool2"
+           ],
+           "readOnly": true|false
+         }
+         ```
+      3. Update capabilityIndex - add agent to relevant capability arrays
+      4. Update modelIndex - add agent to model tier array
+      5. Update toolMatrix - add agent to each tool's array
+    validation:
+      - Ensure file path matches actual agent location
+      - Verify all tools listed exist
+      - Confirm capabilities align with agent purpose
+    formatting_convention:
+      timestamp: 2026-01-28
+      evidence: commit 902c49a agent-registry.json formatting
+      pattern: |
+        Use multi-line array format for readability:
+        ```json
+        "capabilities": [
+          "capability1",
+          "capability2"
+        ],
+        "tools": [
+          "Tool1",
+          "Tool2"
+        ]
+        ```
+        NOT inline: "capabilities": ["capability1", "capability2"]
+      rationale: Improves git diff readability and reduces merge conflicts when adding items
+
+  configure_settings:
+    when: Configuring permissions, hooks, or project behavior
+    structure: |
+      .claude/settings.json:
+      {
+        "statusLine": {"type": "command", "command": "..."},
+        "permissions": {"allow": ["Read", "Glob"], "deny": []},
+        "env": {"VAR": "value"},
+        "hooks": {
+          "<EventType>": [
+            {
+              "matcher": {"tool_name": "Edit"},
+              "hooks": [{"type": "command", "command": "python3 .claude/hooks/<name>.py", "timeout": 5000}]
+            }
+          ]
+        }
+      }
+    notes: |
+      - Local overrides in settings.local.json (gitignored)
+      - Matcher enables tool-specific hooks (e.g., PostToolUse only for Edit)
+      - Valid JSON (no trailing commas)
+      - Hook commands use python3, not uv
+
+  update_do_command_for_expert:
+    when: Adding new expert domain to /do orchestration
+    timestamp: 2026-01-28
+    evidence: commit 902c49a do.md updates for 5 new domains
+    approach: |
+      1. Add domain to Domain Detection section with:
+         - Keywords: domain-specific terms (e.g., "schema", "migration" for database)
+         - Locations: relevant file paths (e.g., app/src/db/)
+         - Indicators: what triggers this domain
+         - Examples: sample user requests
+      2. Update Pattern Classification with domain in Pattern A and B lists
+      3. Add domain to orchestration pattern "Domains Using This Pattern" lists
+      4. Update report templates to include new domain option
+      5. Add Classification Cheat Sheet entries with verb-object patterns
+      6. Add disambiguation options to include new domain
+      7. Add example usage in Examples section
+      8. Update Spec File Storage with new domain directory
+      9. Update Implementation Notes current state count
+    rationale: |
+      /do command uses keyword-based classification to route to correct expert.
+      Each domain needs detection patterns, examples, and orchestration updates.
+  tool_permissions_philosophy:
+    timestamp: 2026-01-28
+    evidence: commit 446e999 tool permissions fix for 20 expert agents
+    principle: "Permissive tools + strict prompts"
+    when: Deciding which tools to grant expert agents
+    approach: |
+      Grant tools liberally based on what an agent MIGHT need, then use prompts
+      to constrain behavior. This prevents workflow breakage when agents need
+      capabilities for validation or verification that weren't anticipated.
+
+      Plan agents (yellow, sonnet):
+      - GRANT: [Read, Glob, Grep, Write, Bash]
+      - Bash enables: git operations, file statistics, wc, verification commands
+      - Rationale: Plan agents write specs and may need to check git state,
+        count files, or verify current state
+
+      Build agents (green, sonnet):
+      - GRANT: [Read, Write, Edit, Glob, Grep, Bash]
+      - Bash enables: type-checking (bunx tsc), test runs (bun test), linting
+      - Rationale: Build agents implement and should verify their work
+
+      Improve agents (purple, sonnet):
+      - GRANT: [Read, Write, Edit, Glob, Grep, Bash, Task]
+      - Task enables: spawning sub-agents for complex analysis
+      - Rationale: Improve agents analyze patterns and may delegate to experts
+
+      Question agents (cyan, haiku):
+      - GRANT: [Read, Glob, Grep]
+      - Rationale: Read-only, fast answers
+    discovered_issue:
+      symptom: Plan agents couldn't write specs, build agents couldn't run tests
+      root_cause: Tool permissions too restrictive, agents failed tasks silently
+      resolution: Added Bash to plan/build agents, Task to improve agents
+      lesson: Better to grant tools and constrain via prompt than block capabilities
+    examples:
+      - Plan agent uses Bash for "git status" to check current branch
+      - Build agent uses Bash for "bunx tsc --noEmit" to verify types
+      - Improve agent uses Task to spawn scout-agent for pattern analysis
+
+
+decision_trees:
+  command_vs_agent_vs_expert:
+    question: What am I creating?
+    options:
+      - if: User-invoked task with fixed workflow
+        then: Slash command (.claude/commands/<category>/)
+      - if: Model-invoked sub-agent for delegation
+        then: Agent (.claude/agents/)
+      - if: Domain expertise with plan/build/improve/question
+        then: Expert domain (.claude/agents/experts/<domain>/)
+
+  agent_model_selection:
+    question: Which model tier?
+    options:
+      - if: Fast, read-only exploration
+        then: haiku (scout-agent, review-agent, question agents)
+      - if: Balanced implementation work
+        then: sonnet (build agents, plan agents, improve agents)
+      - if: Complex coordination and reasoning
+        then: opus (orchestrator-agent)
+
+  expert_location:
+    question: Where to put expert files?
+    options:
+      - file: Agent files (plan, build, improve, question)
+        location: .claude/agents/experts/<domain>/
+      - file: Expertise YAML
+        location: .claude/agents/experts/<domain>/expertise.yaml
+      - file: Orchestrator commands
+        location: .claude/commands/experts/orchestrators/
+
+patterns:
+  expert_domain_4agent:
+    structure: |
+      .claude/agents/experts/<domain>/
+      ├── expertise.yaml (400-600 lines target, 1000 max)
+      ├── <domain>-plan-agent.md (yellow, sonnet, Read/Glob/Grep/Write/Bash)
+      ├── <domain>-build-agent.md (green, sonnet, Read/Write/Edit/Glob/Grep/Bash)
+      ├── <domain>-improve-agent.md (purple, sonnet, all + Bash + Task)
+      └── <domain>-question-agent.md (cyan, haiku, Read/Glob/Grep)
+    color_coding:
+      plan: yellow (analysis, planning)
+      build: green (creation, implementation)
+      improve: purple (review, expertise evolution)
+      question: cyan (meta, read-only Q&A)
+    trade_offs:
+      pros: [Plan-build-improve lifecycle, Color-coded roles, Queryable expertise]
+      cons: [5 files per domain, Requires registry updates]
+    active_domains:
+      timestamp: 2026-01-28
+      list:
+        - claude-config: .claude/ configuration management
+        - agent-authoring: Agent creation and modification
+        - database: SQLite schema, FTS5, migrations, queries
+        - api: HTTP endpoints, MCP tools, Express patterns
+        - testing: Antimocking, Bun tests, SQLite test patterns
+        - indexer: AST parsing, symbol extraction, code analysis
+        - github: Issues, PRs, branches, GitHub CLI workflows
+
+  agent_frontmatter_format:
+    kotadb_style: |
+      ---
+      name: agent-name
+      description: Brief description without colons
+      tools:
+        - Read
+        - Glob
+        - Grep
+        - mcp__kotadb-bunx__search_code
+      model: haiku|sonnet|opus
+      color: yellow|green|purple|cyan
+      constraints:
+        - Constraint 1
+        - Constraint 2
+      ---
+    notes:
+      - Tools as YAML array, NOT comma-separated string
+      - model and color optional but recommended for expert agents
+      - Description MUST NOT contain colons
+      - MCP tools use mcp__server__tool format
+
+  command_template_category:
+    categories:
+      path_resolution: Commands that find or locate files/resources
+      action: Commands that perform changes (build, implement)
+      reference: Commands that provide documentation
+      analysis: Commands that analyze without changing
+    usage: |
+      # /command-name
+
+      **Template Category**: Action
+
+      Command description...
+
+  hook_helpers_pattern:
+    usage: |
+      from hooks.utils.hook_helpers import (
+          read_hook_input,      # Parse JSON from stdin
+          output_result,        # Write JSON result to stdout
+          get_file_path_from_input,  # Extract file path from hook input
+          get_project_root,     # Get CLAUDE_PROJECT_DIR or cwd
+          is_js_ts_file,        # Check if file is JS/TS
+      )
+    conventions:
+      - NEVER use print() - violates logging standards
+      - Always use sys.stdout.write() for output
+      - Import hook_helpers from hooks.utils
+      - Add sys.path.insert for parent directory access
+
+  agent_registry_structure:
+    sections:
+      agents: Individual agent definitions with tools and capabilities
+      capabilityIndex: Map capabilities to agent IDs for discovery
+      modelIndex: Map model tiers to agent IDs
+      toolMatrix: Map tools to agents that use them
+    usage: |
+      Programmatic discovery:
+      - Find agents by capability: registry.capabilityIndex["implement"]
+      - Find agents by model: registry.modelIndex["sonnet"]
+      - Find agents using tool: registry.toolMatrix["Bash"]
+
+  expert_domain_expansion:
+    timestamp: 2026-01-28
+    evidence: commits 902c49a (docs updates), agent-registry.json changes
+    pattern: |
+      When scaling from 2 to 7 expert domains, updates required:
+      1. Create 4 agent files per domain (.claude/agents/experts/<domain>/)
+      2. Create expertise.yaml per domain
+      3. Update agent-registry.json (24+ new entries, indexes)
+      4. Update CLAUDE.md expert domains table and examples
+      5. Update /do command domain detection (9 sections)
+      6. Maintain consistency across all domains
+    challenges:
+      - Registry file grows large (agent-registry.json now 873 lines)
+      - /do command complexity increases with domain count
+      - Multi-line JSON formatting essential for diff readability
+      - Tool permissions must be consistent across similar agent roles
+    best_practices:
+      - Use consistent capability naming pattern (<domain>-planning, <domain>-implementation)
+      - Keep domain keywords non-overlapping for routing accuracy
+      - Document all domains in single CLAUDE.md table for discoverability
+      - Apply uniform tool permissions across agent types (plan/build/improve/question)
+
+best_practices:
+  organization:
+    - Agents in .claude/agents/, commands in .claude/commands/
+    - Expert domains: agents/experts/<domain>/ (4-agent + expertise.yaml)
+    - General agents at root level: build-agent.md, scout-agent.md, review-agent.md
+    - Expertise.yaml: 400-600 lines target, 1000 hard limit
+
+  commands:
+    - Include Template Category after title
+    - Naming: /category:command pattern
+    - Use allowed-tools to restrict capabilities per command
+    - CRITICAL: Never use colons in frontmatter string values
+
+  agents:
+    - Tools as YAML array format (NOT comma-separated)
+    - Include constraints section for behavioral boundaries
+    - Include model and color fields for expert agents
+    - Update agent-registry.json for every new agent
+    - CRITICAL: Never use colons in description field
+    - Add MCP tools where appropriate (mcp__kotadb-bunx__*)
+    - Apply "permissive tools + strict prompts" philosophy
+
+  hooks:
+    - Standard Python shebang (#!/usr/bin/env python3)
+    - Import from hooks.utils.hook_helpers
+    - NEVER use print() - use sys.stdout.write()
+    - Use output_result() for structured responses
+    - Configure in settings.json with matchers
+
+  settings:
+    - settings.json: project-wide (committed)
+    - settings.local.json: local overrides (gitignored)
+    - Valid JSON (no trailing commas)
+    - Hook commands use python3
+
+  expert_expansion:
+    timestamp: 2026-01-28
+    - Document all expert domains in CLAUDE.md for discoverability
+    - Use multi-line JSON arrays in agent-registry.json for git diffs
+    - Keep /do domain detection patterns specific and non-overlapping
+    - Update all 3 files (CLAUDE.md, do.md, agent-registry.json) atomically
+    - Grant consistent tool permissions across agent types within domain
+
+known_issues:
+  - issue: Colons in frontmatter description values break YAML parsing
+    impact: Agents/commands with colons in description fail discovery silently
+    resolution: Remove all colons from description field values
+    prevention: Review all descriptions before commit
+    status: ongoing vigilance required
+
+  - issue: Comma-separated tools format not supported
+    impact: Tools listed as "Read, Glob, Grep" won't parse correctly
+    resolution: Use YAML array format for tools
+    status: use correct format
+
+  - issue: Agent registry out of sync with agent files
+    impact: Programmatic discovery fails to find new agents
+    resolution: Update agent-registry.json when adding/modifying agents
+    status: manual maintenance required
+
+  - issue: Hook using print() violates logging standards
+    impact: Inconsistent output, potential buffering issues
+    resolution: Use sys.stdout.write() per KotaDB conventions
+    status: enforced via code review
+  - issue: Tool permissions too restrictive for agent workflows
+    impact: Agents silently fail to complete tasks (can't write specs, run tests)
+    resolution: Apply "permissive tools + strict prompts" philosophy
+    discovered: 2026-01-28 (commit 446e999)
+    status: resolved via systematic tool permission audit
+
+  - issue: Documentation accuracy drift over time
+    impact: Broken command references, non-existent file dependencies, user confusion
+    symptoms: CLAUDE.md commands that don't exist, settings.json referencing missing files
+    resolution: Systematic validation of all documentation references against actual files
+    discovered: 2026-02-02 (issue #77, claude-config-documentation-fixes-spec.md)
+    examples:
+      - /tools:bun_install, /tools:pr-review, /tools:question (non-existent commands)
+      - statusline.py referenced in settings.json (non-existent file)
+      - workflows/, homeserver/, app/ directories (non-existent in commands/)
+      - Expert domain count mismatches (documented 7 vs actual 9)
+    status: active remediation via systematic documentation cleanup
+    prevention: Add documentation accuracy validation to development workflow
+
+potential_enhancements:
+  - Automated agent registry validation (compare files to registry)
+  - Frontmatter linting for description colons
+  - Template Category validation
+  - Hook output validation
+  - Expert domain registry validation (ensure CLAUDE.md, do.md, agent-registry.json in sync)
+  - Tool permission consistency checker across agent types
+  - Documentation accuracy validation (check all referenced commands/files exist)
+  - Spec file location consistency enforcement (docs/specs/ vs .claude/.cache/specs/)
+
+stability:
+  convergence_indicators:
+    insight_rate_trend: growing
+    contradiction_count: 0
+    new_patterns_added_this_cycle: 1
+    patterns_updated_this_cycle: 2
+    last_reviewed: 2026-02-02
+    utility_ratio: 1.0
+    notes: |
+      Expert domain expansion cycle (7 -> 9 domains) and documentation accuracy patterns:
+      - Added documentation accuracy issues pattern from claude-config-documentation-fixes-spec.md
+      - Updated expert domain count from 7 to 9 domains (automation + documentation)
+      - Identified systematic documentation accuracy issues (non-existent command references)
+      - Added spec file location pattern observations (docs/specs/ vs .claude/.cache/specs/)
+      - Updated registry expansion numbers and active domain lists
+      - Added documentation accuracy validation to potential enhancements
+      - Captured patterns from settings.json cleanup (statusline.py removal)
+

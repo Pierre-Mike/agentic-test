@@ -1,0 +1,554 @@
+# Agent Authoring & Configuration Expertise
+# Target: 500 lines (optimal) | WARNING: 600 lines | HARD LIMIT: 700 lines
+
+overview:
+  description: |
+    Agent authoring and configuration for kotadb—frontmatter schema with tools[], constraints[],
+    readOnly, expertDomain, and color fields; flat agent structure with general-purpose and expert agents;
+    agent-registry.json integration; MCP tool selection (mcp__kotadb-bunx__*); and system prompt
+    structure. This expertise enables correct agent configuration for discoverability, capability,
+    and appropriate model selection within kotadb's local-only architecture.
+  scope: |
+    Covers agent.md frontmatter (name, description, tools[], model, constraints[], readOnly,
+    expertDomain, color), flat agent organization (root-level + experts/), agent-registry.json
+    with capability/model/tool indexes, MCP tool patterns, and system prompt organization.
+    Does NOT cover prompt content specifics or orchestration patterns (see orchestration expert).
+  rationale: |
+    Consistent agent configuration enables discoverability, correct tool usage, and appropriate
+    model selection. kotadb uses a flat agent structure with general-purpose agents at root level
+    and domain experts in experts/<domain>/. Poor agent config leads to capability gaps, security
+    issues, and confusion about agent responsibilities.
+
+core_implementation:
+  primary_files:
+    - path: .claude/agents/
+      purpose: All agent examples with frontmatter patterns
+    - path: .claude/agents/build-agent.md
+      purpose: Implementation agent with write access
+    - path: .claude/agents/scout-agent.md
+      purpose: Read-only exploration agent
+    - path: .claude/agents/review-agent.md
+      purpose: Code review agent
+    - path: .claude/agents/experts/
+      purpose: Expert domain patterns (4-agent standard with plan/build/improve/question)
+    - path: .claude/agents/agent-registry.json
+      purpose: Machine-readable registry with capabilityIndex, modelIndex, toolMatrix
+    - path: .claude/agents/agent-template.md
+      purpose: Template for new agent creation
+
+  key_sections:
+    - name: General Agent Frontmatter
+      location: .claude/agents/build-agent.md (lines 1-10)
+      summary: Standard agent frontmatter with tools list and model
+    - name: Expert Agent Frontmatter
+      location: .claude/agents/experts/automation/automation-plan-agent.md
+      summary: Expert agent frontmatter with expertDomain and color fields
+    - name: Agent Registry Structure
+      location: .claude/agents/agent-registry.json
+      summary: agents, capabilityIndex, modelIndex, toolMatrix structure
+
+key_operations:
+  write_agent_frontmatter:
+    name: Write Complete Agent Frontmatter (kotadb schema)
+    description: Populate all agent.md frontmatter fields correctly for kotadb
+    when_to_use: Creating new agent or updating existing
+    approach: |
+      Required frontmatter fields:
+      1. name: kebab-case identifier (e.g., build-agent, scout-agent)
+      2. description: Action verb + purpose (NEVER use colons in value)
+      3. tools: YAML list format (not comma-separated)
+         - Tool1
+         - Tool2
+      4. model: haiku/sonnet/opus
+
+      kotadb-specific optional fields:
+      5. constraints: List of behavioral boundaries
+      6. readOnly: true|false (explicit flag for read-only agents)
+      7. expertDomain: Domain name for expert agents
+      8. color: Visual identifier for expert agents (yellow=plan, green=build, purple=improve, cyan=question)
+
+      Format (kotadb style):
+      ---
+      name: agent-name
+      description: Brief action-oriented description
+      tools:
+        - Read
+        - Glob
+        - Grep
+      model: sonnet
+      constraints:
+        - Never modify files outside scope
+      readOnly: true
+      ---
+
+      CRITICAL: NEVER use colons in description values. Colons break Claude Code's
+      agent discovery parser. Use "Plans agent creation for kotadb" not
+      "Plans agent creation: for kotadb".
+      
+      Expert agent descriptions document expected input: "Plans X for kotadb. Expects USER_PROMPT"
+    examples:
+      - agent: scout-agent
+        frontmatter: "name: scout-agent | tools: [Read, Glob, Grep] | model: haiku | readOnly: true"
+      - agent: automation-build-agent
+        frontmatter: "name: automation-build-agent | tools: [Read, Write, Edit, Bash, Glob, Grep] | model: sonnet | expertDomain: automation"
+    pitfalls:
+      - what: Using colons in description field values
+        instead: Remove all colons from descriptions
+        reason: Causes silent agent discovery failure
+      - what: Using comma-separated tools string
+        instead: Use YAML list format with tools[]
+      - what: Missing readOnly field on read-only agents
+        instead: Explicitly set readOnly for clarity
+
+  select_tools_for_kotadb_agent:
+    name: Select Tools Based on Agent Role (kotadb patterns)
+    description: Grant appropriate tools including kotadb MCP tools
+    when_to_use: Configuring tools field in frontmatter
+    approach: |
+      **PHILOSOPHY: "Permissive Tools + Strict Prompts"**
+      Give agents tools they might need, guide behavior via instructions.
+      Better to have a tool with clear "use only for X" guidance than to
+      lack a tool when it becomes necessary.
+
+      General Agents:
+      - scout-agent (Read-only exploration): Read, Glob, Grep
+      - build-agent (Implementation): Read, Write, Edit, Bash, Glob, Grep
+      - review-agent (Code review): Read, Glob, Grep
+
+      Expert Domain Agents (8 domains: claude-config, agent-authoring, database, api, testing, indexer, github, automation):
+      - Plan: Read, Glob, Grep, Write, Bash
+        * Write: for spec caching
+        * Bash: for git operations, file statistics, verification commands
+      - Build: Read, Write, Edit, Glob, Grep, Bash
+        * Bash: for type-checking (bunx tsc --noEmit), running tests, verification
+      - Improve: Read, Write, Edit, Glob, Grep, Bash, Task
+        * Bash: for git log/diff analysis
+        * Task: for spawning sub-agents during complex analysis
+      - Question: Read, Glob, Grep (read-only, haiku model)
+
+      **Tool Guidance Pattern:**
+      Add one-liner instruction after Variables section:
+      - Plan/Build agents: "Use Bash for git operations, file statistics, or verification commands."
+      - Improve agents: "Use Task to spawn sub-agents for complex analysis when needed."
+
+      KotaDB MCP tools (for codebase analysis):
+      - mcp__kotadb-bunx__search_code (term)
+      - mcp__kotadb-bunx__search_dependencies (file_path, direction, depth)
+      - mcp__kotadb-bunx__analyze_change_impact (files)
+      - mcp__kotadb-bunx__list_recent_files ()
+    examples:
+      - role: scout-agent
+        tools: Read, Glob, Grep
+      - role: build-agent
+        tools: Read, Write, Edit, Bash, Glob, Grep, mcp__kotadb-bunx__search_code
+      - role: expert-plan
+        tools: Read, Glob, Grep, Write, Bash
+
+  select_model_for_agent:
+    name: Select Model for Agent
+    description: Choose appropriate model based on reasoning needs and cost
+    when_to_use: Setting model field in frontmatter
+    approach: |
+      Model selection decision tree for kotadb:
+
+      haiku (fast, cheap):
+      - Scout agents (read-only exploration)
+      - Question agents (fast Q&A) - ALL 8 expert question agents use haiku
+      - Review agents (read-only analysis)
+      - Test first before downgrading from sonnet
+
+      sonnet (balanced, default):
+      - Build agents (implementation)
+      - Expert plan/build/improve agents - ALL use sonnet
+      - Most general agents use sonnet
+
+      opus (powerful, expensive):
+      - Reserved for future complex orchestration needs
+      - Only when complexity justifies cost
+    examples:
+      - agent: scout-agent | model: haiku | reason: Fast read-only search
+      - agent: automation-question-agent | model: haiku | reason: Fast Q&A on SDK patterns
+      - agent: automation-build-agent | model: sonnet | reason: Complex SDK implementation
+
+  write_agent_description:
+    name: Write Effective Agent Description
+    description: Create description that aids discoverability and invocation
+    when_to_use: Writing description field in frontmatter
+    approach: |
+      Pattern: [Action Verb] + [Domain/Object] + [Context/Purpose] + [Expected Input]
+
+      Components:
+      1. Action verb: Plans, Implements, Reviews, Explores, Answers
+      2. Domain/Object: What it acts on (agent creation, automation, database)
+      3. Context: "for kotadb" or "for KotaDB" (consistency across domains)
+      4. Expected Input: "Expects USER_PROMPT" or "Expects SPEC"
+
+      Character limit: Keep under 120 characters
+      NEVER USE COLONS: Replace with periods or remove
+
+      Description patterns by agent type:
+      - General: "{Action} agent - {capability summary}"
+      - Expert Plan: "Plans {domain} tasks for kotadb. Expects USER_PROMPT ({requirement})"
+      - Expert Build: "Implements {domain} from specs. Expects SPEC (path to spec file)"
+      - Expert Improve: "{Domain} expertise evolution specialist"
+      - Expert Question: "{Domain} Q&A specialist" or "Answers {domain} questions..."
+    examples:
+      - good: "Plans automation layer changes for kotadb. Expects USER_PROMPT (SDK or workflow requirement)"
+      - good: "Automation expertise evolution specialist"
+      - good: "Automation Q&A specialist. Answers questions about SDK patterns and workflow execution"
+      - bad: "Plans: implementation" (colon breaks parser)
+
+  structure_agent_prompt:
+    name: Structure Agent System Prompt Content (kotadb)
+    description: Organize agent prompt with clear sections for kotadb agents
+    when_to_use: Writing agent body content (after frontmatter)
+    approach: |
+      Standard sections for kotadb agents (in order):
+      1. # Agent Name - H1 header
+      2. Brief intro paragraph (1-2 sentences describing role)
+      3. ## Variables - Expected inputs (expert agents) OR ## Input Format (general agents)
+      4. ## Instructions - High-level guidance bullets
+         - Include tool guidance one-liner here (after Output Style)
+      5. ## Expertise - Domain-specific knowledge (expert agents only)
+         - Reference expertise.yaml as canonical source
+         - Include timestamped learnings [YYYY-MM-DD]
+      6. ## Workflow - Numbered steps with clear phases
+      7. ## KotaDB Conventions - MANDATORY for build agents
+         - Path aliases (@api/*, @db/*, @shared/*, etc.)
+         - Logging (process.stdout.write, never console.*)
+         - Testing (real SQLite)
+      8. ## Report - Structured output template (use markdown code block)
+      9. ## Constraints - Behavioral boundaries (if needed)
+
+      Expert agent pattern includes:
+      - Reference to expertise.yaml at top of Expertise section
+      - Timestamped learnings in Expertise section
+      - Variables section documenting USER_PROMPT or SPEC
+    examples:
+      - location: .claude/agents/experts/automation/automation-build-agent.md
+        sections: Variables, Instructions, Expertise (with yaml reference), Workflow, Report, KotaDB Conventions
+
+  update_agent_registry:
+    name: Update agent-registry.json
+    description: Register new agent in machine-readable registry
+    when_to_use: After creating new agent file
+    approach: |
+      agent-registry.json structure:
+      {
+        "agents": {
+          "agent-id": {
+            "name": "agent-id",
+            "description": "Brief description",
+            "file": "path/to/agent.md",
+            "model": "sonnet",
+            "capabilities": ["verb1", "verb2"],
+            "tools": ["Tool1", "Tool2"],
+            "readOnly": true|false
+          }
+        },
+        "capabilityIndex": {
+          "verb": ["agent-id-1", "agent-id-2"]
+        },
+        "modelIndex": {
+          "haiku": ["agent-id-1"],
+          "sonnet": ["agent-id-2"]
+        },
+        "toolMatrix": {
+          "ToolName": ["agent-id-1", "agent-id-2"]
+        }
+      }
+
+      Update steps:
+      1. Add agent entry under "agents" key
+      2. Add capabilities to capabilityIndex (verb -> agent mapping)
+      3. Add to modelIndex under appropriate tier
+      4. Add each tool to toolMatrix
+      
+      Registry v2.0.0 contains 31+ agents across 8 expert domains.
+    examples:
+      - agent: automation-plan-agent
+        registry_entry: "capabilities: ['automation-planning', 'sdk-analysis'], tools: ['Read', 'Glob', 'Grep', 'Write', 'Bash']"
+
+decision_trees:
+  agent_type_selection:
+    name: Agent Type Selection
+    entry_point: What type of agent am I creating?
+    branches:
+      - condition: General-purpose agent (explore, build, review)
+        action: Root-level agent in .claude/agents/
+      - condition: Expert domain (4-agent pattern)
+        action: Expert agents in .claude/agents/experts/<domain>/
+
+  tool_selection_by_role:
+    name: Tool Selection by Agent Role
+    entry_point: What is the agent's role?
+    branches:
+      - condition: Read-only exploration (scout, question)
+        action: Read, Glob, Grep (no Write/Edit/Bash/Task)
+      - condition: Implementation (build)
+        action: Read, Write, Edit, Bash, Glob, Grep
+      - condition: Review (code review)
+        action: Read, Glob, Grep (no Write/Edit/Bash)
+      - condition: Expert plan
+        action: Read, Glob, Grep, Write, Bash
+      - condition: Expert build
+        action: Read, Write, Edit, Bash, Glob, Grep
+      - condition: Expert improve
+        action: Read, Write, Edit, Bash, Task, Glob, Grep
+      - condition: Expert question
+        action: Read, Glob, Grep (read-only)
+
+patterns:
+  flat_agent_structure:
+    name: Flat Agent Structure
+    context: kotadb uses a flat agent structure with general and expert agents
+    implementation: |
+      Structure (as of v2.0.0 with 8th automation domain):
+      .claude/agents/
+      ├── agent-registry.json       # Machine-readable registry (31+ agents)
+      ├── agent-template.md         # Template for new agents
+      ├── build-agent.md            # Implementation agent
+      ├── scout-agent.md            # Read-only exploration
+      ├── review-agent.md           # Code review
+      ├── docs-scraper.md           # Documentation scraping
+      └── experts/                  # 8 domain expert patterns
+          ├── agent-authoring/      # Agent creation
+          ├── automation/           # SDK orchestration & workflow automation
+          ├── claude-config/        # .claude/ configuration
+          ├── database/             # SQLite schema and queries
+          ├── api/                  # HTTP endpoints and MCP
+          ├── testing/              # Antimocking test patterns
+          ├── indexer/              # AST parsing and symbols
+          └── github/               # Issues, PRs, workflows
+
+      General agents: Root level, clear single responsibility, simple tool sets
+      Expert agents: 4-agent pattern (plan/build/improve/question), domain expertise.yaml
+    trade_offs:
+      - advantage: Simple, flat structure easy to navigate
+        cost: Less hierarchical organization
+      - advantage: Clear separation of general vs expert
+        cost: Multiple files per expert domain (4 agents + expertise.yaml)
+
+  expert_4agent_pattern:
+    name: Expert 4-Agent Pattern (kotadb standard)
+    context: Domain experts with plan/build/improve/question workflow across 8 domains
+    implementation: |
+      Standard 4-Agent Pattern (validated across 8 domains):
+      .claude/agents/experts/<domain>/
+      ├── expertise.yaml                   # 350-600 line structured knowledge
+      ├── <domain>-plan-agent.md          # Analyzes requirements, writes spec
+      ├── <domain>-build-agent.md         # Implements from spec
+      ├── <domain>-improve-agent.md       # Updates expertise from changes
+      └── <domain>-question-agent.md      # Read-only Q&A about domain
+
+      Tool sets by agent role (standardized):
+      - Plan: Read, Glob, Grep, Write, Bash (plus domain MCP tools)
+      - Build: Read, Write, Edit, Bash, Glob, Grep (plus domain MCP tools)
+      - Improve: Read, Write, Edit, Bash, Task, Glob, Grep (plus MCP tools)
+      - Question: Read, Glob, Grep (read-only, haiku, plus MCP tools)
+
+      Color scheme (universal): yellow=plan, green=build, purple=improve, cyan=question
+    real_examples:
+      - location: .claude/agents/experts/automation/
+        note: 8th domain - SDK orchestration and workflow automation patterns
+      - location: .claude/agents/experts/database/
+        note: SQLite schema and queries domain
+
+  agent_registry_integration:
+    name: Agent Registry Integration Pattern
+    context: Machine-readable registry enables programmatic agent selection
+    implementation: |
+      agent-registry.json v2.0.0 enables:
+      1. Capability-based selection (capabilityIndex with 45+ capabilities)
+      2. Model tier filtering (modelIndex: haiku/sonnet)
+      3. Tool availability checking (toolMatrix)
+
+      Registry expansion:
+      - v1.0.0: 5 agents (branch/leaf hierarchy)
+      - v2.0.0: 31+ agents (flat structure with 8 expert domains)
+
+      New patterns from 8th domain addition [2026-01-30]:
+      - SDK-specific capabilities (automation-planning, sdk-analysis, sdk-integration)
+      - Workflow orchestration capabilities (workflow-design)
+      - Expertise.yaml sizing patterns (automation: 356 lines, target 350-600)
+    trade_offs:
+      - advantage: Enables dynamic agent selection and SDK patterns
+        cost: Registry must be kept in sync with agent files
+
+  mcp_tool_patterns:
+    name: MCP Tool Selection Patterns (kotadb naming convention)
+    context: kotadb uses MCP tools for codebase search and analysis
+    implementation: |
+      **MCP Tool Naming Convention** [2026-01-29]:
+      Format: mcp__{SERVER_NAME}__toolName
+      
+      Current .mcp.json: "kotadb-bunx" (bunx stdio transport, commit 30173e6)
+      Therefore tool prefix MUST be: mcp__kotadb-bunx__
+
+      KotaDB MCP tools (search and analysis):
+      - mcp__kotadb-bunx__search_code(term) - Semantic code search
+      - mcp__kotadb-bunx__search_dependencies(file_path, direction, depth) - Dependency graph
+      - mcp__kotadb-bunx__analyze_change_impact(files) - Change impact assessment
+      - mcp__kotadb-bunx__list_recent_files() - Recent file discovery
+
+      Tool assignment patterns by agent type:
+      - scout-agent: search_code, search_dependencies, list_recent_files (read-only)
+      - build-agent: search_code, search_dependencies, analyze_change_impact (implementation)
+      - expert plan agents: search_code, search_dependencies, list_recent_files
+      - expert build agents: search_code, search_dependencies, analyze_change_impact
+      - expert improve agents: search_code, search_dependencies (sub-agent analysis)
+      - expert question agents: search_code, search_dependencies, list_recent_files
+
+best_practices:
+  - category: Frontmatter
+    practices:
+      - practice: Use YAML list format for tools (not comma-separated)
+        evidence: All 31+ agents in registry use YAML list format consistently
+        timestamp: 2026-01-30
+      - practice: NEVER use colons in description field values
+        evidence: Colons break Claude Code agent discovery parser - validated across 8 domains
+        timestamp: 2026-01-30
+      - practice: Include readOnly field for read-only agents
+        evidence: scout-agent, review-agent, all 8 question agents have explicit readOnly flag
+        timestamp: 2026-01-30
+      - practice: Expert agents include expertDomain field
+        evidence: All 8 expert domains use expertDomain consistently
+        timestamp: 2026-01-30
+      - practice: Use color field for expert agents (yellow=plan, green=build, purple=improve, cyan=question)
+        evidence: Consistent across all 8 expert domains
+        timestamp: 2026-01-30
+
+  - category: Tool Selection
+    practices:
+      - practice: Scout and question agents are strictly read-only (Read, Glob, Grep only)
+        evidence: scout-agent and all 8 expert question agents have readOnly true with no Write/Edit/Bash/Task
+        timestamp: 2026-01-30
+      - practice: Expert plan agents get Write and Bash tools
+        evidence: All 8 expert plan agents include Write (spec caching) and Bash (git, verification)
+        timestamp: 2026-01-30
+      - practice: Expert build agents get full write access including Bash
+        evidence: All 8 expert build agents have Read, Write, Edit, Bash, Glob, Grep
+        timestamp: 2026-01-30
+      - practice: Expert improve agents get Bash and Task tools
+        evidence: All 8 expert improve agents include Bash (git analysis) and Task (sub-agent spawning)
+        timestamp: 2026-01-30
+      - practice: Question agents use haiku model with read-only tools
+        evidence: All 8 expert question agents are haiku with Read, Glob, Grep
+        timestamp: 2026-01-30
+      - practice: Use "permissive tools + strict prompts" philosophy
+        evidence: 8 domains with one-liner prompt guidance; no misuse reported
+        timestamp: 2026-01-30
+      - practice: MCP tool prefix derives from .mcp.json server name
+        evidence: Server "kotadb-bunx" -> tools use "mcp__kotadb-bunx__" prefix (commit 30173e6)
+        timestamp: 2026-01-30
+
+  - category: Expertise.yaml Structure (NEW LEARNING [2026-01-30])
+    practices:
+      - practice: Target expertise.yaml at 350-600 lines for sustainable maintenance
+        evidence: automation domain created at 356 lines; agent-authoring at 697 (limit reached)
+        timestamp: 2026-01-30
+      - practice: Structure expertise.yaml with overview, core_implementation, key_operations, decision_trees, patterns, best_practices, known_issues, potential_enhancements, stability
+        evidence: Consistent structure across all 8 expert domains
+        timestamp: 2026-01-30
+      - practice: Include key_operations with "when, approach, patterns, code_example, pitfalls" sub-structure
+        evidence: automation expertise.yaml demonstrates comprehensive operation documentation with SDK examples
+        timestamp: 2026-01-30
+      - practice: Document decision_trees for domain-specific choices
+        evidence: automation has sdk_option_selection, message_type_handling, metrics_vs_logging trees
+        timestamp: 2026-01-30
+      - practice: Consolidate learnings when expertise.yaml approaches 600-line warning threshold
+        evidence: agent-authoring at 697 lines; consolidation needed to allow new patterns
+        timestamp: 2026-01-30
+
+  - category: Expert Domain Organization
+    practices:
+      - practice: All expert domains follow 4-agent pattern (plan/build/improve/question)
+        evidence: 8 expert domains all have complete 4-agent structure
+        timestamp: 2026-01-30
+      - practice: Expert domains include expertise.yaml with 350-600 line target
+        evidence: Domain knowledge documented in structured YAML format
+        timestamp: 2026-01-30
+
+known_issues:
+  - issue: Agent-authoring expertise.yaml at hard limit (697 lines)
+    impact: Cannot add new patterns without consolidation
+    resolution: Consolidate pre-2026-01-28 entries, preserve 2026-01-29+ learnings
+    status: needs_consolidation
+    timestamp: 2026-01-30
+
+potential_enhancements:
+  - enhancement: Expertise.yaml size monitoring in improve agents
+    rationale: Catch approaching limits early for proactive consolidation
+    effort: low
+    timestamp: 2026-01-30
+
+  - enhancement: Automation domain learnings documentation
+    rationale: Extract patterns from new SDK-focused domain for future automation experts
+    effort: medium
+    timestamp: 2026-01-30
+
+recent_changes:
+  - change: 8th expert domain added - automation (2026-01-30)
+    impact: Expanded from 7 to 8 expert domains for SDK orchestration
+    learnings: |
+      NEW DOMAIN: automation expert for Claude Agent SDK integration
+      - Created automation-plan-agent.md (207 lines)
+      - Created automation-build-agent.md (257 lines)
+      - Created automation-improve-agent.md (231 lines)
+      - Created automation-question-agent.md (131 lines)
+      - Created expertise.yaml (356 lines)
+      - Added 4 new agents to registry (automation-{plan,build,improve,question}-agent)
+
+      SDK-SPECIFIC EXPERTISE PATTERNS:
+      - query() integration with async for...of message streaming
+      - Type guards for SDKMessage discrimination (system, assistant, result, error)
+      - MCP server configuration with stdio transport for kotadb
+      - Metrics storage with SQLite (workflow_metrics table)
+      - GitHub commenting via gh CLI with Bun.spawn
+      - Message streaming patterns for progress tracking
+      - Cost tracking with proper decimal formatting ($X.XXXX)
+      - Duration formatting (Xm Ys or Xs)
+
+      EXPERTISE.YAML OBSERVATIONS:
+      - Automation expertise.yaml: 356 lines (healthy size)
+      - Structure: overview, core_implementation (4 key files), key_operations (5 operations with SDK patterns), decision_trees, patterns (5 patterns), best_practices, known_issues, potential_enhancements, stability
+      - SDK-specific key_operations: integrate_sdk_query, stream_sdk_messages, configure_mcp_server, record_workflow_metrics, post_github_comment
+      - Code examples in key_operations show proper type guards and async patterns
+      - Patterns section covers sdk_query_pattern, type_guard_pattern, metrics_schema_pattern, github_comment_pattern, cli_argument_pattern
+
+      REGISTRY UPDATES:
+      - 4 new agents registered with 6 new capabilities (automation-planning, sdk-analysis, workflow-design, automation-implementation, sdk-integration, automation-qa)
+      - Capabilities properly indexed for orchestration
+      - Tools properly reflected in toolMatrix
+      - automation-question-agent uses haiku model (cost optimization for Q&A)
+
+      CRITICAL INSIGHT [2026-01-30]:
+      Automation domain demonstrates that SDK-focused experts require:
+      1. Detailed operation documentation with code examples
+      2. Type guard patterns for complex message types
+      3. Integration patterns (MCP server, Bun.spawn, SQLite metrics)
+      4. Clear error handling guidance (non-fatal failures)
+      5. Performance considerations (message streaming vs batching)
+
+      This pattern can guide future infrastructure/SDK-focused expert domains.
+    timestamp: 2026-01-30
+
+stability:
+  convergence_indicators:
+    insight_rate_trend: "stabilizing"
+    contradiction_count: 0
+    last_reviewed: 2026-01-30
+    notes: |
+      8 expert domains now established with consistent 4-agent pattern:
+      - Flat agent structure validated across 8 expert domains
+      - Description patterns consistent (no colons, explicit inputs)
+      - Tool selection patterns standardized (Bash on plan/build, Task on improve)
+      - "Permissive tools + strict prompts" philosophy established
+      - Color scheme universal (yellow/green/purple/cyan)
+      - expertDomain field standard across all expert agents
+      - Registry v2.0.0 with 31+ agents and 45+ capabilities
+      - MCP tool naming convention established (mcp__kotadb-bunx__ from .mcp.json)
+      - Expertise.yaml sizing patterns emerging (350-600 line target)
+      - agent-authoring expertise.yaml at hard limit (697 lines) - consolidation needed
+      - Automation domain demonstrates SDK-focused expertise patterns
+      - Future domains should target 350-600 line expertise.yaml range
