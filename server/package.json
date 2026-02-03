@@ -8,7 +8,7 @@
 		"dev": "wrangler dev",
 		"deploy": "wrangler deploy --minify",
 		"types": "wrangler types --env-interface CloudflareBindings",
-		"test": "bun test",
+		"test": "bun test --coverage",
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
