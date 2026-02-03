@@ -93,7 +93,6 @@ jobs:
               --head "$BRANCH" \
               --draft \
               --title "Closes #${ISSUE_NUMBER}: ${ISSUE_TITLE}" \
-              --label "phase:tests" \
               --body "$(cat <<EOF
           ## Summary
 
@@ -120,7 +119,10 @@ jobs:
           EOF
           )"
 
-            echo "Draft PR created with phase:tests label"
+            # Add label separately to trigger the pull_request labeled event
+            NEW_PR=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number')
+            gh pr edit "$NEW_PR" --add-label "phase:tests"
+            echo "Draft PR created, phase:tests label applied"
           else
             echo "PR #$EXISTING_PR already exists for branch $BRANCH"
             # Ensure phase:tests label is applied
