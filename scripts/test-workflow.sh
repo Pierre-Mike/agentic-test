@@ -62,17 +62,17 @@ trap cleanup EXIT
 pre_cleanup() {
   echo "=== Pre-cleanup: removing stale resources ==="
 
-  # Close open PRs on auto-implement/ branches
+  # Close open PRs on issue-*-auto-implement branches
   local stale_prs
-  stale_prs=$(gh pr list --state open --json number,headRefName -q '.[] | select(.headRefName | startswith("auto-implement/")) | .number')
+  stale_prs=$(gh pr list --state open --json number,headRefName -q '.[] | select(.headRefName | endswith("-auto-implement")) | .number')
   for pr in $stale_prs; do
     echo "Closing stale PR #$pr..."
     gh pr close "$pr" --delete-branch 2>/dev/null || true
   done
 
-  # Delete any remaining remote auto-implement/ branches
+  # Delete any remaining remote issue-*-auto-implement branches
   local stale_branches
-  stale_branches=$(git ls-remote --heads origin 'refs/heads/auto-implement/*' | sed 's|.*refs/heads/||')
+  stale_branches=$(git ls-remote --heads origin | sed 's|.*refs/heads/||' | grep -- '-auto-implement$')
   for branch in $stale_branches; do
     echo "Deleting stale branch $branch..."
     git push origin --delete "$branch" 2>/dev/null || true
