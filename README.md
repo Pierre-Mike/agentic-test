@@ -83,7 +83,7 @@ server
 ```typescript src/index.ts
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import type { ApiResponse, VersionResponse } from 'shared/dist'
+import type { ApiResponse, VersionResponse, TestResponse } from 'shared/dist'
 
 const app = new Hono()
 
@@ -107,6 +107,14 @@ app.get('/version', async (c) => {
   const data: VersionResponse = {
     version: "0.5.1",
     name: "agentic-test"
+  }
+
+  return c.json(data, { status: 200 })
+})
+
+app.get('/test', async (c) => {
+  const data: TestResponse = {
+    test: "ok"
   }
 
   return c.json(data, { status: 200 })
@@ -139,6 +147,14 @@ Response: VersionResponse
 {
   version: string
   name: string
+}
+```
+
+**GET /test** - Simple test endpoint for validation
+```typescript
+Response: TestResponse
+{
+  test: string
 }
 ```
 
