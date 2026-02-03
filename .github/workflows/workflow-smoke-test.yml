@@ -1,0 +1,102 @@
+name: Workflow Smoke Test
+
+on:
+  schedule:
+    - cron: '0 8 * * *' # Daily at 8:00 UTC
+  workflow_dispatch: # Manual trigger
+
+concurrency:
+  group: workflow-smoke-test
+  cancel-in-progress: false
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run workflow smoke test
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          start_time=$(date +%s)
+
+          echo "## Workflow Smoke Test Results" > "$RUNNER_TEMP/report.md"
+          echo "" >> "$RUNNER_TEMP/report.md"
+          echo "| Step | Duration | Status |" >> "$RUNNER_TEMP/report.md"
+          echo "|------|----------|--------|" >> "$RUNNER_TEMP/report.md"
+
+          step_start() { STEP_START=$(date +%s); }
+          step_end() {
+            local elapsed=$(( $(date +%s) - STEP_START ))
+            local mins=$(( elapsed / 60 ))
+            local secs=$(( elapsed % 60 ))
+            echo "| $1 | ${mins}m ${secs}s | $2 |" >> "$RUNNER_TEMP/report.md"
+          }
+
+          # Run the test script, capturing output
+          bash scripts/test-workflow.sh 2>&1 | tee "$RUNNER_TEMP/test-output.log" &
+          TEST_PID=$!
+
+          # Wait for the script to finish
+          if wait $TEST_PID; then
+            TEST_RESULT="PASSED"
+          else
+            TEST_RESULT="FAILED"
+          fi
+
+          total_elapsed=$(( $(date +%s) - start_time ))
+          total_mins=$(( total_elapsed / 60 ))
+          total_secs=$(( total_elapsed % 60 ))
+
+          echo "" >> "$RUNNER_TEMP/report.md"
+          echo "**Result: $TEST_RESULT** (total: ${total_mins}m ${total_secs}s)" >> "$RUNNER_TEMP/report.md"
+          echo "" >> "$RUNNER_TEMP/report.md"
+          echo "<details><summary>Full log</summary>" >> "$RUNNER_TEMP/report.md"
+          echo "" >> "$RUNNER_TEMP/report.md"
+          echo '```' >> "$RUNNER_TEMP/report.md"
+          cat "$RUNNER_TEMP/test-output.log" >> "$RUNNER_TEMP/report.md"
+          echo '```' >> "$RUNNER_TEMP/report.md"
+          echo "</details>" >> "$RUNNER_TEMP/report.md"
+
+          cat "$RUNNER_TEMP/report.md"
+          echo "TEST_RESULT=$TEST_RESULT" >> "$GITHUB_ENV"
+
+      - name: Create failure issue
+        if: env.TEST_RESULT == 'FAILED'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check for existing open failure issue to avoid duplicates
+          existing=$(gh issue list --state open --label "workflow-test-failure" --json number -q '.[0].number' || true)
+          if [[ -n "$existing" ]]; then
+            echo "Updating existing failure issue #$existing"
+            gh issue comment "$existing" --body "$(cat "$RUNNER_TEMP/report.md")"
+          else
+            gh issue create \
+              --title "Workflow smoke test failed ($(date -u '+%Y-%m-%d'))" \
+              --body "$(cat "$RUNNER_TEMP/report.md")" \
+              --label "workflow-test-failure,bug"
+          fi
+
+      - name: Auto-close failure issue on success
+        if: env.TEST_RESULT == 'PASSED'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          existing=$(gh issue list --state open --label "workflow-test-failure" --json number -q '.[0].number' || true)
+          if [[ -n "$existing" ]]; then
+            gh issue close "$existing" --comment "Workflow smoke test passed. Auto-closing."
+          fi
+
+      - name: Fail job if test failed
+        if: env.TEST_RESULT == 'FAILED'
+        run: exit 1
