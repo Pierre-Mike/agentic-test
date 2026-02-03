@@ -23,7 +23,7 @@ jobs:
 
       - name: Run workflow smoke test
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           set -euo pipefail
 
@@ -43,11 +43,13 @@ jobs:
           }
 
           # Run the test script, capturing output
-          bash scripts/test-workflow.sh 2>&1 | tee "$RUNNER_TEMP/test-output.log" &
-          TEST_PID=$!
+          # Disable set -e so we can capture the exit code and still generate the report
+          set +e
+          bash scripts/test-workflow.sh 2>&1 | tee "$RUNNER_TEMP/test-output.log"
+          exit_code=$?
+          set -e
 
-          # Wait for the script to finish
-          if wait $TEST_PID; then
+          if [[ $exit_code -eq 0 ]]; then
             TEST_RESULT="PASSED"
           else
             TEST_RESULT="FAILED"
@@ -73,7 +75,7 @@ jobs:
       - name: Create failure issue
         if: env.TEST_RESULT == 'FAILED'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           # Check for existing open failure issue to avoid duplicates
           existing=$(gh issue list --state open --label "workflow-test-failure" --json number -q '.[0].number' || true)
@@ -90,7 +92,7 @@ jobs:
       - name: Auto-close failure issue on success
         if: env.TEST_RESULT == 'PASSED'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           existing=$(gh issue list --state open --label "workflow-test-failure" --json number -q '.[0].number' || true)
           if [[ -n "$existing" ]]; then
