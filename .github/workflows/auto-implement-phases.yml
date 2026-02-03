@@ -69,14 +69,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          gh pr edit "$PR_NUMBER" --remove-label "phase:tests" --add-label "phase:implement"
+          gh api repos/${{ github.repository }}/issues/${PR_NUMBER}/labels/phase:tests --method DELETE || true
+          gh api repos/${{ github.repository }}/issues/${PR_NUMBER}/labels --method POST -f "labels[]=phase:implement"
 
       - name: Handle failure
         if: failure()
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          gh pr edit "$PR_NUMBER" --add-label "phase:failed"
+          gh api repos/${{ github.repository }}/issues/${PR_NUMBER}/labels --method POST -f "labels[]=phase:failed"
           gh pr comment "$PR_NUMBER" --body "❌ **phase:tests failed.** Remove \`phase:failed\`, then re-apply \`phase:tests\` to retry."
 
   # ── Implement + Validate (TDD Green Phase) ──
@@ -143,14 +144,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          gh pr edit "$PR_NUMBER" --remove-label "phase:implement" --add-label "phase:finalize"
+          gh api repos/${{ github.repository }}/issues/${PR_NUMBER}/labels/phase:implement --method DELETE || true
+          gh api repos/${{ github.repository }}/issues/${PR_NUMBER}/labels --method POST -f "labels[]=phase:finalize"
 
       - name: Handle failure
         if: failure()
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          gh pr edit "$PR_NUMBER" --add-label "phase:failed"
+          gh api repos/${{ github.repository }}/issues/${PR_NUMBER}/labels --method POST -f "labels[]=phase:failed"
           gh pr comment "$PR_NUMBER" --body "❌ **phase:implement failed.** Remove \`phase:failed\`, then re-apply \`phase:implement\` to retry."
 
   # ── Finalize: Docs + Mark Ready ──
@@ -209,12 +211,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           gh pr ready "$PR_NUMBER"
-          gh pr edit "$PR_NUMBER" --remove-label "phase:finalize" --add-label "phase:complete"
+          gh api repos/${{ github.repository }}/issues/${PR_NUMBER}/labels/phase:finalize --method DELETE || true
+          gh api repos/${{ github.repository }}/issues/${PR_NUMBER}/labels --method POST -f "labels[]=phase:complete"
 
       - name: Handle failure
         if: failure()
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          gh pr edit "$PR_NUMBER" --add-label "phase:failed"
+          gh api repos/${{ github.repository }}/issues/${PR_NUMBER}/labels --method POST -f "labels[]=phase:failed"
           gh pr comment "$PR_NUMBER" --body "❌ **phase:finalize failed.** Remove \`phase:failed\`, then re-apply \`phase:finalize\` to retry."

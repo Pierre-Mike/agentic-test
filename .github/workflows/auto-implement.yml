@@ -119,14 +119,14 @@ jobs:
           EOF
           )"
 
-            # Add label separately to trigger the pull_request labeled event
+            # Add label separately via REST API to trigger the pull_request labeled event
             NEW_PR=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number')
-            gh pr edit "$NEW_PR" --add-label "phase:tests"
+            gh api repos/${{ github.repository }}/issues/${NEW_PR}/labels --method POST -f "labels[]=phase:tests"
             echo "Draft PR created, phase:tests label applied"
           else
             echo "PR #$EXISTING_PR already exists for branch $BRANCH"
             # Ensure phase:tests label is applied
-            gh pr edit "$EXISTING_PR" --add-label "phase:tests"
+            gh api repos/${{ github.repository }}/issues/${EXISTING_PR}/labels --method POST -f "labels[]=phase:tests"
           fi
 
       - name: Comment on issue
