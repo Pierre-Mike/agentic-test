@@ -12,6 +12,7 @@ concurrency:
 
 jobs:
   install:
+    if: ${{ github.event_name == 'push' || !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
