@@ -86,7 +86,6 @@ Use Bash for git operations, file statistics, or verification commands.
 
 **Conventional Commits:**
 - Format: `<type>(<scope>): <description>`
-- Include Co-Authored-By for AI-assisted commits
 - Types match issue types: feat, fix, chore, refactor, docs, test
 
 **Release Workflows:**

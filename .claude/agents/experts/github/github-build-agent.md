@@ -160,7 +160,6 @@ Examples:
 
 **From KotaDB Conventions:**
 - Use Conventional Commits format for commit messages
-- Include Co-Authored-By for AI-assisted commits
 - Target develop branch for all PRs
 - Include validation evidence in PR body
 - Apply anti-mock philosophy (no new mocks)

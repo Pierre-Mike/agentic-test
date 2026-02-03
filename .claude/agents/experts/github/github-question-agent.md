@@ -141,10 +141,6 @@ Examples:
 - mcp: MCP tools
 - cli: CLI commands
 
-**"Do I need Co-Authored-By?"**
-- Yes, for AI-assisted commits
-- Format: `Co-Authored-By: Claude <noreply@anthropic.com>`
-
 ### Workflow Questions
 
 **"What's the standard workflow for an issue?"**

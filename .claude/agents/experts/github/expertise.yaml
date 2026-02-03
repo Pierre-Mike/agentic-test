@@ -273,8 +273,7 @@ key_operations:
          git diff --cached
       3. Create commit with Conventional Commits format:
          git commit -m "<type>(<scope>): <description>"
-      4. Include Co-Authored-By when AI-assisted:
-         Co-Authored-By: Claude <noreply@anthropic.com>
+
     conventional_commits_format:
       structure: "<type>(<scope>): <description>"
       types:
@@ -453,7 +452,6 @@ patterns:
 
       <optional body explaining why>
 
-      Co-Authored-By: Claude <noreply@anthropic.com>
     scope_examples:
       - api: API routes and handlers
       - db: Database operations
@@ -531,7 +529,6 @@ best_practices:
     - Keep commits atomic and focused
     - Write meaningful commit messages
     - Include issue references in commits
-    - Add Co-Authored-By for AI assistance
 
   gh_cli_usage:
     - Use gh for all GitHub operations

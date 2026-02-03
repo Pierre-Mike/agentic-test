@@ -126,7 +126,6 @@ Implement #{issue_number}: {issue_title}
 - Detailed changes
 - From auto-implement workflow
 
-Co-Authored-By: GitHub Actions Bot <actions@github.com>
 ```
 
 ### PR Format
