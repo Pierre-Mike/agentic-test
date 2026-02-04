@@ -10,12 +10,7 @@
 			"file": "scout-agent.md",
 			"model": "haiku",
 			"capabilities": ["explore", "search", "analyze", "research"],
-			"tools": [
-				"Glob",
-				"Grep",
-				"Read",
-				"Task"
-			],
+			"tools": ["Glob", "Grep", "Read", "Task"],
 			"readOnly": true
 		},
 		"build-agent": {
@@ -43,13 +38,7 @@
 			"file": "review-agent.md",
 			"model": "haiku",
 			"capabilities": ["review", "audit", "quality", "security", "feedback"],
-			"tools": [
-				"Glob",
-				"Grep",
-				"Read",
-				"Task",
-				"WebFetch"
-			],
+			"tools": ["Glob", "Grep", "Read", "Task", "WebFetch"],
 			"readOnly": true
 		},
 		"docs-scraper": {
@@ -72,12 +61,7 @@
 			"file": "experts/claude-config/claude-config-plan-agent.md",
 			"model": "sonnet",
 			"capabilities": ["claude-config-planning", "spec-generation"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep",
-				"Write"
-			],
+			"tools": ["Read", "Glob", "Grep", "Write"],
 			"readOnly": false
 		},
 		"claude-config-build-agent": {
@@ -86,13 +70,7 @@
 			"file": "experts/claude-config/claude-config-build-agent.md",
 			"model": "sonnet",
 			"capabilities": ["claude-config-implementation"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Write", "Edit", "Glob", "Grep"],
 			"readOnly": false
 		},
 		"claude-config-improve-agent": {
@@ -101,14 +79,7 @@
 			"file": "experts/claude-config/claude-config-improve-agent.md",
 			"model": "sonnet",
 			"capabilities": ["claude-config-expertise-evolution"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Glob",
-				"Grep",
-				"Bash"
-			],
+			"tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash"],
 			"readOnly": false
 		},
 		"claude-config-question-agent": {
@@ -117,11 +88,7 @@
 			"file": "experts/claude-config/claude-config-question-agent.md",
 			"model": "haiku",
 			"capabilities": ["claude-config-qa"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Glob", "Grep"],
 			"readOnly": true
 		},
 		"agent-authoring-plan-agent": {
@@ -130,12 +97,7 @@
 			"file": "experts/agent-authoring/agent-authoring-plan-agent.md",
 			"model": "sonnet",
 			"capabilities": ["agent-authoring-planning", "spec-generation"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep",
-				"Write"
-			],
+			"tools": ["Read", "Glob", "Grep", "Write"],
 			"readOnly": false
 		},
 		"agent-authoring-build-agent": {
@@ -144,13 +106,7 @@
 			"file": "experts/agent-authoring/agent-authoring-build-agent.md",
 			"model": "sonnet",
 			"capabilities": ["agent-authoring-implementation"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Write", "Edit", "Glob", "Grep"],
 			"readOnly": false
 		},
 		"agent-authoring-improve-agent": {
@@ -159,14 +115,7 @@
 			"file": "experts/agent-authoring/agent-authoring-improve-agent.md",
 			"model": "sonnet",
 			"capabilities": ["agent-authoring-expertise-evolution"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Glob",
-				"Grep",
-				"Bash"
-			],
+			"tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash"],
 			"readOnly": false
 		},
 		"agent-authoring-question-agent": {
@@ -175,11 +124,7 @@
 			"file": "experts/agent-authoring/agent-authoring-question-agent.md",
 			"model": "haiku",
 			"capabilities": ["agent-authoring-qa"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Glob", "Grep"],
 			"readOnly": true
 		},
 		"api-plan-agent": {
@@ -188,12 +133,7 @@
 			"file": "experts/api/api-plan-agent.md",
 			"model": "sonnet",
 			"capabilities": ["api-planning", "spec-generation"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep",
-				"Write"
-			],
+			"tools": ["Read", "Glob", "Grep", "Write"],
 			"readOnly": false
 		},
 		"api-build-agent": {
@@ -202,13 +142,7 @@
 			"file": "experts/api/api-build-agent.md",
 			"model": "sonnet",
 			"capabilities": ["api-implementation"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Write", "Edit", "Glob", "Grep"],
 			"readOnly": false
 		},
 		"api-improve-agent": {
@@ -217,14 +151,7 @@
 			"file": "experts/api/api-improve-agent.md",
 			"model": "sonnet",
 			"capabilities": ["api-expertise-evolution"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Glob",
-				"Grep",
-				"Bash"
-			],
+			"tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash"],
 			"readOnly": false
 		},
 		"api-question-agent": {
@@ -233,11 +160,7 @@
 			"file": "experts/api/api-question-agent.md",
 			"model": "haiku",
 			"capabilities": ["api-qa"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Glob", "Grep"],
 			"readOnly": true
 		},
 		"indexer-plan-agent": {
@@ -246,12 +169,7 @@
 			"file": "experts/indexer/indexer-plan-agent.md",
 			"model": "sonnet",
 			"capabilities": ["indexer-planning", "spec-generation"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep",
-				"Write"
-			],
+			"tools": ["Read", "Glob", "Grep", "Write"],
 			"readOnly": false
 		},
 		"indexer-build-agent": {
@@ -260,13 +178,7 @@
 			"file": "experts/indexer/indexer-build-agent.md",
 			"model": "sonnet",
 			"capabilities": ["indexer-implementation"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Write", "Edit", "Glob", "Grep"],
 			"readOnly": false
 		},
 		"indexer-improve-agent": {
@@ -275,14 +187,7 @@
 			"file": "experts/indexer/indexer-improve-agent.md",
 			"model": "sonnet",
 			"capabilities": ["indexer-expertise-evolution"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Glob",
-				"Grep",
-				"Bash"
-			],
+			"tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash"],
 			"readOnly": false
 		},
 		"indexer-question-agent": {
@@ -291,11 +196,7 @@
 			"file": "experts/indexer/indexer-question-agent.md",
 			"model": "haiku",
 			"capabilities": ["indexer-qa"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Glob", "Grep"],
 			"readOnly": true
 		},
 		"database-plan-agent": {
@@ -304,12 +205,7 @@
 			"file": "experts/database/database-plan-agent.md",
 			"model": "sonnet",
 			"capabilities": ["database-planning", "schema-design", "spec-generation"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep",
-				"Write"
-			],
+			"tools": ["Read", "Glob", "Grep", "Write"],
 			"readOnly": false
 		},
 		"database-build-agent": {
@@ -322,13 +218,7 @@
 				"schema-changes",
 				"query-optimization"
 			],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Write", "Edit", "Glob", "Grep"],
 			"readOnly": false
 		},
 		"database-improve-agent": {
@@ -337,14 +227,7 @@
 			"file": "experts/database/database-improve-agent.md",
 			"model": "sonnet",
 			"capabilities": ["database-expertise-evolution"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Glob",
-				"Grep",
-				"Bash"
-			],
+			"tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash"],
 			"readOnly": false
 		},
 		"database-question-agent": {
@@ -353,11 +236,7 @@
 			"file": "experts/database/database-question-agent.md",
 			"model": "haiku",
 			"capabilities": ["database-qa"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Glob", "Grep"],
 			"readOnly": true
 		},
 		"testing-plan-agent": {
@@ -366,12 +245,7 @@
 			"file": "experts/testing/testing-plan-agent.md",
 			"model": "sonnet",
 			"capabilities": ["testing-planning", "spec-generation"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep",
-				"Write"
-			],
+			"tools": ["Read", "Glob", "Grep", "Write"],
 			"readOnly": false
 		},
 		"testing-build-agent": {
@@ -380,13 +254,7 @@
 			"file": "experts/testing/testing-build-agent.md",
 			"model": "sonnet",
 			"capabilities": ["testing-implementation"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Write", "Edit", "Glob", "Grep"],
 			"readOnly": false
 		},
 		"testing-improve-agent": {
@@ -395,14 +263,7 @@
 			"file": "experts/testing/testing-improve-agent.md",
 			"model": "sonnet",
 			"capabilities": ["testing-expertise-evolution"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Glob",
-				"Grep",
-				"Bash"
-			],
+			"tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash"],
 			"readOnly": false
 		},
 		"testing-question-agent": {
@@ -411,11 +272,7 @@
 			"file": "experts/testing/testing-question-agent.md",
 			"model": "haiku",
 			"capabilities": ["testing-qa"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Glob", "Grep"],
 			"readOnly": true
 		},
 		"github-plan-agent": {
@@ -424,13 +281,7 @@
 			"file": "experts/github/github-plan-agent.md",
 			"model": "sonnet",
 			"capabilities": ["github-planning", "spec-generation"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep",
-				"Write",
-				"Bash"
-			],
+			"tools": ["Read", "Glob", "Grep", "Write", "Bash"],
 			"readOnly": false
 		},
 		"github-build-agent": {
@@ -439,14 +290,7 @@
 			"file": "experts/github/github-build-agent.md",
 			"model": "sonnet",
 			"capabilities": ["github-implementation"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Glob",
-				"Grep",
-				"Bash"
-			],
+			"tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash"],
 			"readOnly": false
 		},
 		"github-improve-agent": {
@@ -455,15 +299,7 @@
 			"file": "experts/github/github-improve-agent.md",
 			"model": "sonnet",
 			"capabilities": ["github-expertise-evolution"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Glob",
-				"Grep",
-				"Bash",
-				"Task"
-			],
+			"tools": ["Read", "Write", "Edit", "Glob", "Grep", "Bash", "Task"],
 			"readOnly": false
 		},
 		"github-question-agent": {
@@ -472,11 +308,7 @@
 			"file": "experts/github/github-question-agent.md",
 			"model": "haiku",
 			"capabilities": ["github-qa"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Glob", "Grep"],
 			"readOnly": true
 		},
 		"automation-plan-agent": {
@@ -489,13 +321,7 @@
 				"sdk-analysis",
 				"workflow-design"
 			],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep",
-				"Write",
-				"Bash"
-			],
+			"tools": ["Read", "Glob", "Grep", "Write", "Bash"],
 			"readOnly": false
 		},
 		"automation-build-agent": {
@@ -504,14 +330,7 @@
 			"file": "experts/automation/automation-build-agent.md",
 			"model": "sonnet",
 			"capabilities": ["automation-implementation", "sdk-integration"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Bash",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Write", "Edit", "Bash", "Glob", "Grep"],
 			"readOnly": false
 		},
 		"automation-improve-agent": {
@@ -520,15 +339,7 @@
 			"file": "experts/automation/automation-improve-agent.md",
 			"model": "sonnet",
 			"capabilities": ["automation-learning", "expertise-evolution"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Bash",
-				"Task",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Write", "Edit", "Bash", "Task", "Glob", "Grep"],
 			"readOnly": false
 		},
 		"automation-question-agent": {
@@ -537,11 +348,7 @@
 			"file": "experts/automation/automation-question-agent.md",
 			"model": "haiku",
 			"capabilities": ["automation-qa"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Glob", "Grep"],
 			"readOnly": true
 		},
 		"frontend-plan-agent": {
@@ -550,13 +357,7 @@
 			"file": "experts/frontend/frontend-plan-agent.md",
 			"model": "sonnet",
 			"capabilities": ["frontend-planning", "spec-generation"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep",
-				"Write",
-				"Bash"
-			],
+			"tools": ["Read", "Glob", "Grep", "Write", "Bash"],
 			"readOnly": false
 		},
 		"frontend-build-agent": {
@@ -565,14 +366,7 @@
 			"file": "experts/frontend/frontend-build-agent.md",
 			"model": "sonnet",
 			"capabilities": ["frontend-implementation"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Bash",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Write", "Edit", "Bash", "Glob", "Grep"],
 			"readOnly": false
 		},
 		"frontend-improve-agent": {
@@ -581,15 +375,7 @@
 			"file": "experts/frontend/frontend-improve-agent.md",
 			"model": "sonnet",
 			"capabilities": ["frontend-expertise-evolution"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Bash",
-				"Task",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Write", "Edit", "Bash", "Task", "Glob", "Grep"],
 			"readOnly": false
 		},
 		"frontend-question-agent": {
@@ -598,11 +384,7 @@
 			"file": "experts/frontend/frontend-question-agent.md",
 			"model": "haiku",
 			"capabilities": ["frontend-qa"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Glob", "Grep"],
 			"readOnly": true
 		},
 		"security-plan-agent": {
@@ -611,13 +393,7 @@
 			"file": "experts/security/security-plan-agent.md",
 			"model": "sonnet",
 			"capabilities": ["security-planning", "spec-generation"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep",
-				"Write",
-				"Bash"
-			],
+			"tools": ["Read", "Glob", "Grep", "Write", "Bash"],
 			"readOnly": false
 		},
 		"security-build-agent": {
@@ -626,14 +402,7 @@
 			"file": "experts/security/security-build-agent.md",
 			"model": "sonnet",
 			"capabilities": ["security-implementation"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Bash",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Write", "Edit", "Bash", "Glob", "Grep"],
 			"readOnly": false
 		},
 		"security-improve-agent": {
@@ -642,15 +411,7 @@
 			"file": "experts/security/security-improve-agent.md",
 			"model": "sonnet",
 			"capabilities": ["security-expertise-evolution"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Bash",
-				"Task",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Write", "Edit", "Bash", "Task", "Glob", "Grep"],
 			"readOnly": false
 		},
 		"security-question-agent": {
@@ -659,11 +420,7 @@
 			"file": "experts/security/security-question-agent.md",
 			"model": "haiku",
 			"capabilities": ["security-qa"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Glob", "Grep"],
 			"readOnly": true
 		},
 		"deployment-plan-agent": {
@@ -672,13 +429,7 @@
 			"file": "experts/deployment/deployment-plan-agent.md",
 			"model": "sonnet",
 			"capabilities": ["deployment-planning", "spec-generation"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep",
-				"Write",
-				"Bash"
-			],
+			"tools": ["Read", "Glob", "Grep", "Write", "Bash"],
 			"readOnly": false
 		},
 		"deployment-build-agent": {
@@ -687,14 +438,7 @@
 			"file": "experts/deployment/deployment-build-agent.md",
 			"model": "sonnet",
 			"capabilities": ["deployment-implementation"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Bash",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Write", "Edit", "Bash", "Glob", "Grep"],
 			"readOnly": false
 		},
 		"deployment-improve-agent": {
@@ -703,15 +447,7 @@
 			"file": "experts/deployment/deployment-improve-agent.md",
 			"model": "sonnet",
 			"capabilities": ["deployment-expertise-evolution"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Bash",
-				"Task",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Write", "Edit", "Bash", "Task", "Glob", "Grep"],
 			"readOnly": false
 		},
 		"deployment-question-agent": {
@@ -720,11 +456,7 @@
 			"file": "experts/deployment/deployment-question-agent.md",
 			"model": "haiku",
 			"capabilities": ["deployment-qa"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Glob", "Grep"],
 			"readOnly": true
 		},
 		"performance-plan-agent": {
@@ -733,13 +465,7 @@
 			"file": "experts/performance/performance-plan-agent.md",
 			"model": "sonnet",
 			"capabilities": ["performance-planning", "spec-generation"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep",
-				"Write",
-				"Bash"
-			],
+			"tools": ["Read", "Glob", "Grep", "Write", "Bash"],
 			"readOnly": false
 		},
 		"performance-build-agent": {
@@ -748,14 +474,7 @@
 			"file": "experts/performance/performance-build-agent.md",
 			"model": "sonnet",
 			"capabilities": ["performance-implementation"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Bash",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Write", "Edit", "Bash", "Glob", "Grep"],
 			"readOnly": false
 		},
 		"performance-improve-agent": {
@@ -764,15 +483,7 @@
 			"file": "experts/performance/performance-improve-agent.md",
 			"model": "sonnet",
 			"capabilities": ["performance-expertise-evolution"],
-			"tools": [
-				"Read",
-				"Write",
-				"Edit",
-				"Bash",
-				"Task",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Write", "Edit", "Bash", "Task", "Glob", "Grep"],
 			"readOnly": false
 		},
 		"performance-question-agent": {
@@ -781,11 +492,7 @@
 			"file": "experts/performance/performance-question-agent.md",
 			"model": "haiku",
 			"capabilities": ["performance-qa"],
-			"tools": [
-				"Read",
-				"Glob",
-				"Grep"
-			],
+			"tools": ["Read", "Glob", "Grep"],
 			"readOnly": true
 		}
 	},
