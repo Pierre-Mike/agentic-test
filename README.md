@@ -140,6 +140,14 @@ Response: VersionResponse
 }
 ```
 
+**GET /test** - Simple test endpoint for health checks and automated testing
+```typescript
+Response: TestResponse
+{
+  test: string
+}
+```
+
 All response types are defined in the `shared` package for type safety across client and server.
 
 If you wanted to add a database to Hono you can do so with a multitude of Typescript libraries like [Supabase](https://supabase.com), or ORMs like [Drizzle](https://orm.drizzle.team/docs/get-started) or [Prisma](https://www.prisma.io/orm)
