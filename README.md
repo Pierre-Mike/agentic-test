@@ -81,7 +81,7 @@ server
 ```typescript src/index.ts
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import type { ApiResponse, VersionResponse } from 'shared/dist'
+import type { ApiResponse, VersionResponse, TestResponse } from 'shared/dist'
 
 const app = new Hono()
 
@@ -105,6 +105,14 @@ app.get('/version', async (c) => {
   const data: VersionResponse = {
     version: "0.5.1",
     name: "agentic-test"
+  }
+
+  return c.json(data, { status: 200 })
+})
+
+app.get('/test', (c) => {
+  const data: TestResponse = {
+    test: "ok"
   }
 
   return c.json(data, { status: 200 })
@@ -137,6 +145,14 @@ Response: VersionResponse
 {
   version: string
   name: string
+}
+```
+
+**GET /test** - Returns a simple test response for health checks and validation
+```typescript
+Response: TestResponse
+{
+  test: "ok"
 }
 ```
 
@@ -248,7 +264,7 @@ By running `bun run dev` or `bun run build` it will compile and export the packa
 
 ```typescript
 // Import types
-import { ApiResponse, VersionResponse } from 'shared'
+import { ApiResponse, VersionResponse, TestResponse } from 'shared'
 
 // Import utility functions
 import { greet } from 'shared'
