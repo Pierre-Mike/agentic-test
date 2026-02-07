@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import app from "./index";
-import type { VersionResponse } from "shared/dist";
+import type { VersionResponse, TestResponse } from "shared/dist";
 
 describe("/version endpoint", () => {
 	test("should return status 200", async () => {
@@ -28,6 +28,35 @@ describe("/version endpoint", () => {
 
 	test("should have application/json content-type", async () => {
 		const res = await app.request("/version");
+		const contentType = res.headers.get("content-type");
+
+		expect(contentType).toContain("application/json");
+	});
+});
+
+describe("/test endpoint", () => {
+	test("should return status 200", async () => {
+		const res = await app.request("/test");
+		expect(res.status).toBe(200);
+	});
+
+	test("should return JSON with correct structure", async () => {
+		const res = await app.request("/test");
+		const data = (await res.json()) as TestResponse;
+
+		expect(data).toHaveProperty("test");
+		expect(data.test).toBe("ok");
+	});
+
+	test("should return exactly {\"test\": \"ok\"}", async () => {
+		const res = await app.request("/test");
+		const data = (await res.json()) as TestResponse;
+
+		expect(data).toEqual({ test: "ok" });
+	});
+
+	test("should have application/json content-type", async () => {
+		const res = await app.request("/test");
 		const contentType = res.headers.get("content-type");
 
 		expect(contentType).toContain("application/json");
