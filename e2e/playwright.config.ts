@@ -24,10 +24,18 @@ export default defineConfig({
 	],
 	webServer: process.env.E2E_BASE_URL
 		? undefined
-		: {
-				command: "bun run dev:client",
-				url: "http://localhost:5173",
-				reuseExistingServer: !process.env.CI,
-				cwd: "..",
-			},
+		: [
+				{
+					command: "bun run dev:client",
+					url: "http://localhost:5173",
+					reuseExistingServer: !process.env.CI,
+					cwd: "..",
+				},
+				{
+					command: "bun run dev:server",
+					url: "http://localhost:8787",
+					reuseExistingServer: !process.env.CI,
+					cwd: "..",
+				},
+			],
 });
