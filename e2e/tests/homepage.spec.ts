@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { apiURL } from "../playwright.config";
 
 test.describe("Homepage", () => {
 	test.beforeEach(async ({ page }) => {
@@ -34,5 +35,17 @@ test.describe("Homepage", () => {
 			'a[href="https://github.com/stevedylandev/bhvr"]',
 		);
 		await expect(logoLink).toBeVisible();
+	});
+
+	test("test endpoint returns correct response", async () => {
+		const response = await fetch(`${apiURL}/test`);
+
+		expect(response.status).toBe(200);
+
+		const contentType = response.headers.get("content-type");
+		expect(contentType).toContain("application/json");
+
+		const data = await response.json();
+		expect(data).toEqual({ test: "ok" });
 	});
 });
