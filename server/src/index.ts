@@ -26,6 +26,10 @@ export const app = new Hono<{ Bindings: CloudflareBindings }>()
 			name: c.env?.APP_NAME ?? "server",
 		};
 		return c.json(data, { status: 200 });
+	})
+
+	.get("/test", (c) => {
+		return c.json({ test: "ok" }, { status: 200 });
 	});
 
 export default app;
