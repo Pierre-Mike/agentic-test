@@ -110,6 +110,10 @@ app.get('/version', async (c) => {
   return c.json(data, { status: 200 })
 })
 
+app.get('/test', (c) => {
+  return c.json({ test: "ok" }, { status: 200 })
+})
+
 export default app
 ```
 
@@ -137,6 +141,14 @@ Response: VersionResponse
 {
   version: string
   name: string
+}
+```
+
+**GET /test** - Test endpoint for validation
+```typescript
+Response: { test: "ok" }
+{
+  test: string
 }
 ```
 
