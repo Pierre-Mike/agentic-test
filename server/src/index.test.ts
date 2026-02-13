@@ -33,3 +33,24 @@ describe("/version endpoint", () => {
 		expect(contentType).toContain("application/json");
 	});
 });
+
+describe("/test endpoint", () => {
+	test("should return status 200", async () => {
+		const res = await app.request("/test");
+		expect(res.status).toBe(200);
+	});
+
+	test("should return response body exactly {test: 'ok'}", async () => {
+		const res = await app.request("/test");
+		const data = await res.json();
+
+		expect(data).toEqual({ test: "ok" });
+	});
+
+	test("should have application/json content-type", async () => {
+		const res = await app.request("/test");
+		const contentType = res.headers.get("content-type");
+
+		expect(contentType).toContain("application/json");
+	});
+});
